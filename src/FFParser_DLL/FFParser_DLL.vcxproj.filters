@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Records">
+      <UniqueIdentifier>{1076e3c5-9ea0-4afe-bb52-92c7f4b5bb7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Parsing">
+      <UniqueIdentifier>{136dd1e2-3e0e-4d13-8aba-d8ee1767542f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Parsing">
+      <UniqueIdentifier>{6780d454-60dc-4a34-8ad0-ff6f3ba76b5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Accessors">
+      <UniqueIdentifier>{bfdf4da5-3e8b-4dd7-8092-a250ef2033ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Storage">
+      <UniqueIdentifier>{a61186f0-0739-4bb9-97e1-e40e23b7e2ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Helpers">
+      <UniqueIdentifier>{7f0567fe-3840-438f-b5a3-492b69e2c206}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Accessors">
+      <UniqueIdentifier>{c0fd2899-4f62-4a35-92ab-89824ce51a56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Helpers">
+      <UniqueIdentifier>{6d3ee4bc-ddea-4068-9f19-13a540749649}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Storage">
+      <UniqueIdentifier>{2942eea5-4ba9-4c63-9aa0-ed59ae6ed818}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Records">
+      <UniqueIdentifier>{c549422c-6c6f-4ec2-87cf-605269267d49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{7be9dcb7-814d-481e-a6e6-58f938e101b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sqlite3">
+      <UniqueIdentifier>{cc605a17-1b60-4fab-8a7f-d21c42da289e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\accessors\DBAccessorImpl.h">
+      <Filter>Header Files\Accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="source\accessors\FileAccessorImpl.h">
+      <Filter>Header Files\Accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="source\accessors\IDatabaseAccessor.h">
+      <Filter>Header Files\Accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="source\accessors\IFileAccessor.h">
+      <Filter>Header Files\Accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="source\helpers\HelperFacade.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\BookmarksParser.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\CacheFilesParser.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\DBParserBase.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\FileParserBase.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\HistoryParser.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\LoginsParser.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\parsing\ParserBase.h">
+      <Filter>Header Files\Parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="source\records\RecordImpl.h">
+      <Filter>Header Files\Records</Filter>
+    </ClInclude>
+    <ClInclude Include="source\records\RecordsStreamImpl.h">
+      <Filter>Header Files\Records</Filter>
+    </ClInclude>
+    <ClInclude Include="source\storage\StorageFactoryImpl.h">
+      <Filter>Header Files\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ERecordTypes.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\FFParser_DLL.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\IRecord.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\IRecordsStream.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\IStorageFactory.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite3\sqlite3.h">
+      <Filter>sqlite3</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\accessors\DBAccessorImpl.cpp">
+      <Filter>Source Files\Accessors</Filter>
+    </ClCompile>
+    <ClCompile Include="source\accessors\FileAccessorImpl.cpp">
+      <Filter>Source Files\Accessors</Filter>
+    </ClCompile>
+    <ClCompile Include="source\helpers\HelperFacade.cpp">
+      <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parsing\BookmarksParser.cpp">
+      <Filter>Source Files\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parsing\CacheFilesParser.cpp">
+      <Filter>Source Files\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parsing\HistoryParser.cpp">
+      <Filter>Source Files\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="source\parsing\LoginsParser.cpp">
+      <Filter>Source Files\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="source\records\RecordsStreamImpl.cpp">
+      <Filter>Source Files\Records</Filter>
+    </ClCompile>
+    <ClCompile Include="source\storage\StorageFactoryImpl.cpp">
+      <Filter>Source Files\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="source\FFParser_DLL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite3\sqlite3.c">
+      <Filter>sqlite3</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

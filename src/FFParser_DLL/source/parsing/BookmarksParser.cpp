@@ -1,0 +1,75 @@
+#include "BookmarksParser.h"
+
+#include <ctime>	//for unix epoch to local time conversion
+
+namespace FFParser {
+
+	//ctor
+	BookmarksParser::BookmarksParser(const std::shared_ptr<IFileAccessor>& fa, const std::shared_ptr<IDatabaseAccessor>& dba) : DBParserBase(fa, dba) 
+	{
+		//set field names
+		_field_names.reserve(4);
+		_field_names.push_back("id");
+		_field_names.push_back("title");
+		_field_names.push_back("dateAdded");
+		_field_names.push_back("lastModified");
+
+		//set main query
+		_bookmarks_query = "SELECT id, title, dateAdded, lastModified \
+							FROM moz_bookmarks \
+							WHERE title IS NOT NULL \
+							ORDER BY id \
+							LIMIT ";
+		//count query
+		_bookmarks_count_query = "SELECT count(*) FROM moz_bookmarks WHERE title IS NOT NULL;";
+	}
+
+
+	//methods
+	
+	void BookmarksParser::parseBookmarkRecord(const std::vector<std::string>& input, std::vector<std::string>& output) const
+	{
+		std::time_t btime;
+
+		output.reserve(input.size());
+
+		//parse process or just copy data
+		output.push_back( std::move(input[0]) );		//id
+		output.push_back( std::move(input[1]) );		//title
+
+		btime = std::stoull(input[2]) / 1000000;
+		output.push_back( std::asctime(std::localtime(&btime)) );		//dateAdded
+
+		btime = std::stoull(input[3]) / 1000000;
+		output.push_back( std::asctime(std::localtime(&btime)) );		//lastModified
+	}
+	
+	
+	size_t BookmarksParser::getTotalRecords(size_t profile)
+	{
+		if (auto file_sh = _file_accessor_ref.lock()) {
+			getRecordsFromDB(file_sh->getPathToResource(EResourcePaths::DATABASE, profile), _bookmarks_count_query);
+
+			return std::stoi(_db_records[0][0]);
+		}
+
+		return 0;
+	}
+
+
+	void BookmarksParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
+	{
+		std::string query = _bookmarks_query + std::to_string(from) + ", " + (number ? std::to_string(number) : "-1") + ";";
+
+		if (auto file_sh = _file_accessor_ref.lock()) {
+			getRecordsFromDB(file_sh->getPathToResource(EResourcePaths::DATABASE, profile), query);
+
+			output.reserve(_db_records.size());
+
+			for (size_t i = 0; i < _db_records.size(); ++i) {
+				parseBookmarkRecord(_db_records[i], output[i]);
+			}
+		}
+	}
+
+}
