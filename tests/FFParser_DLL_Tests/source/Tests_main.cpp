@@ -30,29 +30,40 @@ int main()
 	IStorageFactory* FactoryStorage = dll_getstorage();
 	
 	//get history
-	IRecordsStream* history = FactoryStorage->createRecordsStream(ERecordTypes::LOGINS, 0);
-	history->loadRecords(1);
+	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
 	
+	size_t from = 100;
+	size_t number = 2;
+	size_t cnt = recstr->loadRecords(from, number);
+	size_t cnt2 = recstr->loadNextRecords(number);
+	size_t sz = recstr->getNumberOfRecords();
+
 
 	// TEST getRecordByIndex
-	IRecord* onerec = history->getRecordByIndex(0);
+	IRecord* onerec = recstr->getRecordByIndex(0);
 	if (onerec != nullptr) {
-		onerec->getFieldValue(0);
-		onerec->getFieldValue(1);
-		onerec->getFieldValue(2);
+		std::cout 
+			<< onerec->getFieldValue(0) << " "
+			<< onerec->getFieldValue(1) << " "
+			<< onerec->getFieldValue(2) << " "
+			//<< onerec->getFieldValue(3) << " "
+			<< "\n\n";
 	}
 	
 	//TEST getNextRecord
-	for (int i = 0; i < 5; ++i) {
-		onerec = history->getNextRecord();
+	for (size_t i = 1; i < sz; ++i) {
+		onerec = recstr->getNextRecord();
 		if (onerec != nullptr) {
-			onerec->getFieldValue(0);
-			onerec->getFieldValue(1);
-			onerec->getFieldValue(2);
+			std::cout 
+				<< onerec->getFieldValue(0) << " "
+				<< onerec->getFieldValue(1) << " "
+				<< onerec->getFieldValue(2) << " "
+				//<< onerec->getFieldValue(3) << " "
+				<< "\n\n";
 		}
 	}
 	
-	FactoryStorage->freeRecordsStream(history);
+	system("pause");
 
 	return 0;
 }

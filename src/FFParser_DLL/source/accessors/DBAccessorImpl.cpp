@@ -6,7 +6,7 @@ namespace FFParser {
 	//ctor
 
 	DBAccessorImpl::DBAccessorImpl() :
-		_db(nullptr, [](sqlite3** db) { if (*db != nullptr) sqlite3_close(*db); })		//close db on ptr destruction
+		_db(nullptr, [](sqlite3* db) { if (db != nullptr) sqlite3_close(db); })		//close db on ptr destruction
 	{
 	}
 
@@ -15,10 +15,14 @@ namespace FFParser {
 
 	int DBAccessorImpl::connectToDB(const std::string& db_path)
 	{
-		int res = sqlite3_open(db_path.c_str(), _db.get());
-
+		int res = sqlite3_open(db_path.c_str(), &_raw_db);
+		
+		//if open failed
 		if (res) {
-			sqlite3_close(*_db);
+			sqlite3_close(_raw_db);
+		}
+		else {
+			_db.reset(_raw_db);		//set RAII pointer
 		}
 
 		return res;
@@ -30,9 +34,11 @@ namespace FFParser {
 		int status;
 		char* error;
 
-		if (*_db == nullptr) return -1;
+		if (_db.get() == nullptr) {
+			return -1;
+		}
 
-		status = sqlite3_exec(*_db, query.c_str(), NULL, 0, &error);
+		status = sqlite3_exec(_db.get(), query.c_str(), NULL, 0, &error);
 
 		if (status) {
 			//TODO:
@@ -48,12 +54,14 @@ namespace FFParser {
 	{
 		int status;
 		int columns;
-		sqlite3_stmt* stmt;
+		sqlite3_stmt* stmt = nullptr;
 
 
-		if (*_db == nullptr) return -1;
+		if (_db.get() == nullptr) {
+			return -1;
+		}
 
-		status = sqlite3_prepare_v2(*_db, query.c_str(), query.length(), &stmt, NULL);
+		status = sqlite3_prepare_v2(_db.get(), query.c_str(), query.length(), &stmt, NULL);
 
 		if (status) {
 			//TODO:
@@ -83,7 +91,10 @@ namespace FFParser {
 
 	void DBAccessorImpl::disconnectFromDB()
 	{
-		if (*_db != nullptr) sqlite3_close(*_db);
+		if (_db.get() != nullptr) {
+			sqlite3_close(_db.get());
+		}
+		_db.reset();
 	}
 
 }

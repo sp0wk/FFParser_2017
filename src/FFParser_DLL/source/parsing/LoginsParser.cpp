@@ -115,10 +115,11 @@ namespace FFParser {
 	}
 
 
-	void LoginsParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
+	size_t LoginsParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
 	{
+		size_t count = 0;
 		std::string profileDir;
-		size_t counter = 0;
+		size_t limit_counter = 0;
 		bool nolimit = false;
 		size_t max = from + number;
 
@@ -127,7 +128,7 @@ namespace FFParser {
 		if (NSSInit == nullptr) {
 			//TODO:
 			//display error message or ignore
-			return;
+			return count;
 		}
 
 
@@ -150,16 +151,17 @@ namespace FFParser {
 			//iterate through all logins
 			for (auto search_result : _pt.get_child("logins")) {
 				//limit returned records
-				if (counter >= from && (counter < max || nolimit)) {
+				if (limit_counter >= from && (limit_counter < max || nolimit)) {
 					std::vector<std::string> tmp;
 					tmp.push_back(search_result.second.get<std::string>("hostname"));
 					tmp.push_back(DecryptString(std::string(search_result.second.get<std::string>("encryptedUsername"))));
 					tmp.push_back(DecryptString(std::string(search_result.second.get<std::string>("encryptedPassword"))));
 
 					output.push_back(std::move(tmp));
+					++count;
 				}
 
-				++counter;
+				++limit_counter;
 			}
 		}
 		catch (const std::exception& ex) {
@@ -168,6 +170,8 @@ namespace FFParser {
 		}
 
 		NSSShutdown();
+
+		return count;
 	}
 
 }

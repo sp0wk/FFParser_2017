@@ -11,7 +11,8 @@ namespace FFParser {
 		_helper_ref(HelperFacade::getInstance()),
 		_profile(profile),
 		_stream_type(type),
-		_current_record(-1)
+		_current_record(-1),
+		_last_from(0)
 	{
 		_helper_ref.getFieldNames(_field_names, _stream_type);
 	}
@@ -20,53 +21,56 @@ namespace FFParser {
 	//Interface methods
 
 
-	size_t RecordsStreamImpl::getTotalRecords(size_t profile) const
+	size_t CALL RecordsStreamImpl::getTotalRecords(size_t profile) const
 	{
 		return _helper_ref.getTotalRecords(_stream_type, profile);
 	}
 
 
-	size_t RecordsStreamImpl::loadRecords(size_t number)
+	size_t CALL RecordsStreamImpl::loadNextRecords(size_t number)
 	{
+		size_t count = 0;
 		std::vector<std::vector<std::string>> tmp;
 
-		_helper_ref.parseRecords(_stream_type, _profile, tmp, _records.size(), number);
+		count = _helper_ref.parseRecords(_stream_type, _profile, tmp, _last_from + _records.size(), number);
 
 		for (auto& iter : tmp) {
 			_records.push_back(std::move(static_cast<RecordImpl>(iter)));
 		}
 
-		return _records.size();
+		return count;
 	}
 
 
-	size_t RecordsStreamImpl::loadRecords(size_t from, size_t number)
+	size_t CALL RecordsStreamImpl::loadRecords(size_t from, size_t number)
 	{
+		size_t count = 0;
 		std::vector<std::vector<std::string>> tmp;
 
-		_helper_ref.parseRecords(_stream_type, _profile, tmp, from, number);
+		_last_from = from;
+		count = _helper_ref.parseRecords(_stream_type, _profile, tmp, from, number);
 
 		for (auto& iter : tmp) {
 			_records.push_back(std::move(static_cast<RecordImpl>(iter)));
 		}
 
-		return _records.size();
+		return count;
 	}
 
 
-	size_t RecordsStreamImpl::getNumberOfRecords() const
+	size_t CALL RecordsStreamImpl::getNumberOfRecords() const
 	{
 		return _records.size();
 	}
 
 
-	size_t RecordsStreamImpl::currentRecord() const
+	size_t CALL RecordsStreamImpl::currentRecord() const
 	{
 		return _current_record;
 	}
 
 
-	IRecord* RecordsStreamImpl::getPrevRecord()
+	IRecord* CALL RecordsStreamImpl::getPrevRecord()
 	{
 		if (_current_record == 0 || _records.size() == 0) {
 			return nullptr;
@@ -75,7 +79,7 @@ namespace FFParser {
 	}
 
 
-	IRecord* RecordsStreamImpl::getNextRecord()
+	IRecord* CALL RecordsStreamImpl::getNextRecord()
 	{
 		if (_current_record + 1 == _records.size()) {
 			return nullptr;
@@ -84,7 +88,7 @@ namespace FFParser {
 	}
 
 
-	IRecord* RecordsStreamImpl::getRecordByIndex(size_t index)
+	IRecord* CALL RecordsStreamImpl::getRecordByIndex(size_t index)
 	{
 		if (index < _records.size()) {
 			_current_record = index;
@@ -94,13 +98,13 @@ namespace FFParser {
 	}
 
 
-	size_t RecordsStreamImpl::getNumberOfFields() const
+	size_t CALL RecordsStreamImpl::getNumberOfFields() const
 	{
 		return _field_names.size();
 	}
 
 
-	const char* RecordsStreamImpl::getFieldName(size_t index) const
+	const char* CALL RecordsStreamImpl::getFieldName(size_t index) const
 	{
 		if (index < _field_names.size()) {
 			return _field_names[index].c_str();

@@ -25,8 +25,8 @@ namespace FFParser {
 
 
 		//Interface methods
-		virtual const char* getFieldValue(size_t index) const override { return _fields[index].c_str(); }
-		virtual size_t getFieldSize(size_t index) const override { return _fields[index].size(); }
+		virtual const char* CALL getFieldValue(size_t index) const override { return _fields[index].c_str(); }
+		virtual size_t CALL getFieldSize(size_t index) const override { return _fields[index].size(); }
 	};
 
 }

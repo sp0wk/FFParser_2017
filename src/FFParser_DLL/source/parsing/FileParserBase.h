@@ -29,7 +29,7 @@ namespace FFParser {
 
 		//methods
 		virtual size_t getTotalRecords(size_t profile) = 0;
-		virtual void parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number) = 0;
+		virtual size_t parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number) = 0;
 	};
 
 }

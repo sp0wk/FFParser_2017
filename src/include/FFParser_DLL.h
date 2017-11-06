@@ -7,6 +7,7 @@
 #define DLLAPI __declspec(dllimport)
 #define EXP_TEMPLATE extern
 #endif
+
 #define CALL __cdecl
 
 

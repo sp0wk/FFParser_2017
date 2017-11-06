@@ -10,7 +10,6 @@
 #include "../helpers/HelperFacade.h"
 
 
-
 // Singleton Factory
 
 namespace FFParser {
@@ -33,10 +32,10 @@ namespace FFParser {
 		static StorageFactoryImpl& getInstance();
 
 		//Interface methods
-		virtual size_t getNumberOfProfiles() const override;
-		virtual const char* getProfileNameByIndex(size_t index) const override;
-		virtual IRecordsStream* createRecordsStream(ERecordTypes type, size_t profile) override;
-		virtual void freeRecordsStream(IRecordsStream* &record) override;
+		virtual size_t CALL getNumberOfProfiles() const override;
+		virtual const char* CALL getProfileNameByIndex(size_t index) const override;
+		virtual IRecordsStream* CALL createRecordsStream(ERecordTypes type, size_t profile) override;
+		virtual void CALL freeRecordsStream(IRecordsStream* &record) override;
 	};
 
 }

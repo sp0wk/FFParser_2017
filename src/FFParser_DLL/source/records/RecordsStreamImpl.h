@@ -21,6 +21,7 @@ namespace FFParser {
 		ERecordTypes _stream_type;
 		std::vector<RecordImpl> _records;
 		size_t _current_record;
+		size_t _last_from;			//for next records loading
 
 		std::vector<std::string> _field_names;		// { "id", "url", "path", ... };
 
@@ -30,16 +31,16 @@ namespace FFParser {
 		virtual ~RecordsStreamImpl() = default;
 
 		//Interface methods
-		virtual size_t getTotalRecords(size_t profile) const override;
-		virtual size_t loadRecords(size_t number) override;
-		virtual size_t loadRecords(size_t from, size_t number) override;
-		virtual size_t getNumberOfRecords() const override;
-		virtual size_t currentRecord() const override;
-		virtual IRecord* getPrevRecord() override;
-		virtual IRecord* getNextRecord() override;
-		virtual IRecord* getRecordByIndex(size_t index) override;
-		virtual size_t getNumberOfFields() const override;
-		virtual const char* getFieldName(size_t index) const override;
+		virtual size_t CALL getTotalRecords(size_t profile) const override;
+		virtual size_t CALL loadNextRecords(size_t number) override;
+		virtual size_t CALL loadRecords(size_t from, size_t number) override;
+		virtual size_t CALL getNumberOfRecords() const override;
+		virtual size_t CALL currentRecord() const override;
+		virtual IRecord* CALL getPrevRecord() override;
+		virtual IRecord* CALL getNextRecord() override;
+		virtual IRecord* CALL getRecordByIndex(size_t index) override;
+		virtual size_t CALL getNumberOfFields() const override;
+		virtual const char* CALL getFieldName(size_t index) const override;
 	};
 
 }

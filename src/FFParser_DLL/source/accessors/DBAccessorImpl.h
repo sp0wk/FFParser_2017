@@ -16,7 +16,8 @@ namespace FFParser {
 	class DBAccessorImpl : public IDatabaseAccessor
 	{
 	private:
-		std::unique_ptr<sqlite3*, std::function<void(sqlite3**)>> _db;
+		sqlite3* _raw_db;
+		std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> _db;
 
 	public:
 		//ctor and dtor

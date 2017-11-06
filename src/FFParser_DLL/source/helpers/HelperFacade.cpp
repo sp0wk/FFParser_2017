@@ -42,9 +42,9 @@ namespace FFParser {
 	}
 
 
-	void HelperFacade::parseRecords(ERecordTypes type, size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
+	size_t HelperFacade::parseRecords(ERecordTypes type, size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
 	{
-		_parsers[size_t(type)]->parse(profile, output, from, number);
+		return _parsers[size_t(type)]->parse(profile, output, from, number);
 	}
 
 }

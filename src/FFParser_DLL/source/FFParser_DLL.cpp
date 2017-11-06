@@ -9,7 +9,7 @@ namespace FFParser {
 
 	DLLAPI IStorageFactory* CALL GetStorage()
 	{
-		return static_cast<IStorageFactory*>(&StorageFactoryImpl::getInstance());
+		return &StorageFactoryImpl::getInstance();
 	}
 
 }

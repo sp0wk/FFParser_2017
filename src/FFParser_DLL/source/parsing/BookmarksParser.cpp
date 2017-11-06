@@ -11,17 +11,21 @@ namespace FFParser {
 		_field_names.reserve(4);
 		_field_names.push_back("id");
 		_field_names.push_back("title");
+		_field_names.push_back("url");
 		_field_names.push_back("dateAdded");
-		_field_names.push_back("lastModified");
 
 		//set main query
-		_bookmarks_query = "SELECT id, title, dateAdded, lastModified \
-							FROM moz_bookmarks \
-							WHERE title IS NOT NULL \
-							ORDER BY id \
+		_bookmarks_query =	"SELECT bk.id, bk.title, pl.url, bk.dateAdded \
+							FROM moz_bookmarks bk \
+							JOIN moz_places pl ON bk.fk = pl.id \
+							WHERE bk.fk IS NOT NULL AND bk.title IS NOT NULL \
+							ORDER BY bk.title \
 							LIMIT ";
 		//count query
-		_bookmarks_count_query = "SELECT count(*) FROM moz_bookmarks WHERE title IS NOT NULL;";
+		_bookmarks_count_query =	"SELECT count(*) \
+									FROM moz_bookmarks bk \
+									JOIN moz_places pl ON bk.fk = pl.id \
+									WHERE bk.fk IS NOT NULL AND bk.title IS NOT NULL;";
 	}
 
 
@@ -30,18 +34,19 @@ namespace FFParser {
 	void BookmarksParser::parseBookmarkRecord(const std::vector<std::string>& input, std::vector<std::string>& output) const
 	{
 		std::time_t btime;
+		std::string stime;
 
 		output.reserve(input.size());
 
 		//parse process or just copy data
 		output.push_back( std::move(input[0]) );		//id
 		output.push_back( std::move(input[1]) );		//title
-
-		btime = std::stoull(input[2]) / 1000000;
-		output.push_back( std::asctime(std::localtime(&btime)) );		//dateAdded
+		output.push_back( std::move(input[2]) );		//url
 
 		btime = std::stoull(input[3]) / 1000000;
-		output.push_back( std::asctime(std::localtime(&btime)) );		//lastModified
+		stime = std::asctime(std::localtime(&btime));
+		stime.erase(stime.length() - 1); //remove '\n'
+		output.push_back(stime);						//dateAdded
 	}
 	
 	
@@ -57,8 +62,9 @@ namespace FFParser {
 	}
 
 
-	void BookmarksParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
+	size_t BookmarksParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
 	{
+		size_t count = 0;
 		std::string query = _bookmarks_query + std::to_string(from) + ", " + (number ? std::to_string(number) : "-1") + ";";
 
 		if (auto file_sh = _file_accessor_ref.lock()) {
@@ -67,9 +73,13 @@ namespace FFParser {
 			output.reserve(_db_records.size());
 
 			for (size_t i = 0; i < _db_records.size(); ++i) {
+				output.emplace_back();
 				parseBookmarkRecord(_db_records[i], output[i]);
+				++count;
 			}
 		}
+
+		return count;
 	}
 
 }

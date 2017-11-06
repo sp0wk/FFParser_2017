@@ -4,19 +4,15 @@
 
 
 //for DLL
-#include <memory>
-#include <functional>
 #include <windows.h>
 #include "../include/FFParser_DLL.h"
 
 using namespace FFParser;
 
+typedef IStorageFactory* (CALL *GetStorageFunc)();
 
-const wchar_t* dllname = L"FFParser_DLL.dll";
-
-using GetStorageFunc = IStorageFactory* (CALL *)();
-
-
+//global access to storage
+IStorageFactory* DLLStorage;
 
 
 int main(int argc, char *argv[])
@@ -25,8 +21,9 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-
     //dll load
+    const wchar_t* dllname = L"FFParser_DLL.dll";
+
     HINSTANCE dll_load = LoadLibrary(dllname);
 
     if (!dll_load) {
@@ -35,36 +32,42 @@ int main(int argc, char *argv[])
 
     GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load, "GetStorage");
 
-    IStorageFactory* DLLStorage = dll_getstorage();
+    DLLStorage = dll_getstorage();
 
-    //get history
-    IRecordsStream* history = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
+    //get history example
+    IRecordsStream* recstr = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
 
+    size_t from = 100;
+	size_t number = 2;
+    size_t cnt = recstr->loadRecords(from, number);
+    size_t cnt2 = recstr->loadNextRecords(number);
+	size_t sz = recstr->getNumberOfRecords();
 
     // TEST getRecordByIndex - OK
     qDebug() << "getRecordByIndex:\n";
-    IRecord* onerec = history->getRecordByIndex(0);
+    IRecord* onerec = recstr->getRecordByIndex(0);
     if (onerec != nullptr) {
         qDebug()
-            << "\t" << onerec->getFieldValue(0) << " "
-            << "\t" << onerec->getFieldValue(1) << " "
-            << "\t" << onerec->getFieldValue(2) << " "
-            << "\t" << onerec->getFieldValue(3) << "\n";
+            << onerec->getFieldValue(0) << " "
+            << onerec->getFieldValue(1) << " "
+            << onerec->getFieldValue(2) << " "
+            //<< onerec->getFieldValue(3) << " "
+            << "\n";
     }
 
     //TEST getNext - OK
     qDebug() << "getNextRecord:\n";
-    for (int i = 0; i < 5; ++i) {
-        onerec = history->getNextRecord();
+    for (size_t i = 1; i < sz; ++i) {
+        onerec = recstr->getNextRecord();
         if (onerec != nullptr) {
             qDebug()
-                   << "\t" << onerec->getFieldValue(0) << " "
-                   << "\t" << onerec->getFieldValue(1) << " "
-                   << "\t" << onerec->getFieldValue(2) << " "
-                   << "\t" << onerec->getFieldValue(3) << "\n";
+                   << onerec->getFieldValue(0) << " "
+                   << onerec->getFieldValue(1) << " "
+                   << onerec->getFieldValue(2) << " "
+                   //<< onerec->getFieldValue(3) << " "
+                   << "\n";
         }
     }
-
 
 
     return a.exec();

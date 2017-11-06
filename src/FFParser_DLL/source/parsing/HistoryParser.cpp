@@ -15,14 +15,17 @@ namespace FFParser {
 		_field_names.push_back("visit_date");
 
 		//set main query
-		_history_query =	"SELECT hv.id, mz.url, mz.title, hv.visit_date \
+		_history_query =	"SELECT hv.id, pl.url, pl.title, hv.visit_date \
 							FROM moz_historyvisits hv \
-							JOIN moz_places mz ON hv.place_id = mz.id \
-							WHERE mz.title IS NOT NULL \
+							JOIN moz_places pl ON hv.place_id = pl.id \
+							WHERE pl.title IS NOT NULL \
 							ORDER BY hv.id DESC \
 							LIMIT ";
 		//set count query
-		_history_count_query = "SELECT count(*) FROM moz_historyvisits WHERE title IS NOT NULL;";
+		_history_count_query =	"SELECT count(*) \
+								FROM moz_historyvisits hv \
+								JOIN moz_places pl ON hv.place_id = pl.id \
+								WHERE pl.title IS NOT NULL;";
 	}
 
 
@@ -31,6 +34,7 @@ namespace FFParser {
 	void HistoryParser::parseHistoryRecord(const std::vector<std::string>& input, std::vector<std::string>& output)
 	{
 		std::time_t htime;
+		std::string stime;
 		
 		output.reserve(input.size());
 
@@ -41,7 +45,9 @@ namespace FFParser {
 		output.push_back( std::move(input[2]) );		//title
 
 		htime = std::stoull(input[3]) / 1000000;
-		output.push_back( std::asctime(std::localtime(&htime)) );		//visit_date
+		stime = std::asctime(std::localtime(&htime));
+		stime.erase(stime.length() - 1); //remove '\n'
+		output.push_back( stime );						//visit_date
 	}
 	
 
@@ -57,8 +63,9 @@ namespace FFParser {
 	}
 
 
-	void HistoryParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
+	size_t HistoryParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
 	{
+		size_t count = 0;
 		std::string query = _history_query + std::to_string(from) + ", " + (number ? std::to_string(number) : "-1") + ";";
 
 		if (auto file_sh = _file_accessor_ref.lock()) {
@@ -67,9 +74,13 @@ namespace FFParser {
 			output.reserve(_db_records.size());
 
 			for (size_t i = 0; i < _db_records.size(); ++i) {
+				output.emplace_back();
 				parseHistoryRecord(_db_records[i], output[i]);
+				++count;
 			}
 		}
+
+		return count;
 	}
 
 }

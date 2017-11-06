@@ -24,19 +24,19 @@ namespace FFParser {
 	// Interface methods
 
 
-	size_t StorageFactoryImpl::getNumberOfProfiles() const
+	size_t CALL StorageFactoryImpl::getNumberOfProfiles() const
 	{
 		return _profiles.size();
 	}
 
 
-	const char* StorageFactoryImpl::getProfileNameByIndex(size_t index) const
+	const char* CALL StorageFactoryImpl::getProfileNameByIndex(size_t index) const
 	{
 		return index < _profiles.size() ? _profiles[index].c_str() : nullptr;
 	}
 
 
-	IRecordsStream* StorageFactoryImpl::createRecordsStream(ERecordTypes type, size_t profile)
+	IRecordsStream* CALL StorageFactoryImpl::createRecordsStream(ERecordTypes type, size_t profile)
 	{
 		IRecordsStream* newstream = nullptr;
 
@@ -49,7 +49,7 @@ namespace FFParser {
 	}
 
 
-	void StorageFactoryImpl::freeRecordsStream(IRecordsStream* &record)
+	void CALL StorageFactoryImpl::freeRecordsStream(IRecordsStream* &record)
 	{
 		_storage.remove_if( [&](std::unique_ptr<IRecordsStream>& elem) { return record == elem.get(); } );
 		record = nullptr;

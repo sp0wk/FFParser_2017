@@ -27,7 +27,7 @@ namespace FFParser {
 
 		//methods
 		virtual size_t getTotalRecords(size_t profile) override;
-		virtual void parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number) override;
+		virtual size_t parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number) override;
 	};
 
 }
