@@ -82,14 +82,24 @@ namespace FFParser {
 		mozgluedll = LoadLibraryA((installPath + "\\mozglue.dll").c_str());
 		libnss = LoadLibraryA((installPath + "\\nss3.dll").c_str());
 
-		if (mozgluedll && libnss) {
-			NSSInit = (NSS_Init)GetProcAddress(libnss, "NSS_Init");
-			NSSShutdown = (NSS_Shutdown)GetProcAddress(libnss, "NSS_Shutdown");
-			PK11GetInternalKeySlot = (PK11_GetInternalKeySlot)GetProcAddress(libnss, "PK11_GetInternalKeySlot");
-			PK11FreeSlot = (PK11_FreeSlot)GetProcAddress(libnss, "PK11_FreeSlot");
-			PK11Authenticate = (PK11_Authenticate)GetProcAddress(libnss, "PK11_Authenticate");
-			PK11SDRDecrypt = (PK11SDR_Decrypt)GetProcAddress(libnss, "PK11SDR_Decrypt");
+		if (!mozgluedll || !libnss) {	//if libs from Firefox installation path failed
+			//try destributed libs
+			mozgluedll = LoadLibrary(L"FFDecryptLibs\\mozglue.dll");
+			libnss = LoadLibrary(L"FFDecryptLibs\\nss3.dll");
+
+			if (!mozgluedll || !libnss) {
+				//TODO:
+				//display error message or log or ignore
+				return;
+			}
 		}
+
+		NSSInit = (NSS_Init)GetProcAddress(libnss, "NSS_Init");
+		NSSShutdown = (NSS_Shutdown)GetProcAddress(libnss, "NSS_Shutdown");
+		PK11GetInternalKeySlot = (PK11_GetInternalKeySlot)GetProcAddress(libnss, "PK11_GetInternalKeySlot");
+		PK11FreeSlot = (PK11_FreeSlot)GetProcAddress(libnss, "PK11_FreeSlot");
+		PK11Authenticate = (PK11_Authenticate)GetProcAddress(libnss, "PK11_Authenticate");
+		PK11SDRDecrypt = (PK11SDR_Decrypt)GetProcAddress(libnss, "PK11SDR_Decrypt");
 	}
 
 
@@ -126,11 +136,8 @@ namespace FFParser {
 
 		//test for failed lib
 		if (NSSInit == nullptr) {
-			//TODO:
-			//display error message or ignore
-			return count;
+			return 0;
 		}
-
 
 		if (number == 0) {
 			nolimit = true;

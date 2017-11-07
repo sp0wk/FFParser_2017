@@ -143,22 +143,24 @@ namespace FFParser {
 
 	std::string FileAccessorImpl::getPathToResource(EResourcePaths resource, size_t profile) const
 	{
-		switch (resource)
-		{
-			case EResourcePaths::INSTALLDIR:
-			case EResourcePaths::PROFILES_INI:
-			case EResourcePaths::PROFILES:
-			case EResourcePaths::PROFILESLOCAL:
-				return _resource_paths[size_t(resource)];
+		if (profile < _profile_list.size()) {
+			switch (resource)
+			{
+				case EResourcePaths::INSTALLDIR:
+				case EResourcePaths::PROFILES_INI:
+				case EResourcePaths::PROFILES:
+				case EResourcePaths::PROFILESLOCAL:
+					return _resource_paths[size_t(resource)];
 
-			case EResourcePaths::PROFILEPATH:
-				return _profile_list[profile].second;
+				case EResourcePaths::PROFILEPATH:
+					return _profile_list[profile].second;
 
-			//path to profile + resource
-			case EResourcePaths::CACHE:
-			case EResourcePaths::DATABASE:
-			case EResourcePaths::LOGINS:
-				return _profile_list[profile].second + _resource_paths[size_t(resource)];
+					//path to profile + resource
+				case EResourcePaths::CACHE:
+				case EResourcePaths::DATABASE:
+				case EResourcePaths::LOGINS:
+					return _profile_list[profile].second + _resource_paths[size_t(resource)];
+			}
 		}
 		
 		return "";

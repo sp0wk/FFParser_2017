@@ -30,6 +30,12 @@ namespace FFParser {
 	}
 
 
+	std::string HelperFacade::getPathToProfile(size_t profile) const
+	{
+		return _file_accessor->getPathToResource(EResourcePaths::PROFILEPATH, profile);
+	}
+
+
 	void HelperFacade::getFieldNames(std::vector<std::string>& list, ERecordTypes type) const
 	{
 		_parsers[size_t(type)]->getFieldNames(list);

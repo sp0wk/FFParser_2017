@@ -30,9 +30,16 @@ namespace FFParser {
 	}
 
 
-	const char* CALL StorageFactoryImpl::getProfileNameByIndex(size_t index) const
+	const char* CALL StorageFactoryImpl::getProfileName(size_t index) const
 	{
 		return index < _profiles.size() ? _profiles[index].c_str() : nullptr;
+	}
+
+
+	const char* CALL StorageFactoryImpl::getPathToProfile(size_t index)
+	{
+		_temp_profile_path = _helper_ref.getPathToProfile(index);
+		return _temp_profile_path.c_str();
 	}
 
 

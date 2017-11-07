@@ -29,6 +29,9 @@ int main()
 
 	IStorageFactory* FactoryStorage = dll_getstorage();
 	
+	// TEST getPathToProfile
+	std::cout << FactoryStorage->getPathToProfile(0) << "\n\n";
+
 	//get history
 	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
 	
