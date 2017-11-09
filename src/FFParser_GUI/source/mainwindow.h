@@ -10,6 +10,18 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
+//for DLL
+#include <windows.h>
+#include "../include/FFParser_DLL.h"
+
+using namespace FFParser;
+
+typedef IStorageFactory* (CALL *GetStorageFunc)();
+
+
+
+
+
 #include "ui_mainwindow.h"
 
 
@@ -25,6 +37,11 @@ protected:
     void changeEvent(QEvent *);
     void closeEvent(QCloseEvent *);
 
+
+    void setNameColumnTable(IRecordsStream *);
+    void veiwRecord(IRecordsStream *);
+    void removeRowTable(size_t);
+
 protected slots:
     void slotLanguageChanged(QAction *);
 
@@ -32,9 +49,19 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_tabWidget_tabBarClicked(int index);
+
+    void on_pushButton_3_clicked();
+
+
+    void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
+
 private:
     Ui::MainWindow ui;
-    void createUI(const QStringList &headers);
+    void createUI(const QStringList &headers, size_t);
 
     void loadLanguage(const QString &rLanguage);
 
@@ -44,6 +71,26 @@ private:
     QTranslator m_translatorQt;
     QString m_currLang;
     QString m_langPath;
+
+
+
+    IRecordsStream *historyRecord;
+    IRecordsStream *bookmarksRecord;
+
+    size_t firstRecord;
+    size_t lastRecord;
+    size_t step;
+    size_t oldStep;
+    size_t flag;
+
+    //dll load
+    const wchar_t* dllname;
+    HINSTANCE dll_load;
+    //global access to storage
+    IStorageFactory* DLLStorage;
+
+
+
 };
 
 #endif // MAINWINDOW_H

@@ -1,35 +1,107 @@
 #include "mainwindow.h"
+#include <QDebug>
 
 
 
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)/*,
-    ui(new Ui::MainWindow)*/
+    QMainWindow(parent),
+    historyRecord(nullptr),
+    bookmarksRecord(nullptr),
+    firstRecord(0),
+    lastRecord(0),
+    step(25),
+    oldStep(step),
+    flag(0)
 {
     ui.setupUi(this);
     createLanguageMenu();
 
-     // Customize the appearance of the table
-     this->createUI(QStringList() << tr("size")
-                    << trUtf8("creation time")
-                    << trUtf8("last modification time")
-                    << trUtf8("last access time")
-                    << trUtf8("URL"));
 
+    //dll load
+    dllname = L"FFParser_DLL.dll";
+
+    dll_load = LoadLibrary(dllname);
+
+    if (!dll_load) {
+        exit(1);
+    }
+
+    GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load, "GetStorage");
+
+    DLLStorage = dll_getstorage();
+
+
+    //get history example
+    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
+    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, 0);
+
+
+
+}
+
+void MainWindow::setNameColumnTable(IRecordsStream *ptr)
+{
+    int counter = 0;
+
+    QStringList temp;
+    while (ptr->getFieldName(counter) != nullptr)
+    {
+        temp += ptr->getFieldName(counter);
+        ++counter;
+    }
+
+    createUI(temp, counter);
+
+}
+
+void MainWindow::removeRowTable(size_t counter)
+{
+    while (counter != -1)
+    {
+        ui.tableWidget->removeRow(counter);
+        --counter;
+    }
+}
+void MainWindow::veiwRecord(IRecordsStream *ptr)
+{
+    //removeRowTable(oldStep);
+    ui.tableWidget->clearContents();
+
+    size_t value = ptr->loadRecords(firstRecord, step);
+    size_t counterRecords = ptr->getNumberOfRecords();
+
+    IRecord* onerec = ptr->getRecordByIndex(firstRecord);
+    lastRecord = firstRecord + step;
+
+    for (size_t i = firstRecord; i < lastRecord; ++i)
+    {
+        ui.tableWidget->insertRow(i);
+        size_t counter = 0;
+        while (onerec->getFieldValue(counter) != nullptr)
+        {
+            ui.tableWidget->setItem(i, counter, new QTableWidgetItem(onerec->getFieldValue(counter)));
+            ++counter;
+        }
+
+        onerec = ptr->getNextRecord();
+    }
+    oldStep = step;
 }
 
 MainWindow::~MainWindow()
 {
     //delete ui;
+    delete historyRecord;
+    delete bookmarksRecord;
 }
 
 
 
-void MainWindow::createUI(const QStringList &headers)
+void MainWindow::createUI(const QStringList &headers, size_t number)
 {
     // Specify the number of columns
-    ui.tableWidget->setColumnCount(5);
+    ui.tableWidget->setColumnCount(number);
     ui.tableWidget->setShowGrid(true); // Insert the grid
 
     // Let's select only one element
@@ -42,11 +114,9 @@ void MainWindow::createUI(const QStringList &headers)
     ui.tableWidget->setHorizontalHeaderLabels(headers);
 
     // Stretch the last column in all available space
-    ui.tableWidget->horizontalHeader()->setStretchLastSection(true);
+    ui.tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui.tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
 
-
-    // Column resizing by content
-    ui.tableWidget->resizeColumnsToContents();
 }
 
 
@@ -169,3 +239,46 @@ void MainWindow::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
+
+
+void MainWindow::on_tabWidget_tabBarClicked(int index)
+{
+    switch (index)
+    {
+    case 0:
+        flag = 0;
+        setNameColumnTable(historyRecord);
+        veiwRecord(historyRecord);
+        break;
+    case 1:
+        flag = 1;
+        setNameColumnTable(bookmarksRecord);
+        veiwRecord(bookmarksRecord);
+        break;
+    default:
+        qDebug() << "Nituda!!!\n";
+        break;
+    }
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    if (ui.textEdit->toPlainText().toInt() > 0)
+    {
+        step = ui.textEdit->toPlainText().toInt();
+    }
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    firstRecord = lastRecord;
+    on_tabWidget_tabBarClicked(flag);
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    lastRecord = firstRecord;
+    firstRecord = lastRecord - step;
+    on_tabWidget_tabBarClicked(flag);
+}
