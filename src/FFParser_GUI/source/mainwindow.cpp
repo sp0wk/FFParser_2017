@@ -12,7 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
     lastRecord(0),
     step(25),
     oldStep(step),
-    flag(0)
+    flag(0),
+    counterRecords(0)
 {
     ui.setupUi(this);
     createLanguageMenu();
@@ -57,6 +58,11 @@ void MainWindow::setNameColumnTable(IRecordsStream *ptr)
 
 void MainWindow::removeRowTable(size_t counter)
 {
+    if (counter == 0)
+        return;
+
+    ui.tableWidget->clearContents();
+
     while (counter != -1)
     {
         ui.tableWidget->removeRow(counter);
@@ -65,26 +71,34 @@ void MainWindow::removeRowTable(size_t counter)
 }
 void MainWindow::veiwRecord(IRecordsStream *ptr)
 {
-    //removeRowTable(oldStep);
-    ui.tableWidget->clearContents();
+    removeRowTable(oldStep);
+    counterRecords = ptr->loadRecords(firstRecord, step);
 
-    size_t value = ptr->loadRecords(firstRecord, step);
-    size_t counterRecords = ptr->getNumberOfRecords();
+    if (counterRecords == 0)
+        return;
+    else if (step > counterRecords)
+        step = counterRecords;
 
     IRecord* onerec = ptr->getRecordByIndex(firstRecord);
     lastRecord = firstRecord + step;
 
+
+    size_t iterator = 0;
+
     for (size_t i = firstRecord; i < lastRecord; ++i)
     {
-        ui.tableWidget->insertRow(i);
+        ui.tableWidget->insertRow(iterator);
         size_t counter = 0;
         while (onerec->getFieldValue(counter) != nullptr)
         {
-            ui.tableWidget->setItem(i, counter, new QTableWidgetItem(onerec->getFieldValue(counter)));
+            ui.tableWidget->setItem(iterator, counter, new QTableWidgetItem(onerec->getFieldValue(counter)));
             ++counter;
         }
-
+        ++iterator;
         onerec = ptr->getNextRecord();
+
+        if (onerec == nullptr)
+            break;
     }
     oldStep = step;
 }
@@ -92,8 +106,6 @@ void MainWindow::veiwRecord(IRecordsStream *ptr)
 MainWindow::~MainWindow()
 {
     //delete ui;
-    delete historyRecord;
-    delete bookmarksRecord;
 }
 
 
@@ -239,9 +251,7 @@ void MainWindow::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
-
-
-void MainWindow::on_tabWidget_tabBarClicked(int index)
+void MainWindow::switchVeiwRecords(size_t index)
 {
     switch (index)
     {
@@ -261,6 +271,11 @@ void MainWindow::on_tabWidget_tabBarClicked(int index)
     }
 }
 
+void MainWindow::on_tabWidget_tabBarClicked(int index)
+{
+    switchVeiwRecords(static_cast<size_t>(index));
+}
+
 void MainWindow::on_pushButton_3_clicked()
 {
     if (ui.textEdit->toPlainText().toInt() > 0)
@@ -273,12 +288,20 @@ void MainWindow::on_pushButton_3_clicked()
 void MainWindow::on_pushButton_clicked()
 {
     firstRecord = lastRecord;
-    on_tabWidget_tabBarClicked(flag);
+    switchVeiwRecords(flag);
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    lastRecord = firstRecord;
-    firstRecord = lastRecord - step;
-    on_tabWidget_tabBarClicked(flag);
+    if (static_cast<int>(firstRecord - step) <= 0)
+    {
+        firstRecord = 0;
+        lastRecord = step;
+    }
+    else
+    {
+        firstRecord -= step;
+        lastRecord -= step;
+    }
+   switchVeiwRecords(flag);
 }

@@ -41,6 +41,7 @@ protected:
     void setNameColumnTable(IRecordsStream *);
     void veiwRecord(IRecordsStream *);
     void removeRowTable(size_t);
+    void switchVeiwRecords(size_t);
 
 protected slots:
     void slotLanguageChanged(QAction *);
@@ -82,6 +83,7 @@ private:
     size_t step;
     size_t oldStep;
     size_t flag;
+    size_t counterRecords;
 
     //dll load
     const wchar_t* dllname;
