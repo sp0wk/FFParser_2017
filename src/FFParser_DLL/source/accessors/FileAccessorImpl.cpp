@@ -105,6 +105,7 @@ namespace FFParser {
 
 				std::string name;
 				std::string path;
+				std::string cache_path;
 
 				//if section is "Profile"
 				if (section.first.find("Profile", 0, 7) != std::string::npos) {
@@ -121,18 +122,22 @@ namespace FFParser {
 						}
 					}
 
-					//create path for relative profiles
+					//create paths for relative profiles
 					if (isRelative) {
 						path.erase(0, 9);	//remove "Profile/" 
+						cache_path = _resource_paths[size_t(EResourcePaths::PROFILESLOCAL)] + "\\" + path + _resource_paths[size_t(EResourcePaths::CACHE)];
 						path = _resource_paths[size_t(EResourcePaths::PROFILES)] + "\\" + path;
+					}
+					else {
+						cache_path = path + _resource_paths[size_t(EResourcePaths::CACHE)];
 					}
 
 					//add profile
-					_profile_list.push_back({ name, path });
+					_profile_list.push_back({ name, path, cache_path });
 				}
 			}
 		}
-		catch (const std::exception &ex)	{
+		catch (const std::exception &ex) {
 			//TODO:
 			//log or ignore
 		}
@@ -153,13 +158,14 @@ namespace FFParser {
 					return _resource_paths[size_t(resource)];
 
 				case EResourcePaths::PROFILEPATH:
-					return _profile_list[profile].second;
+					return _profile_list[profile].path;
 
-					//path to profile + resource
 				case EResourcePaths::CACHE:
+					return _profile_list[profile].cache_path;
+
 				case EResourcePaths::DATABASE:
 				case EResourcePaths::LOGINS:
-					return _profile_list[profile].second + _resource_paths[size_t(resource)];
+					return _profile_list[profile].path + _resource_paths[size_t(resource)];
 			}
 		}
 		
@@ -218,7 +224,7 @@ namespace FFParser {
 	{
 		for (auto iter : _profile_list) {
 			//add profile name to vector
-			list.push_back(iter.first);
+			list.push_back(iter.name);
 		}
 	}
 

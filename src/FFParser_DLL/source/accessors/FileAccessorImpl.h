@@ -13,8 +13,15 @@ namespace FFParser {
 	class FileAccessorImpl : public IFileAccessor
 	{
 	private:
+		struct ProfileInfo
+		{
+			std::string name;
+			std::string path;
+			std::string cache_path;
+		};
+
 		std::array<std::string, size_t(EResourcePaths::NUMBER_OF_PATHS)> _resource_paths;
-		std::vector<std::pair<std::string, std::string>> _profile_list;
+		std::vector<ProfileInfo> _profile_list;
 
 		//methods
 		std::string getFirefoxInstallDir() const;
