@@ -33,13 +33,14 @@ int main()
 	std::cout << FactoryStorage->getPathToProfile(0) << "\n\n";
 
 	//get history
-	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
+	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 0);
 	
 	size_t from = 100;
 	size_t number = 2;
 	size_t cnt = recstr->loadRecords(from, number);
 	size_t cnt2 = recstr->loadNextRecords(number);
 	size_t sz = recstr->getNumberOfRecords();
+	size_t total = recstr->getTotalRecords();
 
 
 	// TEST getRecordByIndex
@@ -49,7 +50,12 @@ int main()
 			<< onerec->getFieldValue(0) << " "
 			<< onerec->getFieldValue(1) << " "
 			<< onerec->getFieldValue(2) << " "
-			//<< onerec->getFieldValue(3) << " "
+			<< onerec->getFieldValue(3) << " "
+			<< onerec->getFieldValue(4) << " "
+			<< onerec->getFieldValue(5) << " "
+			<< onerec->getFieldValue(6) << " "
+			<< onerec->getFieldValue(7) << " "
+			<< onerec->getFieldValue(8) << " "
 			<< "\n\n";
 	}
 	
@@ -61,7 +67,12 @@ int main()
 				<< onerec->getFieldValue(0) << " "
 				<< onerec->getFieldValue(1) << " "
 				<< onerec->getFieldValue(2) << " "
-				//<< onerec->getFieldValue(3) << " "
+				<< onerec->getFieldValue(3) << " "
+				<< onerec->getFieldValue(4) << " "
+				<< onerec->getFieldValue(5) << " "
+				<< onerec->getFieldValue(6) << " "
+				<< onerec->getFieldValue(7) << " "
+				<< onerec->getFieldValue(8) << " "
 				<< "\n\n";
 		}
 	}

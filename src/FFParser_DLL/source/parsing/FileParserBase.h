@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 #include <memory>
+//read file headers
+#include <fstream>
+#include <streambuf>
 
 #include "ParserBase.h"
 
@@ -15,11 +18,19 @@ namespace FFParser {
 	protected:
 		std::string _file_content;
 
-		size_t readFileToString(const std::string& file_path) const
+		size_t readFileToString(const std::string& file_path)
 		{
-			//TODO:
-			//read file to content and return number of read bytes
-			return 0;
+			//open file
+			std::ifstream file(file_path, std::ios::in | std::ifstream::binary);
+
+			if (!file.is_open()) {
+				return 0;
+			}
+
+			//read file
+			_file_content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+			
+			return _file_content.size();
 		}
 
 	public:

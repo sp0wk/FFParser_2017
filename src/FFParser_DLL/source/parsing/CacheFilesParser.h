@@ -5,6 +5,8 @@
 #include <string>
 #include <memory>
 
+#include <regex>
+
 #include "FileParserBase.h"
 #include "../accessors/IFileAccessor.h"
 
@@ -15,10 +17,30 @@ namespace FFParser {
 	class CacheFilesParser final : public FileParserBase
 	{
 	private:
-		//TODO:
-		//add regex pattern
+		std::vector<std::string> filelist;		//cache files list
 
-		void parseCacheFile(const std::string& filename, std::vector<std::string>& output) const;
+		//search patterns
+		std::regex parseRegionRegex;
+		std::regex urlRegex;
+		std::regex filenameRegex;
+		std::regex fnWithExtRegex;
+		std::regex contentTypeRegex;
+		std::regex contentEncodingRegex;
+		std::regex dateRegex;
+		std::regex lastModifiedRegex;
+		std::regex expiresRegex;
+
+		//generic file extension types
+		std::string textType = "plain";
+		std::string jsType = "javascript";
+		std::string htmlType = "html";
+		std::string cssType = "css";
+		std::string jsonType = "json";
+		std::string iconType = "icon";
+		std::string svgType = "svg";
+
+		//methods
+		void parseCacheFile(const std::string& filename, std::vector<std::string>& output);
 
 	public:
 		CacheFilesParser(const std::shared_ptr<IFileAccessor>& fa);
