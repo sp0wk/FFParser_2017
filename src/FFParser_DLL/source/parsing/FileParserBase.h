@@ -8,6 +8,8 @@
 #include <fstream>
 #include <streambuf>
 
+#include <Windows.h>	//for MessageBox
+
 #include "ParserBase.h"
 
 
@@ -24,6 +26,9 @@ namespace FFParser {
 			std::ifstream file(file_path, std::ios::in | std::ifstream::binary);
 
 			if (!file.is_open()) {
+				//display error
+				std::string error = "Couldn't open cache file:\n" + file_path;
+				MessageBoxA(NULL, error.c_str(), "ParserDLL error: \"File open error\"", MB_OK | MB_ICONERROR);
 				return 0;
 			}
 

@@ -1,5 +1,6 @@
 #include "parsing/LoginsParser.h"
 
+#include <Windows.h>	//for MessageBox
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -88,8 +89,11 @@ namespace FFParser {
 			libnss = LoadLibrary(L"FFDecryptLibs\\nss3.dll");
 
 			if (!mozgluedll || !libnss) {
-				//TODO:
-				//display error message or log or ignore
+				//display error
+				MessageBoxA(NULL, "Check if mozglue.dll and nss3.dll are present in \"FFDecryptLibs\" folder OR \
+								  try running version of this application (32 or 64bit) which match with your Firefox version", 
+								  "ParserDLL error: \"Couldn't find proper Firefox decrypt libraries\"", 
+								  MB_OK | MB_ICONERROR);
 				return;
 			}
 		}
@@ -117,8 +121,8 @@ namespace FFParser {
 			return _pt.get_child("logins").size();
 		}
 		catch (const std::exception& ex) {
-			//TODO:
-			//log error or ignore it
+			//display error
+			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error during LOGINS.JSON parsing occured\"", MB_OK | MB_ICONERROR);
 		}
 
 		return 0;
@@ -172,8 +176,8 @@ namespace FFParser {
 			}
 		}
 		catch (const std::exception& ex) {
-			//TODO:
-			//log error or ignore it
+			//display error
+			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error during LOGINS.JSON parsing occured\"", MB_OK | MB_ICONERROR);
 		}
 
 		NSSShutdown();

@@ -1,5 +1,5 @@
 #include "FileAccessorImpl.h"
-#include <Windows.h>	//for registry API
+#include <Windows.h>	//for registry API and MessageBox
 
 #include <boost/filesystem.hpp>
 
@@ -46,7 +46,11 @@ namespace FFParser {
 			//try 32-bit Firefox
 			st = RegOpenKeyExA(HKEY_LOCAL_MACHINE, subkey.c_str(), NULL, KEY_WOW64_32KEY | KEY_READ, &hKey);
 
-			if (st != 0) return result;
+			if (st != 0) {
+				//display error
+				MessageBoxA(NULL, "Couldn't open/find Firefox subkey in registry. Either error occured or Firefox is not installed.", "ParserDLL error: \"Error opening registry keys\"", MB_OK | MB_ICONERROR);
+				return result;
+			}
 
 			key6432 = KEY_WOW64_32KEY;	// Firefox is 32-bit
 		}
@@ -72,6 +76,11 @@ namespace FFParser {
 			if (buf[0] != 0) {
 				result = buf;
 			}
+		}
+
+		if (buf[0] == 0) {
+			//display error
+			MessageBoxA(NULL, "Couldn't detect your Firefox version in registry", "ParserDLL error: \"Firefox version unknown\"", MB_OK | MB_ICONERROR);
 		}
 
 		RegCloseKey(hKey);
@@ -138,8 +147,8 @@ namespace FFParser {
 			}
 		}
 		catch (const std::exception &ex) {
-			//TODO:
-			//log or ignore
+			//display error
+			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error during PROFILES.INI parsing occured\"", MB_OK | MB_ICONERROR);
 		}
 	}
 
@@ -182,14 +191,16 @@ namespace FFParser {
 			if (exists(p)) {
 				if (is_directory(p)) {
 					for (auto& iter : directory_iterator(p)) {
-						if (is_regular_file(iter)) ++count;
+						if (is_regular_file(iter)) {
+							++count;
+						}
 					}
 				}
 			}
 		}
 		catch (const filesystem_error& ex) {
-			//TODO:
-			//log error or ignore
+			//display error
+			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error occured while reading cache folder contents\"", MB_OK | MB_ICONERROR);
 		}
 
 		return count;
@@ -214,8 +225,8 @@ namespace FFParser {
 			}
 		}
 		catch (const filesystem_error& ex) {
-			//TODO:
-			//log error or ignore
+			//display error
+			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error occured while reading cache folder contents\"", MB_OK | MB_ICONERROR);
 		}
 	}
 

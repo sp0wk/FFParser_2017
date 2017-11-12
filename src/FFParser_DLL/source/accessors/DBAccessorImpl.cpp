@@ -1,5 +1,6 @@
 #include "DBAccessorImpl.h"
 
+#include <Windows.h>	//for MessageBox
 
 namespace FFParser {
 
@@ -15,10 +16,12 @@ namespace FFParser {
 
 	int DBAccessorImpl::connectToDB(const std::string& db_path)
 	{
-		int res = sqlite3_open(db_path.c_str(), &_raw_db);
+		int res = sqlite3_open_v2(db_path.c_str(), &_raw_db, SQLITE_OPEN_READONLY, NULL);
 		
 		//if open failed
 		if (res) {
+			//display error
+			MessageBoxA(NULL, sqlite3_errstr(res), "ParserDLL error: \"Error opening places.sqlite database\"", MB_OK | MB_ICONERROR);
 			sqlite3_close(_raw_db);
 		}
 		else {
@@ -41,8 +44,8 @@ namespace FFParser {
 		status = sqlite3_exec(_db.get(), query.c_str(), NULL, 0, &error);
 
 		if (status) {
-			//TODO:
-			//error can be logged here
+			//display error
+			MessageBoxA(NULL, error, "ParserDLL error: \"Database query error occured\"", MB_OK | MB_ICONERROR);
 			sqlite3_free(error);
 		}
 
@@ -64,8 +67,8 @@ namespace FFParser {
 		status = sqlite3_prepare_v2(_db.get(), query.c_str(), query.length(), &stmt, NULL);
 
 		if (status) {
-			//TODO:
-			//log error or ignore
+			//display error
+			MessageBoxA(NULL, sqlite3_errstr(status), "ParserDLL error: \"Database query error occured\"", MB_OK | MB_ICONERROR);
 			return status;
 		}
 
