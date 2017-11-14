@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QDebug>
+#include <QVariant>
 
 
 
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //get history example
     historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
     bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, 0);
+
 
 
 
@@ -304,4 +306,36 @@ void MainWindow::on_pushButton_2_clicked()
         lastRecord -= step;
     }
    switchVeiwRecords(flag);
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    if (counterRecords != 0)
+    {
+        QString dataToFind = ui.textEdit_2->toPlainText();
+        size_t columnCount = ui.tableWidget->columnCount();
+        size_t rowCount = ui.tableWidget->rowCount();
+        for (size_t i = 0; i < rowCount; ++i)
+        {
+            for (size_t j = 0; j < columnCount; ++j)
+            {
+                QTableWidgetItem *item =  ui.tableWidget->item(i, j);
+
+
+                QString temp = item->text();
+                QString substr = temp.split(dataToFind).first();
+
+                if (substr == "")
+                {
+                    ui.tableWidget->selectRow(i);
+                    // Имитируем нажатие кнопки Tab, чтобы выделить строку
+                        QKeyEvent* pe = new QKeyEvent(QEvent::KeyPress,
+                                Qt::Key_Tab,Qt::NoModifier, "Tab");
+                        QApplication::sendEvent(this, pe) ;
+                }
+
+            }
+        }
+
+    }
 }
