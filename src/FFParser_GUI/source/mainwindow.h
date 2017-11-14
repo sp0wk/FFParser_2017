@@ -81,6 +81,7 @@ private:
 
     IRecordsStream *historyRecord;
     IRecordsStream *bookmarksRecord;
+    IRecordsStream *loginRecord;
 
     size_t firstRecord;
     size_t lastRecord;

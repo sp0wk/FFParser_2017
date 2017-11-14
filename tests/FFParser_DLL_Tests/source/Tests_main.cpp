@@ -33,11 +33,11 @@ int main()
 	std::cout << FactoryStorage->getPathToProfile(0) << "\n\n";
 
 	//get history
-	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 0);
+	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::LOGINS, 0);
 	
 	size_t from = 100;
 	size_t number = 2;
-	size_t cnt = recstr->loadRecords(from, number);
+	size_t cnt = recstr->loadRecords(0, number);
 	size_t cnt2 = recstr->loadNextRecords(number);
 	size_t sz = recstr->getNumberOfRecords();
 	size_t total = recstr->getTotalRecords();

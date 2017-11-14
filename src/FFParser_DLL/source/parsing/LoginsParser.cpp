@@ -90,8 +90,7 @@ namespace FFParser {
 
 			if (!mozgluedll || !libnss) {
 				//display error
-				MessageBoxA(NULL, "Check if mozglue.dll and nss3.dll are present in \"FFDecryptLibs\" folder OR \
-								  try running version of this application (32 or 64bit) which match with your Firefox version", 
+				MessageBoxA(NULL, "Check if mozglue.dll and nss3.dll are present in \"FFDecryptLibs\" folder OR try running version of this application (32 or 64bit) which match with your Firefox version", 
 								  "ParserDLL error: \"Couldn't find proper Firefox decrypt libraries\"", 
 								  MB_OK | MB_ICONERROR);
 				return;

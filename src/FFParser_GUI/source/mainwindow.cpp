@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     historyRecord(nullptr),
     bookmarksRecord(nullptr),
+    loginRecord(0),
     firstRecord(0),
     lastRecord(0),
     step(25),
@@ -37,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //get history example
     historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
     bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, 0);
-
+    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, 0);
 
 
 
@@ -267,6 +268,11 @@ void MainWindow::switchVeiwRecords(size_t index)
         setNameColumnTable(bookmarksRecord);
         veiwRecord(bookmarksRecord);
         break;
+    case 2:
+        flag = 2;
+        setNameColumnTable(loginRecord);
+        veiwRecord(loginRecord);
+        break;
     default:
         qDebug() << "Nituda!!!\n";
         break;
@@ -310,11 +316,19 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::on_pushButton_4_clicked()
 {
+
     if (counterRecords != 0)
     {
         QString dataToFind = ui.textEdit_2->toPlainText();
         size_t columnCount = ui.tableWidget->columnCount();
         size_t rowCount = ui.tableWidget->rowCount();
+        for (int i = 0; i < rowCount; ++i)
+        {
+            for (int  j = 0; j < columnCount; ++j)
+            {
+                ui.tableWidget->item(i, j)->setData(Qt::BackgroundRole, QColor (255, 255, 255));
+            }
+        }
         for (size_t i = 0; i < rowCount; ++i)
         {
             for (size_t j = 0; j < columnCount; ++j)
@@ -323,6 +337,22 @@ void MainWindow::on_pushButton_4_clicked()
 
 
                 QString temp = item->text();
+
+
+                size_t counter = 0;
+
+                while ((counter = temp.indexOf(dataToFind, counter)) != -1)
+                {
+                    ++counter;
+                    size_t currCounter = 0;
+                    while (currCounter < columnCount)
+                    {
+                        ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (250,0,0));
+                        ++currCounter;
+                    }
+                }
+
+                /*
                 QString substr = temp.split(dataToFind).first();
 
                 if (substr == "")
@@ -333,6 +363,7 @@ void MainWindow::on_pushButton_4_clicked()
                                 Qt::Key_Tab,Qt::NoModifier, "Tab");
                         QApplication::sendEvent(this, pe) ;
                 }
+                */
 
             }
         }
