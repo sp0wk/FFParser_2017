@@ -44,6 +44,7 @@ protected:
     void veiwRecord(IRecordsStream *);
     void removeRowTable(size_t);
     void switchVeiwRecords(size_t);
+    void setNameProfile();
 
 protected slots:
     void slotLanguageChanged(QAction *);
@@ -64,6 +65,8 @@ private slots:
 
     void on_pushButton_4_clicked();
 
+    void on_comboBox_activated(int index);
+
 private:
     Ui::MainWindow ui;
     void createUI(const QStringList &headers, size_t);
@@ -82,6 +85,7 @@ private:
     IRecordsStream *historyRecord;
     IRecordsStream *bookmarksRecord;
     IRecordsStream *loginRecord;
+    IRecordsStream *cacheRecord;
 
     size_t firstRecord;
     size_t lastRecord;
@@ -89,6 +93,8 @@ private:
     size_t oldStep;
     size_t flag;
     size_t counterRecords;
+    size_t profileNumber;
+    size_t counterProfile;
 
     //dll load
     const wchar_t* dllname;

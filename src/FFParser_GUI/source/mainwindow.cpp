@@ -10,12 +10,15 @@ MainWindow::MainWindow(QWidget *parent) :
     historyRecord(nullptr),
     bookmarksRecord(nullptr),
     loginRecord(0),
+    cacheRecord(0),
     firstRecord(0),
     lastRecord(0),
     step(25),
     oldStep(step),
     flag(0),
-    counterRecords(0)
+    counterRecords(0),
+    profileNumber(0),
+    counterProfile(0)
 {
     ui.setupUi(this);
     createLanguageMenu();
@@ -34,13 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     DLLStorage = dll_getstorage();
 
-
     //get history example
-    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
-    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, 0);
-    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, 0);
+    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, profileNumber);
+    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, profileNumber);
+    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, profileNumber);
+    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, profileNumber);
 
-
+    counterProfile = DLLStorage->getNumberOfProfiles();
+    setNameProfile();
 
 }
 
@@ -104,6 +108,17 @@ void MainWindow::veiwRecord(IRecordsStream *ptr)
             break;
     }
     oldStep = step;
+}
+
+void MainWindow::setNameProfile()
+{
+    size_t counter = 0;
+    while (counter < counterProfile)
+    {
+        ui.comboBox->addItem(DLLStorage->getProfileName(counter), counter);
+        ++counter;
+    }
+
 }
 
 MainWindow::~MainWindow()
@@ -273,6 +288,11 @@ void MainWindow::switchVeiwRecords(size_t index)
         setNameColumnTable(loginRecord);
         veiwRecord(loginRecord);
         break;
+    case 3:
+        flag = 3;
+        setNameColumnTable(cacheRecord);
+        veiwRecord(cacheRecord);
+        break;
     default:
         qDebug() << "Nituda!!!\n";
         break;
@@ -352,21 +372,17 @@ void MainWindow::on_pushButton_4_clicked()
                     }
                 }
 
-                /*
-                QString substr = temp.split(dataToFind).first();
-
-                if (substr == "")
-                {
-                    ui.tableWidget->selectRow(i);
-                    // Имитируем нажатие кнопки Tab, чтобы выделить строку
-                        QKeyEvent* pe = new QKeyEvent(QEvent::KeyPress,
-                                Qt::Key_Tab,Qt::NoModifier, "Tab");
-                        QApplication::sendEvent(this, pe) ;
-                }
-                */
-
             }
         }
 
     }
+    else
+        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
+                                                                   tr("The records are not load!\n"),
+                                                                   QMessageBox::Ok);
+}
+
+void MainWindow::on_comboBox_activated(int index)
+{
+    profileNumber = static_cast<size_t>(index);
 }
