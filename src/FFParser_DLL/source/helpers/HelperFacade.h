@@ -31,7 +31,7 @@ namespace FFParser {
 		std::shared_ptr<IDatabaseAccessor> _db_accessor;
 
 		//parsers
-		std::array<std::unique_ptr<ParserBase>, size_t(ERecordTypes::NUMBER_OF_TYPES)> _parsers;
+		std::vector<std::vector<std::unique_ptr<ParserBase>>> _parsers;
 
 		//private ctor and dtor
 		HelperFacade();

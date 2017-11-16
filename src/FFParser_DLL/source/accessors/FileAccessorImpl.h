@@ -37,6 +37,7 @@ namespace FFParser {
 		virtual size_t getFilesCount(const std::string& dir_path) const override;
 		virtual void getFileList(std::vector<std::string>& list, const std::string& dir_path) const override;
 		virtual void getProfiles(std::vector<std::string>& list) const override;
+		virtual size_t getNumberOfProfiles() const override;
 	};
 
 }

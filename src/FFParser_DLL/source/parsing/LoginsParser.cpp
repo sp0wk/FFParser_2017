@@ -115,7 +115,9 @@ namespace FFParser {
 		}
 
 		try	{
-			boost::property_tree::read_json(profileDir.append("\\logins.json"), _pt);
+			if (_pt.empty()) {
+				boost::property_tree::read_json(profileDir.append("\\logins.json"), _pt);
+			}
 
 			return _pt.get_child("logins").size();
 		}

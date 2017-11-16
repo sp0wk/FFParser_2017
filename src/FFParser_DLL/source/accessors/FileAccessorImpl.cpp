@@ -239,4 +239,9 @@ namespace FFParser {
 		}
 	}
 
+
+	size_t FileAccessorImpl::getNumberOfProfiles() const
+	{
+		return _profile_list.size();
+	}
 }
