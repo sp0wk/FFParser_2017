@@ -1,7 +1,7 @@
 {
 	"_type": "Project",
 	"_id": "AAAAAAFF+h6SjaM2Hec=",
-	"name": "Untitled",
+	"name": "FFParser_DLL_Architecture",
 	"ownedElements": [
 		{
 			"_type": "UMLModel",
@@ -17,7 +17,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "Main",
+					"name": "FFParser_DLL",
 					"visible": true,
 					"defaultDiagram": true,
 					"ownedViews": [
@@ -648,6 +648,34 @@
 											"text": "+getProfiles()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAFfxjXRNRS/Eoc=",
+											"_parent": {
+												"$ref": "AAAAAAFe8tRJ7se/9Jo="
+											},
+											"model": {
+												"$ref": "AAAAAAFfxjXRCRS8C1E="
+											},
+											"visible": true,
+											"enabled": true,
+											"lineColor": "#000000",
+											"fillColor": "#ffffff",
+											"fontColor": "#000000",
+											"font": "Arial;13;0",
+											"showShadow": true,
+											"containerChangeable": false,
+											"containerExtending": false,
+											"left": 1925,
+											"top": 517,
+											"width": 183,
+											"height": 13,
+											"autoResize": false,
+											"underline": false,
+											"text": "+getNumberOfProfiles()",
+											"horizontalAlignment": 0,
+											"verticalAlignment": 5
 										}
 									],
 									"visible": true,
@@ -662,7 +690,7 @@
 									"left": 1920,
 									"top": 407,
 									"width": 193,
-									"height": 113,
+									"height": 128,
 									"autoResize": false
 								},
 								{
@@ -726,7 +754,7 @@
 							"left": 1920,
 							"top": 344,
 							"width": 193,
-							"height": 176,
+							"height": 191,
 							"autoResize": false,
 							"stereotypeDisplay": "label",
 							"showVisibility": true,
@@ -8396,7 +8424,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-parsers: array<ParserBase*>",
+											"text": "-parsers: vector<ParserBase*>",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										}
@@ -8737,7 +8765,7 @@
 											"containerExtending": false,
 											"left": 1725,
 											"top": 365,
-											"width": 135,
+											"width": 143,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
@@ -8762,7 +8790,7 @@
 											"containerExtending": false,
 											"left": 1725,
 											"top": 380,
-											"width": 135,
+											"width": 143,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
@@ -8831,7 +8859,7 @@
 									"containerExtending": false,
 									"left": 1720,
 									"top": 360,
-									"width": 145,
+									"width": 153,
 									"height": 38,
 									"autoResize": false,
 									"stereotypeLabel": {
@@ -8901,7 +8929,7 @@
 											"containerExtending": false,
 											"left": 1725,
 											"top": 403,
-											"width": 135,
+											"width": 143,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
@@ -8929,7 +8957,7 @@
 											"containerExtending": false,
 											"left": 1725,
 											"top": 418,
-											"width": 135,
+											"width": 143,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
@@ -8957,7 +8985,7 @@
 											"containerExtending": false,
 											"left": 1725,
 											"top": 433,
-											"width": 135,
+											"width": 143,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
@@ -8985,11 +9013,39 @@
 											"containerExtending": false,
 											"left": 1725,
 											"top": 448,
-											"width": 135,
+											"width": 143,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
 											"text": "+getProfiles()",
+											"horizontalAlignment": 0,
+											"verticalAlignment": 5
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAFfxjVKYxGGesY=",
+											"_parent": {
+												"$ref": "AAAAAAFfILFnSd6EHoE="
+											},
+											"model": {
+												"$ref": "AAAAAAFfxjVKFxF6rOM="
+											},
+											"visible": true,
+											"enabled": true,
+											"lineColor": "#000000",
+											"fillColor": "#ffffff",
+											"fontColor": "#000000",
+											"font": "Arial;13;2",
+											"showShadow": true,
+											"containerChangeable": false,
+											"containerExtending": false,
+											"left": 1725,
+											"top": 463,
+											"width": 143,
+											"height": 13,
+											"autoResize": false,
+											"underline": false,
+											"text": "+getNumberOfProfiles()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										}
@@ -9005,8 +9061,8 @@
 									"containerExtending": false,
 									"left": 1720,
 									"top": 398,
-									"width": 145,
-									"height": 68,
+									"width": 153,
+									"height": 83,
 									"autoResize": false
 								},
 								{
@@ -9069,8 +9125,8 @@
 							"containerExtending": false,
 							"left": 1720,
 							"top": 360,
-							"width": 145,
-							"height": 106,
+							"width": 153,
+							"height": 121,
 							"autoResize": false,
 							"stereotypeDisplay": "label",
 							"showVisibility": true,
@@ -10490,7 +10546,7 @@
 									"showShadow": true,
 									"containerChangeable": false,
 									"containerExtending": false,
-									"left": 1891,
+									"left": 1895,
 									"top": 409,
 									"width": 0,
 									"height": 13,
@@ -10523,7 +10579,7 @@
 									"showShadow": true,
 									"containerChangeable": false,
 									"containerExtending": false,
-									"left": 1891,
+									"left": 1895,
 									"top": 424,
 									"width": 0,
 									"height": 13,
@@ -10556,7 +10612,7 @@
 									"showShadow": true,
 									"containerChangeable": false,
 									"containerExtending": false,
-									"left": 1892,
+									"left": 1896,
 									"top": 379,
 									"width": 0,
 									"height": 13,
@@ -10588,7 +10644,7 @@
 								"$ref": "AAAAAAFe8tRJ7ce4lg4="
 							},
 							"lineStyle": 0,
-							"points": "1920:400;1864:400",
+							"points": "1920:400;1872:400",
 							"stereotypeDisplay": "label",
 							"showVisibility": true,
 							"showProperty": true,
@@ -15325,6 +15381,20 @@
 							"concurrency": "sequential",
 							"isQuery": false,
 							"isAbstract": false
+						},
+						{
+							"_type": "UMLOperation",
+							"_id": "AAAAAAFfxjXRCRS8C1E=",
+							"_parent": {
+								"$ref": "AAAAAAFe8tRJ7Me2M8M="
+							},
+							"name": "getNumberOfProfiles",
+							"visibility": "public",
+							"isStatic": false,
+							"isLeaf": false,
+							"concurrency": "sequential",
+							"isQuery": false,
+							"isAbstract": false
 						}
 					],
 					"isAbstract": false,
@@ -17257,7 +17327,7 @@
 							"visibility": "private",
 							"isStatic": false,
 							"isLeaf": false,
-							"type": "array<ParserBase*>",
+							"type": "vector<ParserBase*>",
 							"isReadOnly": false,
 							"isOrdered": false,
 							"isUnique": false,
@@ -17475,6 +17545,20 @@
 							"isQuery": false,
 							"isAbstract": true,
 							"specification": "in std::vector<std::string>& list"
+						},
+						{
+							"_type": "UMLOperation",
+							"_id": "AAAAAAFfxjVKFxF6rOM=",
+							"_parent": {
+								"$ref": "AAAAAAFfILFnSN57dOI="
+							},
+							"name": "getNumberOfProfiles",
+							"visibility": "public",
+							"isStatic": false,
+							"isLeaf": false,
+							"concurrency": "sequential",
+							"isQuery": false,
+							"isAbstract": true
 						}
 					],
 					"isAbstract": false,

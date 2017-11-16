@@ -27,7 +27,7 @@
 							},
 							"name": "View DB Records",
 							"visible": true,
-							"defaultDiagram": false,
+							"defaultDiagram": true,
 							"ownedViews": [
 								{
 									"_type": "UMLFrameView",
@@ -8248,35 +8248,12 @@
 							},
 							"name": "RecordImpl",
 							"visibility": "public",
-							"represent": {
-								"$ref": "AAAAAAFfjw3V2iYdYGo="
-							},
 							"isMultiInstance": false
 						}
 					]
 				}
 			],
 			"visibility": "public",
-			"attributes": [
-				{
-					"_type": "UMLAttribute",
-					"_id": "AAAAAAFfjw3V2iYdYGo=",
-					"_parent": {
-						"$ref": "AAAAAAFfTz5p/S3marU="
-					},
-					"name": "Role1",
-					"visibility": "public",
-					"isStatic": false,
-					"isLeaf": false,
-					"type": "",
-					"isReadOnly": false,
-					"isOrdered": false,
-					"isUnique": false,
-					"isDerived": false,
-					"aggregation": "none",
-					"isID": false
-				}
-			],
 			"isAbstract": false,
 			"isFinalSpecialization": false,
 			"isLeaf": false

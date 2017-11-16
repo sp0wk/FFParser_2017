@@ -27,7 +27,7 @@
 							},
 							"name": "View File Records",
 							"visible": true,
-							"defaultDiagram": false,
+							"defaultDiagram": true,
 							"ownedViews": [
 								{
 									"_type": "UMLFrameView",
@@ -4032,13 +4032,13 @@
 											"showShadow": true,
 											"containerChangeable": false,
 											"containerExtending": false,
-											"left": 404,
-											"top": 455,
+											"left": 432,
+											"top": 454,
 											"width": 25.29541015625,
 											"height": 13,
 											"autoResize": false,
-											"alpha": -3.1730288359339753,
-											"distance": 318.1571938523471,
+											"alpha": -3.179505513805183,
+											"distance": 290.2085457046363,
 											"hostEdge": {
 												"$ref": "AAAAAAFfT8MGRjKLptQ="
 											},
@@ -4066,13 +4066,13 @@
 											"showShadow": true,
 											"containerChangeable": false,
 											"containerExtending": false,
-											"left": 427,
-											"top": 455,
+											"left": 455,
+											"top": 454,
 											"width": 50.5908203125,
 											"height": 13,
 											"autoResize": false,
-											"alpha": -3.177038795104411,
-											"distance": 282.177249260106,
+											"alpha": -3.1848726981305524,
+											"distance": 254.23807739990482,
 											"hostEdge": {
 												"$ref": "AAAAAAFfT8MGRjKLptQ="
 											},
@@ -4367,13 +4367,13 @@
 											"showShadow": true,
 											"containerChangeable": false,
 											"containerExtending": false,
-											"left": 55,
-											"top": 518,
+											"left": 87,
+											"top": 519,
 											"width": 106.93896484375,
 											"height": 13,
 											"autoResize": false,
-											"alpha": -3.1642225351121867,
-											"distance": 486.12446965772045,
+											"alpha": -3.163615524687696,
+											"distance": 454.1101188037985,
 											"hostEdge": {
 												"$ref": "AAAAAAFfT8b4XjLGREI="
 											},
@@ -7488,35 +7488,12 @@
 							},
 							"name": "RecordImpl",
 							"visibility": "public",
-							"represent": {
-								"$ref": "AAAAAAFfjw3V2iYdYGo="
-							},
 							"isMultiInstance": false
 						}
 					]
 				}
 			],
 			"visibility": "public",
-			"attributes": [
-				{
-					"_type": "UMLAttribute",
-					"_id": "AAAAAAFfjw3V2iYdYGo=",
-					"_parent": {
-						"$ref": "AAAAAAFfTz5p/S3marU="
-					},
-					"name": "Role1",
-					"visibility": "public",
-					"isStatic": false,
-					"isLeaf": false,
-					"type": "",
-					"isReadOnly": false,
-					"isOrdered": false,
-					"isUnique": false,
-					"isDerived": false,
-					"aggregation": "none",
-					"isID": false
-				}
-			],
 			"isAbstract": false,
 			"isFinalSpecialization": false,
 			"isLeaf": false
