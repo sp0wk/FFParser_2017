@@ -22,7 +22,7 @@ namespace FFParser {
 		{
 			output.reserve(_field_names.size());
 			for (auto& iter : _field_names) {
-				output.push_back(iter);
+				output.emplace_back(iter);
 			}
 		}
 

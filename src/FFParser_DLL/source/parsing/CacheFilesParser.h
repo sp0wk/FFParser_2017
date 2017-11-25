@@ -28,24 +28,24 @@ namespace FFParser {
 		std::vector<std::string> _filelist;		//cache files list
 
 		//search patterns
-		std::regex _parseRegionRegex;
-		std::regex _urlRegex;
-		std::regex _filenameRegex;
-		std::regex _fnWithExtRegex;
-		std::regex _contentTypeRegex;
-		std::regex _contentEncodingRegex;
-		std::regex _dateRegex;
-		std::regex _lastModifiedRegex;
-		std::regex _expiresRegex;
+		static std::regex s_parseRegionRegex;
+		static std::regex s_urlRegex;
+		static std::regex s_filenameRegex;
+		static std::regex s_fnWithExtRegex;
+		static std::regex s_contentTypeRegex;
+		static std::regex s_contentEncodingRegex;
+		static std::regex s_dateRegex;
+		static std::regex s_lastModifiedRegex;
+		static std::regex s_expiresRegex;
 
 		//generic file extension types
-		std::string _textType = "plain";
-		std::string _jsType = "javascript";
-		std::string _htmlType = "html";
-		std::string _cssType = "css";
-		std::string _jsonType = "json";
-		std::string _iconType = "icon";
-		std::string _svgType = "svg";
+		static std::string s_textType;
+		static std::string s_jsType;
+		static std::string s_htmlType;
+		static std::string s_cssType;
+		static std::string s_jsonType;
+		static std::string s_iconType;
+		static std::string s_svgType;
 
 		//methods
 		void parseCacheFile(const std::string& filename, std::vector<std::string>& output);

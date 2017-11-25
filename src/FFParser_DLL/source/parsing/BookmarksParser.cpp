@@ -5,14 +5,15 @@
 namespace FFParser {
 
 	//ctor
-	BookmarksParser::BookmarksParser(const std::shared_ptr<IFileAccessor>& fa, const std::shared_ptr<IDatabaseAccessor>& dba) : DBParserBase(fa, dba) 
+	BookmarksParser::BookmarksParser(const std::shared_ptr<IFileAccessor>& fa, const std::shared_ptr<IDatabaseAccessor>& dba) : 
+		DBParserBase(fa, dba) 
 	{
 		//set field names
 		_field_names.reserve(4);
-		_field_names.push_back("id");
-		_field_names.push_back("title");
-		_field_names.push_back("url");
-		_field_names.push_back("dateAdded");
+		_field_names.emplace_back("id");
+		_field_names.emplace_back("title");
+		_field_names.emplace_back("url");
+		_field_names.emplace_back("dateAdded");
 
 		//set main query
 		_bookmarks_query =	"SELECT bk.id, bk.title, pl.url, bk.dateAdded \
@@ -39,14 +40,14 @@ namespace FFParser {
 		output.reserve(input.size());
 
 		//parse process or just copy data
-		output.push_back( std::move(input[0]) );		//id
-		output.push_back( std::move(input[1]) );		//title
-		output.push_back( std::move(input[2]) );		//url
+		output.emplace_back( std::move(input[0]) );		//id
+		output.emplace_back( std::move(input[1]) );		//title
+		output.emplace_back( std::move(input[2]) );		//url
 
 		btime = std::stoull(input[3]) / 1000000;
 		stime = std::asctime(std::localtime(&btime));
 		stime.erase(stime.length() - 1); //remove '\n'
-		output.push_back(stime);						//dateAdded
+		output.emplace_back(stime);						//dateAdded
 	}
 	
 	

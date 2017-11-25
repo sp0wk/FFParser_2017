@@ -5,14 +5,15 @@
 namespace FFParser {
 
 	//ctor
-	HistoryParser::HistoryParser(const std::shared_ptr<IFileAccessor>& fa, const std::shared_ptr<IDatabaseAccessor>& dba) : DBParserBase(fa, dba) 
+	HistoryParser::HistoryParser(const std::shared_ptr<IFileAccessor>& fa, const std::shared_ptr<IDatabaseAccessor>& dba) : 
+		DBParserBase(fa, dba) 
 	{
 		//set field names
 		_field_names.reserve(4);
-		_field_names.push_back("id");
-		_field_names.push_back("url");
-		_field_names.push_back("title");
-		_field_names.push_back("visit_date");
+		_field_names.emplace_back("id");
+		_field_names.emplace_back("url");
+		_field_names.emplace_back("title");
+		_field_names.emplace_back("visit_date");
 
 		//set main query
 		_history_query =	"SELECT hv.id, pl.url, pl.title, hv.visit_date \
@@ -40,14 +41,14 @@ namespace FFParser {
 
 		//parse process or just copy data
 
-		output.push_back( std::move(input[0]) );		//id
-		output.push_back( std::move(input[1]) );		//url
-		output.push_back( std::move(input[2]) );		//title
+		output.emplace_back( std::move(input[0]) );		//id
+		output.emplace_back( std::move(input[1]) );		//url
+		output.emplace_back( std::move(input[2]) );		//title
 
 		htime = std::stoull(input[3]) / 1000000;
 		stime = std::asctime(std::localtime(&htime));
 		stime.erase(stime.length() - 1); //remove '\n'
-		output.push_back( stime );						//visit_date
+		output.emplace_back( stime );						//visit_date
 	}
 	
 

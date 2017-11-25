@@ -83,7 +83,7 @@ namespace FFParser {
 				tmp[i] = (const char*)sqlite3_column_text(stmt, i);
 			}
 
-			output.push_back(std::move(tmp));
+			output.emplace_back(std::move(tmp));
 		}
 
 		sqlite3_finalize(stmt);

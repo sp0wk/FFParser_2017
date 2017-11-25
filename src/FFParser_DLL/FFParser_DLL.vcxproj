@@ -34,6 +34,7 @@
     <ClInclude Include="source\parsing\DBParserBase.h" />
     <ClInclude Include="source\parsing\FileParserBase.h" />
     <ClInclude Include="source\parsing\HistoryParser.h" />
+    <ClInclude Include="source\parsing\LoginsDecryptor.h" />
     <ClInclude Include="source\parsing\LoginsParser.h" />
     <ClInclude Include="source\parsing\ParserBase.h" />
     <ClInclude Include="source\records\RecordImpl.h" />
@@ -49,6 +50,7 @@
     <ClCompile Include="source\parsing\BookmarksParser.cpp" />
     <ClCompile Include="source\parsing\CacheFilesParser.cpp" />
     <ClCompile Include="source\parsing\HistoryParser.cpp" />
+    <ClCompile Include="source\parsing\LoginsDecryptor.cpp" />
     <ClCompile Include="source\parsing\LoginsParser.cpp" />
     <ClCompile Include="source\records\RecordsStreamImpl.cpp" />
     <ClCompile Include="source\storage\StorageFactoryImpl.cpp" />

@@ -216,7 +216,7 @@ namespace FFParser {
 				if (is_directory(p)) {
 					for (auto&& iter : directory_iterator(p)) {
 						if (is_regular_file(iter)) {
-							list.push_back(iter.path().filename().string());
+							list.emplace_back(iter.path().filename().string());
 						}
 					}
 
@@ -235,7 +235,7 @@ namespace FFParser {
 	{
 		for (auto iter : _profile_list) {
 			//add profile name to vector
-			list.push_back(iter.name);
+			list.emplace_back(iter.name);
 		}
 	}
 
