@@ -3,22 +3,20 @@
 #include <QVariant>
 
 
-
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     historyRecord(nullptr),
     bookmarksRecord(nullptr),
     loginRecord(0),
     cacheRecord(0),
-    firstRecord(0),
+    _firstRecord(0),
     lastRecord(0),
     step(25),
     oldStep(step),
     flag(0),
-    counterRecords(0),
+    _counterRecords(0),
     profileNumber(0),
-    counterProfile(0)
+    m_allAmountProfile(0)
 {
     ui.setupUi(this);
     createLanguageMenu();
@@ -37,15 +35,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     DLLStorage = dll_getstorage();
 
+    m_allAmountProfile = DLLStorage->getNumberOfProfiles();
+    setNameProfile();
+
     //get history example
     historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, profileNumber);
     bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, profileNumber);
     loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, profileNumber);
     cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, profileNumber);
 
-    counterProfile = DLLStorage->getNumberOfProfiles();
-    setNameProfile();
 
+    for (int i = 0; i < ui.tabWidget->count(); ++i)
+        stepForTabs.push_back(0);
 }
 
 void MainWindow::setNameColumnTable(IRecordsStream *ptr)
@@ -79,20 +80,13 @@ void MainWindow::removeRowTable(size_t counter)
 void MainWindow::veiwRecord(IRecordsStream *ptr)
 {
     removeRowTable(oldStep);
-    counterRecords = ptr->loadRecords(firstRecord, step);
 
-    if (counterRecords == 0)
-        return;
-    else if (step > counterRecords)
-        step = counterRecords;
-
-    IRecord* onerec = ptr->getRecordByIndex(firstRecord);
-    lastRecord = firstRecord + step;
-
+    initialLoadRecord(ptr);
+    IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
 
     size_t iterator = 0;
 
-    for (size_t i = firstRecord; i < lastRecord; ++i)
+    for (size_t i = _firstRecord; i < _firstRecord + stepForTabs[ui.tabWidget->currentIndex()]; ++i)
     {
         ui.tableWidget->insertRow(iterator);
         size_t counter = 0;
@@ -107,13 +101,13 @@ void MainWindow::veiwRecord(IRecordsStream *ptr)
         if (onerec == nullptr)
             break;
     }
-    oldStep = step;
+    oldStep = stepForTabs[ui.tabWidget->currentIndex()];
 }
 
 void MainWindow::setNameProfile()
 {
     size_t counter = 0;
-    while (counter < counterProfile)
+    while (counter < m_allAmountProfile)
     {
         ui.comboBox->addItem(DLLStorage->getProfileName(counter), counter);
         ++counter;
@@ -121,29 +115,37 @@ void MainWindow::setNameProfile()
 
 }
 
+
+void MainWindow::initialLoadRecord(IRecordsStream *ptr)
+{
+    if (ptr->getNumberOfRecords() == 0)
+    {
+        if (ui.textEdit->toPlainText().toInt() > 0)
+        {
+            _counterRecords = ptr->loadRecords(0, ui.textEdit->toPlainText().toInt());
+            stepForTabs[ui.tabWidget->currentIndex()] = ui.textEdit->toPlainText().toInt();
+        }
+    }
+}
+
 MainWindow::~MainWindow()
 {
-    //delete ui;
+    FreeLibrary(dll_load);
 }
 
 
 
 void MainWindow::createUI(const QStringList &headers, size_t number)
 {
-    // Specify the number of columns
     ui.tableWidget->setColumnCount(number);
-    ui.tableWidget->setShowGrid(true); // Insert the grid
+    ui.tableWidget->setShowGrid(true);
 
-    // Let's select only one element
     ui.tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    // Let's select the line by line
     ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    // Set the column headers
     ui.tableWidget->setHorizontalHeaderLabels(headers);
 
-    // Stretch the last column in all available space
     ui.tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui.tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
 
@@ -299,36 +301,66 @@ void MainWindow::switchVeiwRecords(size_t index)
     }
 }
 
-void MainWindow::on_tabWidget_tabBarClicked(int index)
+void MainWindow::loadNewNextRecords(size_t &indexTab, size_t &counterElement)
 {
-    switchVeiwRecords(static_cast<size_t>(index));
+    switch (indexTab) {
+
+    case 0:
+        historyRecord->loadNextRecords(counterElement);
+        break;
+    case 1:
+        bookmarksRecord->loadNextRecords(counterElement);
+        break;
+    case 2:
+        loginRecord->loadNextRecords(counterElement);
+        break;
+    case 3:
+        cacheRecord->loadNextRecords(counterElement);
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::on_pushButton_3_clicked()
 {
     if (ui.textEdit->toPlainText().toInt() > 0)
     {
-        step = ui.textEdit->toPlainText().toInt();
+        size_t tempStep = ui.textEdit->toPlainText().toInt();
+        size_t tempIndex = ui.tabWidget->currentIndex();
+        stepForTabs[tempIndex] = tempStep;
+
+        if (_firstRecord + tempStep > _counterRecords)
+        {
+            size_t tempCounter = _firstRecord + tempStep - _counterRecords;
+            loadNewNextRecords(tempIndex, tempCounter);
+        }
+        switchVeiwRecords(ui.tabWidget->currentIndex());
     }
 }
 
 
 void MainWindow::on_pushButton_clicked()
 {
-    firstRecord = lastRecord;
-    switchVeiwRecords(flag);
+    if (_firstRecord + stepForTabs[ui.tabWidget->currentIndex()] > _counterRecords)
+    {
+        size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
+        size_t tempCounter = _firstRecord + tempStep - _counterRecords;
+        loadNewNextRecords(tempStep, tempCounter);
+    }
+    _firstRecord = _firstRecord + stepForTabs[ui.tabWidget->currentIndex()];
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    if (static_cast<int>(firstRecord - step) <= 0)
+    if (static_cast<int>(_firstRecord - step) <= 0)
     {
-        firstRecord = 0;
+        _firstRecord = 0;
         lastRecord = step;
     }
     else
     {
-        firstRecord -= step;
+        _firstRecord -= step;
         lastRecord -= step;
     }
    switchVeiwRecords(flag);
@@ -337,7 +369,7 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_pushButton_4_clicked()
 {
 
-    if (counterRecords != 0)
+    if (_counterRecords != 0)
     {
         QString dataToFind = ui.textEdit_2->toPlainText();
         size_t columnCount = ui.tableWidget->columnCount();
@@ -385,4 +417,16 @@ void MainWindow::on_pushButton_4_clicked()
 void MainWindow::on_comboBox_activated(int index)
 {
     profileNumber = static_cast<size_t>(index);
+
+    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, profileNumber);
+    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, profileNumber);
+    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, profileNumber);
+    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, profileNumber);
+
+    switchVeiwRecords(ui.tabWidget->currentIndex());
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    switchVeiwRecords(static_cast<size_t>(index));
 }

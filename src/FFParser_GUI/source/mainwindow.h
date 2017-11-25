@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QAbstractItemModel>
+#include <vector>
 
 //for DLL
 #include <windows.h>
@@ -46,6 +47,7 @@ protected:
     void switchVeiwRecords(size_t);
     void setNameProfile();
 
+
 protected slots:
     void slotLanguageChanged(QAction *);
 
@@ -54,10 +56,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_tabWidget_tabBarClicked(int index);
-
     void on_pushButton_3_clicked();
-
 
     void on_pushButton_clicked();
 
@@ -67,6 +66,8 @@ private slots:
 
     void on_comboBox_activated(int index);
 
+    void on_tabWidget_currentChanged(int index);
+
 private:
     Ui::MainWindow ui;
     void createUI(const QStringList &headers, size_t);
@@ -74,6 +75,9 @@ private:
     void loadLanguage(const QString &rLanguage);
 
     void createLanguageMenu(void);
+
+    void initialLoadRecord(IRecordsStream *);
+    void loadNewNextRecords(size_t &, size_t &);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
@@ -87,14 +91,16 @@ private:
     IRecordsStream *loginRecord;
     IRecordsStream *cacheRecord;
 
-    size_t firstRecord;
+    size_t _firstRecord;
     size_t lastRecord;
     size_t step;
     size_t oldStep;
     size_t flag;
-    size_t counterRecords;
+    size_t _counterRecords;
     size_t profileNumber;
-    size_t counterProfile;
+    size_t m_allAmountProfile;
+
+    std::vector<int> stepForTabs;
 
     //dll load
     const wchar_t* dllname;
