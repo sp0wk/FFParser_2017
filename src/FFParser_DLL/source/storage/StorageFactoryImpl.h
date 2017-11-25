@@ -16,19 +16,6 @@ namespace FFParser {
 
 	class StorageFactoryImpl final : public IStorageFactory
 	{
-	private:
-		HelperFacade& _helper_ref;
-
-		std::vector<std::string> _profiles;
-		std::string _temp_profile_path;
-
-		//list of created streams
-		std::list<std::unique_ptr<IRecordsStream>> _storage;
-
-		//private ctor and dtor
-		StorageFactoryImpl();
-		~StorageFactoryImpl() = default;
-
 	public:
 		static StorageFactoryImpl& getInstance();
 
@@ -38,6 +25,19 @@ namespace FFParser {
 		virtual const char* CALL getPathToProfile(size_t index) override;
 		virtual IRecordsStream* CALL createRecordsStream(ERecordTypes type, size_t profile) override;
 		virtual void CALL freeRecordsStream(IRecordsStream* &record) override;
+
+	private:
+		HelperFacade& _helper_ref;
+
+		std::vector<std::string> _profiles;
+		std::string _temp_profile_path;
+
+		//list of created streams
+		std::list<std::unique_ptr<RecordsStreamImpl>> _storage;
+
+		//private ctor and dtor
+		StorageFactoryImpl();
+		~StorageFactoryImpl() = default;
 	};
 
 }

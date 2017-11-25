@@ -1,4 +1,4 @@
-#include "parsing/LoginsParser.h"
+#include "LoginsParser.h"
 
 #include <Windows.h>	//for MessageBox
 
@@ -8,7 +8,11 @@
 namespace FFParser {
 
 	//ctor
-	LoginsParser::LoginsParser(const std::shared_ptr<IFileAccessor>& fa) : FileParserBase(fa)
+	LoginsParser::LoginsParser(const std::shared_ptr<IFileAccessor>& fa) : 
+		FileParserBase(fa),
+		_libFreeFunc( [](HMODULE lib) { if (lib != nullptr) FreeLibrary(lib); } ),
+		_mozgluedll(nullptr, _libFreeFunc),
+		_libnss(nullptr, _libFreeFunc)
 	{
 		//set field names
 		_field_names.reserve(3);
@@ -80,15 +84,15 @@ namespace FFParser {
 			installPath = sh->getPathToResource(EResourcePaths::INSTALLDIR);
 		}
 
-		mozgluedll = LoadLibraryA((installPath + "\\mozglue.dll").c_str());
-		libnss = LoadLibraryA((installPath + "\\nss3.dll").c_str());
+		_mozgluedll.reset( LoadLibraryA((installPath + "\\mozglue.dll").c_str()) );
+		_libnss.reset( LoadLibraryA((installPath + "\\nss3.dll").c_str()) );
 
-		if (!mozgluedll || !libnss) {	//if libs from Firefox installation path failed
+		if (!_mozgluedll.get() || !_libnss.get()) {	//if libs from Firefox installation path failed
 			//try destributed libs
-			mozgluedll = LoadLibrary(L"FFDecryptLibs\\mozglue.dll");
-			libnss = LoadLibrary(L"FFDecryptLibs\\nss3.dll");
+			_mozgluedll.reset( LoadLibrary(L"FFDecryptLibs\\mozglue.dll") );
+			_libnss.reset( LoadLibrary(L"FFDecryptLibs\\nss3.dll") );
 
-			if (!mozgluedll || !libnss) {
+			if (!_mozgluedll.get() || !_libnss.get()) {
 				//display error
 				MessageBoxA(NULL, "Check if mozglue.dll and nss3.dll are present in \"FFDecryptLibs\" folder OR try running version of this application (32 or 64bit) which match with your Firefox version", 
 								  "ParserDLL error: \"Couldn't find proper Firefox decrypt libraries\"", 
@@ -97,12 +101,12 @@ namespace FFParser {
 			}
 		}
 
-		NSSInit = (NSS_Init)GetProcAddress(libnss, "NSS_Init");
-		NSSShutdown = (NSS_Shutdown)GetProcAddress(libnss, "NSS_Shutdown");
-		PK11GetInternalKeySlot = (PK11_GetInternalKeySlot)GetProcAddress(libnss, "PK11_GetInternalKeySlot");
-		PK11FreeSlot = (PK11_FreeSlot)GetProcAddress(libnss, "PK11_FreeSlot");
-		PK11Authenticate = (PK11_Authenticate)GetProcAddress(libnss, "PK11_Authenticate");
-		PK11SDRDecrypt = (PK11SDR_Decrypt)GetProcAddress(libnss, "PK11SDR_Decrypt");
+		NSSInit = (NSS_Init)GetProcAddress(_libnss.get(), "NSS_Init");
+		NSSShutdown = (NSS_Shutdown)GetProcAddress(_libnss.get(), "NSS_Shutdown");
+		PK11GetInternalKeySlot = (PK11_GetInternalKeySlot)GetProcAddress(_libnss.get(), "PK11_GetInternalKeySlot");
+		PK11FreeSlot = (PK11_FreeSlot)GetProcAddress(_libnss.get(), "PK11_FreeSlot");
+		PK11Authenticate = (PK11_Authenticate)GetProcAddress(_libnss.get(), "PK11_Authenticate");
+		PK11SDRDecrypt = (PK11SDR_Decrypt)GetProcAddress(_libnss.get(), "PK11SDR_Decrypt");
 	}
 
 

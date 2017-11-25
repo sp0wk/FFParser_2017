@@ -45,11 +45,11 @@ namespace FFParser {
 
 	IRecordsStream* CALL StorageFactoryImpl::createRecordsStream(ERecordTypes type, size_t profile)
 	{
-		IRecordsStream* newstream = nullptr;
+		RecordsStreamImpl* newstream = nullptr;
 
 		if (profile < _profiles.size()) {
-			newstream = new RecordsStreamImpl(profile, type);
-			_storage.push_back(std::unique_ptr<IRecordsStream>(newstream));		//save to storage
+			_storage.emplace_back(new RecordsStreamImpl(profile, type));	//save to storage
+			newstream = _storage.back().get();
 		}
 		
 		return newstream;
@@ -58,7 +58,7 @@ namespace FFParser {
 
 	void CALL StorageFactoryImpl::freeRecordsStream(IRecordsStream* &record)
 	{
-		_storage.remove_if( [&](std::unique_ptr<IRecordsStream>& elem) { return record == elem.get(); } );
+		_storage.remove_if( [&](std::unique_ptr<RecordsStreamImpl>& elem) { return record == elem.get(); } );
 		record = nullptr;
 	}
 

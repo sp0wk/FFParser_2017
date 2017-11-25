@@ -17,6 +17,15 @@ namespace FFParser {
 
 	class FileParserBase : public ParserBase
 	{
+	public:
+		//ctor and dtor
+		FileParserBase(const std::shared_ptr<IFileAccessor>& fa) : ParserBase(fa) {}
+		virtual ~FileParserBase() = default;
+
+		//methods
+		virtual size_t getTotalRecords(size_t profile) = 0;
+		virtual size_t parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number) = 0;
+
 	protected:
 		std::string _file_content;
 
@@ -37,15 +46,6 @@ namespace FFParser {
 			
 			return _file_content.size();
 		}
-
-	public:
-		//ctor and dtor
-		FileParserBase(const std::shared_ptr<IFileAccessor>& fa) : ParserBase(fa) {}
-		virtual ~FileParserBase() = default;
-
-		//methods
-		virtual size_t getTotalRecords(size_t profile) = 0;
-		virtual size_t parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number) = 0;
 	};
 
 }

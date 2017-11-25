@@ -1,5 +1,7 @@
 #include <iostream>
 #include <windows.h>
+#include <memory>
+#include <functional>
 
 #include "include/FFParser_DLL.h"
 
@@ -19,13 +21,14 @@ using GetStorageFunc = IStorageFactory* (CALL *)();
 int main()
 {
 	//dll load
-	HINSTANCE dll_load = LoadLibrary(dllname);
+	using LibGuard = std::unique_ptr<std::remove_pointer_t<HMODULE>, std::function<void(HMODULE)>>;
+	LibGuard dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); });
 
-	if (!dll_load) {
+	if (!dll_load.get()) {
 		exit(1);
 	}
 
-	GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load, "GetStorage");
+	GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
 
 	IStorageFactory* FactoryStorage = dll_getstorage();
 	

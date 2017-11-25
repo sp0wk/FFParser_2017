@@ -12,6 +12,17 @@ namespace FFParser {
 
 	class FileAccessorImpl : public IFileAccessor
 	{
+	public:
+		FileAccessorImpl();
+		virtual ~FileAccessorImpl() = default;
+
+		//Interface methods
+		virtual std::string getPathToResource(EResourcePaths resource, size_t profile = 0) const override;
+		virtual size_t getFilesCount(const std::string& dir_path) const override;
+		virtual void getFileList(std::vector<std::string>& list, const std::string& dir_path) const override;
+		virtual void getProfiles(std::vector<std::string>& list) const override;
+		virtual size_t getNumberOfProfiles() const override;
+
 	private:
 		struct ProfileInfo
 		{
@@ -27,17 +38,6 @@ namespace FFParser {
 		std::string getFirefoxInstallDir() const;
 		void setupPaths();
 		void loadProfiles();
-
-	public:
-		FileAccessorImpl();
-		virtual ~FileAccessorImpl() = default;
-
-		//Interface methods
-		virtual std::string getPathToResource(EResourcePaths resource, size_t profile = 0) const override;
-		virtual size_t getFilesCount(const std::string& dir_path) const override;
-		virtual void getFileList(std::vector<std::string>& list, const std::string& dir_path) const override;
-		virtual void getProfiles(std::vector<std::string>& list) const override;
-		virtual size_t getNumberOfProfiles() const override;
 	};
 
 }

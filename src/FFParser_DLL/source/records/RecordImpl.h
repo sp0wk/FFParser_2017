@@ -10,11 +10,6 @@ namespace FFParser {
 
 	class RecordImpl : public IRecord
 	{
-	protected:
-		using Fields = std::vector<std::string>;
-
-		Fields _fields;
-
 	public:
 		//ctors and dtor
 		RecordImpl() = default;
@@ -38,6 +33,11 @@ namespace FFParser {
 				return _fields[index].size(); 
 			return 0;
 		}
+
+	protected:
+		using Fields = std::vector<std::string>;
+
+		Fields _fields;
 	};
 
 }

@@ -22,6 +22,9 @@ namespace FFParser {
 		//fields
 		virtual size_t CALL getNumberOfFields() const = 0;
 		virtual const char* CALL getFieldName(size_t index) const = 0;
+
+	protected:
+		~IRecordsStream() {}
 	};
 
 }
