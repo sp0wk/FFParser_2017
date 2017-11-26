@@ -82,7 +82,13 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
     if (onerec == nullptr)
         return;
 
+
     size_t iterator = 0;
+
+    size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
+    size_t total = ptr->getTotalRecords();
+    if (tempStep > total)
+        stepForTabs[ui.tabWidget->currentIndex()] = total;
 
     for (size_t i = _firstRecord; i < _firstRecord + stepForTabs[ui.tabWidget->currentIndex()]; ++i)
     {
@@ -118,8 +124,13 @@ void MainWindow::initialLoadRecord(IRecordsStream *ptr)
 {
     if (ptr->getNumberOfRecords() == 0)
     {
-        ptr->loadRecords(0, ui.spinBox->text().toInt());
-        stepForTabs[ui.tabWidget->currentIndex()] = ui.spinBox->text().toInt();
+        size_t tempStep = ui.spinBox->value();
+        size_t total = ptr->getTotalRecords();
+
+        if (tempStep > total)
+            tempStep = total;
+        ptr->loadRecords(0, tempStep);
+        stepForTabs[ui.tabWidget->currentIndex()] = tempStep;
     }
 }
 
@@ -352,7 +363,7 @@ void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, co
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    size_t tempStep = ui.spinBox->text().toInt();
+    size_t tempStep = ui.spinBox->value();
     size_t tempIndex = ui.tabWidget->currentIndex();
 
     checkNewRecords(tempIndex, 0, tempStep);
@@ -460,49 +471,58 @@ bool MainWindow::checkRecords(const size_t &indexTab)
 
 void MainWindow::on_pushButton_4_clicked()
 {
-    if (checkRecords(ui.tabWidget->currentIndex()))
+    QString dataToFind = ui.lineEdit->text().toLower();
+    if (dataToFind.size() >= 2)
     {
-        QString dataToFind = ui.lineEdit->text();
-        size_t columnCount = ui.tableWidget->columnCount();
-        size_t rowCount = ui.tableWidget->rowCount();
-        for (int i = 0; i < rowCount; ++i)
+        if (checkRecords(ui.tabWidget->currentIndex()))
         {
-            for (int  j = 0; j < columnCount; ++j)
+            size_t columnCount = ui.tableWidget->columnCount();
+            size_t rowCount = ui.tableWidget->rowCount();
+            for (int i = 0; i < rowCount; ++i)
             {
-                ui.tableWidget->item(i, j)->setData(Qt::BackgroundRole, QColor (255, 255, 255));
-            }
-        }
-        for (size_t i = 0; i < rowCount; ++i)
-        {
-            for (size_t j = 0; j < columnCount; ++j)
-            {
-                QTableWidgetItem *item =  ui.tableWidget->item(i, j);
-
-
-                QString temp = item->text();
-
-
-                size_t counter = 0;
-
-                while ((counter = temp.indexOf(dataToFind, counter)) != -1)
+                for (int  j = 0; j < columnCount; ++j)
                 {
-                    ++counter;
-                    size_t currCounter = 0;
-                    while (currCounter < columnCount)
-                    {
-                        ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (250,0,0));
-                        ++currCounter;
-                    }
+                    ui.tableWidget->item(i, j)->setData(Qt::BackgroundRole, QColor (255, 255, 255));
                 }
+            }
+            for (size_t i = 0; i < rowCount; ++i)
+            {
+                for (size_t j = 0; j < columnCount; ++j)
+                {
+                    QTableWidgetItem *item =  ui.tableWidget->item(i, j);
 
+
+                    QString temp = item->text().toLower();
+
+                    size_t counter = 0;
+
+                    while (temp.indexOf(dataToFind, counter) != -1)
+                    {
+                        ++counter;
+                        size_t currCounter = 0;
+                        while (currCounter < columnCount)
+                        {
+                            ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (250,0,0));
+                            ++currCounter;
+                        }
+                    }
+
+                }
             }
         }
-
-    }
-    else
-        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
+        else
+        {
+            QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
                                                                    tr("The records are not load!\n"),
                                                                    QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
+                                                                   tr("Input value very small!\n"),
+                                                                   QMessageBox::Ok);
+    }
 }
 
 void MainWindow::on_comboBox_activated(int index)

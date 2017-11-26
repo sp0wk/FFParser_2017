@@ -82,6 +82,7 @@ private:
     bool isOutOfRange(const size_t &, const size_t &, const size_t &);
     bool checkRecords(const size_t &);
     void viewStep(const size_t &);
+    void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
