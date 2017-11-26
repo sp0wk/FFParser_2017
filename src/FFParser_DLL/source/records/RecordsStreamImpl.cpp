@@ -21,9 +21,9 @@ namespace FFParser {
 	//Interface methods
 
 
-	size_t CALL RecordsStreamImpl::getTotalRecords(size_t profile) const
+	size_t CALL RecordsStreamImpl::getTotalRecords() const
 	{
-		return _helper_ref.getTotalRecords(_stream_type, profile);
+		return _helper_ref.getTotalRecords(_stream_type, _profile);
 	}
 
 

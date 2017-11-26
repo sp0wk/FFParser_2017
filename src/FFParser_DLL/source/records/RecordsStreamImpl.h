@@ -20,7 +20,7 @@ namespace FFParser {
 		virtual ~RecordsStreamImpl() = default;
 
 		//Interface methods
-		virtual size_t CALL getTotalRecords(size_t profile) const override;
+		virtual size_t CALL getTotalRecords() const override;
 		virtual size_t CALL loadNextRecords(size_t number) override;
 		virtual size_t CALL loadRecords(size_t from, size_t number) override;
 		virtual size_t CALL getNumberOfRecords() const override;

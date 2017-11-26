@@ -79,6 +79,8 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
 
     initialLoadRecord(ptr);
     IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
+    if (onerec == nullptr)
+        return;
 
     size_t iterator = 0;
 

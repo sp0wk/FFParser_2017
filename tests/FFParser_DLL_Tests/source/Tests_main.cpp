@@ -38,7 +38,7 @@ int main()
 	//get records
 	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 0);
 	
-	size_t from = 100;
+	size_t from = 0;
 	size_t number = 2;
 	size_t cnt = recstr->loadRecords(from, number);
 	size_t cnt2 = recstr->loadNextRecords(number);

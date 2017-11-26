@@ -10,7 +10,7 @@ namespace FFParser {
 	{
 	public:
 		//load
-		virtual size_t CALL getTotalRecords(size_t profile = 0) const = 0;
+		virtual size_t CALL getTotalRecords() const = 0;
 		virtual size_t CALL loadNextRecords(size_t number = 0) = 0;
 		virtual size_t CALL loadRecords(size_t from, size_t number) = 0;
 		//get record
