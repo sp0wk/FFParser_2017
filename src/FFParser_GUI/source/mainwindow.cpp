@@ -10,11 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     loginRecord(0),
     cacheRecord(0),
     _firstRecord(0),
-    lastRecord(0),
-    step(25),
-    oldStep(step),
-    flag(0),
-    _counterRecords(0),
+    oldStep(25),
     profileNumber(0),
     m_allAmountProfile(0)
 {
@@ -77,7 +73,7 @@ void MainWindow::removeRowTable(size_t counter)
         --counter;
     }
 }
-void MainWindow::veiwRecord(IRecordsStream *ptr)
+void MainWindow::viewRecord(IRecordsStream *ptr)
 {
     removeRowTable(oldStep);
 
@@ -120,11 +116,8 @@ void MainWindow::initialLoadRecord(IRecordsStream *ptr)
 {
     if (ptr->getNumberOfRecords() == 0)
     {
-        if (ui.textEdit->toPlainText().toInt() > 0)
-        {
-            _counterRecords = ptr->loadRecords(0, ui.textEdit->toPlainText().toInt());
-            stepForTabs[ui.tabWidget->currentIndex()] = ui.textEdit->toPlainText().toInt();
-        }
+        ptr->loadRecords(0, ui.spinBox->text().toInt());
+        stepForTabs[ui.tabWidget->currentIndex()] = ui.spinBox->text().toInt();
     }
 }
 
@@ -271,37 +264,33 @@ void MainWindow::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
-void MainWindow::switchVeiwRecords(size_t index)
+void MainWindow::switchViewRecords(size_t index)
 {
     switch (index)
     {
     case 0:
-        flag = 0;
         setNameColumnTable(historyRecord);
-        veiwRecord(historyRecord);
+        viewRecord(historyRecord);
         break;
     case 1:
-        flag = 1;
         setNameColumnTable(bookmarksRecord);
-        veiwRecord(bookmarksRecord);
+        viewRecord(bookmarksRecord);
         break;
     case 2:
-        flag = 2;
         setNameColumnTable(loginRecord);
-        veiwRecord(loginRecord);
+        viewRecord(loginRecord);
         break;
     case 3:
-        flag = 3;
         setNameColumnTable(cacheRecord);
-        veiwRecord(cacheRecord);
+        viewRecord(cacheRecord);
         break;
     default:
-        qDebug() << "Nituda!!!\n";
+        qDebug() << "Out of range!\n";
         break;
     }
 }
 
-void MainWindow::loadNewNextRecords(size_t &indexTab, size_t &counterElement)
+void MainWindow::loadNewNextRecords(const size_t &indexTab, const size_t &counterElement)
 {
     switch (indexTab) {
 
@@ -322,56 +311,156 @@ void MainWindow::loadNewNextRecords(size_t &indexTab, size_t &counterElement)
     }
 }
 
-void MainWindow::on_pushButton_3_clicked()
+void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, const size_t &step)
 {
-    if (ui.textEdit->toPlainText().toInt() > 0)
+    switch (indexTab)
     {
-        size_t tempStep = ui.textEdit->toPlainText().toInt();
-        size_t tempIndex = ui.tabWidget->currentIndex();
-        stepForTabs[tempIndex] = tempStep;
-
-        if (_firstRecord + tempStep > _counterRecords)
+    case 0:
+        if (first + step >= historyRecord->getNumberOfRecords())
         {
-            size_t tempCounter = _firstRecord + tempStep - _counterRecords;
-            loadNewNextRecords(tempIndex, tempCounter);
+            size_t temp = (first + step) - historyRecord->getNumberOfRecords();
+            loadNewNextRecords(indexTab, temp);
         }
-        switchVeiwRecords(ui.tabWidget->currentIndex());
+        break;
+    case 1:
+        if (first + step >= bookmarksRecord->getNumberOfRecords())
+        {
+            size_t temp = (first + step) - bookmarksRecord->getNumberOfRecords();
+            loadNewNextRecords(indexTab, temp);
+        }
+        break;
+    case 2:
+        if (first + step >= loginRecord->getNumberOfRecords())
+        {
+            size_t temp = (first + step) - loginRecord->getNumberOfRecords();
+            loadNewNextRecords(indexTab, temp);
+        }
+        break;
+    case 3:
+        if (first + step >= cacheRecord->getNumberOfRecords())
+        {
+            size_t temp = (first + step) - cacheRecord->getNumberOfRecords();
+            loadNewNextRecords(indexTab, temp);
+        }
+        break;
+    default:
+        break;
     }
 }
 
+void MainWindow::on_pushButton_3_clicked()
+{
+    size_t tempStep = ui.spinBox->text().toInt();
+    size_t tempIndex = ui.tabWidget->currentIndex();
+
+    checkNewRecords(tempIndex, 0, tempStep);
+    stepForTabs[tempIndex] = tempStep;
+    switchViewRecords(tempIndex);
+
+}
+
+bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const size_t &step)
+{
+    bool flag = false;
+
+    switch (indexTab)
+    {
+    case 0:
+        if (first + step > historyRecord->getTotalRecords())
+        {
+            flag = true;
+        }
+        break;
+    case 1:
+        if (first + step > bookmarksRecord->getTotalRecords())
+        {
+            flag = true;
+        }
+        break;
+    case 2:
+        if (first + step > loginRecord->getTotalRecords())
+        {
+            flag = true;
+        }
+        break;
+    case 3:
+        if (first + step > cacheRecord->getTotalRecords())
+        {
+            flag = true;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return flag;
+}
 
 void MainWindow::on_pushButton_clicked()
 {
-    if (_firstRecord + stepForTabs[ui.tabWidget->currentIndex()] > _counterRecords)
+    checkNewRecords(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]);
+    if (isOutOfRange(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]) == false)
     {
-        size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
-        size_t tempCounter = _firstRecord + tempStep - _counterRecords;
-        loadNewNextRecords(tempStep, tempCounter);
+        _firstRecord += stepForTabs[ui.tabWidget->currentIndex()];
     }
-    _firstRecord = _firstRecord + stepForTabs[ui.tabWidget->currentIndex()];
+    switchViewRecords(ui.tabWidget->currentIndex());
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    if (static_cast<int>(_firstRecord - step) <= 0)
+    if (static_cast<int>(_firstRecord - stepForTabs[ui.tabWidget->currentIndex()]) <= 0)
     {
         _firstRecord = 0;
-        lastRecord = step;
     }
     else
     {
-        _firstRecord -= step;
-        lastRecord -= step;
+        _firstRecord -= stepForTabs[ui.tabWidget->currentIndex()];
     }
-   switchVeiwRecords(flag);
+   switchViewRecords(ui.tabWidget->currentIndex());
+}
+
+bool MainWindow::checkRecords(const size_t &indexTab)
+{
+    bool flag = false;
+
+    switch (indexTab)
+    {
+    case 0:
+        if (historyRecord->getNumberOfRecords() != 0)
+        {
+            flag = true;
+        }
+        break;
+    case 1:
+        if (bookmarksRecord->getNumberOfRecords() != 0)
+        {
+            flag = true;
+        }
+        break;
+    case 2:
+        if (loginRecord->getNumberOfRecords() != 0)
+        {
+            flag = true;
+        }
+        break;
+    case 3:
+        if (cacheRecord->getNumberOfRecords() != 0)
+        {
+            flag = true;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return flag;
 }
 
 void MainWindow::on_pushButton_4_clicked()
 {
-
-    if (_counterRecords != 0)
+    if (checkRecords(ui.tabWidget->currentIndex()))
     {
-        QString dataToFind = ui.textEdit_2->toPlainText();
+        QString dataToFind = ui.lineEdit->text();
         size_t columnCount = ui.tableWidget->columnCount();
         size_t rowCount = ui.tableWidget->rowCount();
         for (int i = 0; i < rowCount; ++i)
@@ -423,10 +512,18 @@ void MainWindow::on_comboBox_activated(int index)
     loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, profileNumber);
     cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, profileNumber);
 
-    switchVeiwRecords(ui.tabWidget->currentIndex());
+    _firstRecord = 0;
+    switchViewRecords(ui.tabWidget->currentIndex());
+}
+
+void MainWindow::viewStep(const size_t &indexTab)
+{
+    ui.spinBox->setValue(stepForTabs[indexTab]);
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
-    switchVeiwRecords(static_cast<size_t>(index));
+    _firstRecord = 0;
+    switchViewRecords(static_cast<size_t>(index));
+    viewStep(static_cast<size_t>(index));
 }

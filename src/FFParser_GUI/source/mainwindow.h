@@ -42,9 +42,9 @@ protected:
 
 
     void setNameColumnTable(IRecordsStream *);
-    void veiwRecord(IRecordsStream *);
+    void viewRecord(IRecordsStream *);
     void removeRowTable(size_t);
-    void switchVeiwRecords(size_t);
+    void switchViewRecords(size_t);
     void setNameProfile();
 
 
@@ -77,7 +77,11 @@ private:
     void createLanguageMenu(void);
 
     void initialLoadRecord(IRecordsStream *);
-    void loadNewNextRecords(size_t &, size_t &);
+    void loadNewNextRecords(const size_t &, const size_t &);
+    void checkNewRecords(const size_t &, const size_t &, const size_t &);
+    bool isOutOfRange(const size_t &, const size_t &, const size_t &);
+    bool checkRecords(const size_t &);
+    void viewStep(const size_t &);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
@@ -92,15 +96,11 @@ private:
     IRecordsStream *cacheRecord;
 
     size_t _firstRecord;
-    size_t lastRecord;
-    size_t step;
     size_t oldStep;
-    size_t flag;
-    size_t _counterRecords;
     size_t profileNumber;
     size_t m_allAmountProfile;
 
-    std::vector<int> stepForTabs;
+    std::vector<size_t> stepForTabs;
 
     //dll load
     const wchar_t* dllname;
