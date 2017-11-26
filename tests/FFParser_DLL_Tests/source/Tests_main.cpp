@@ -7,7 +7,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-
 using namespace FFParser;
 
 
@@ -15,7 +14,16 @@ using namespace FFParser;
 const wchar_t* dllname = L"FFParser_DLL.dll";
 
 using GetStorageFunc = IStorageFactory* (CALL *)();
+using SetErrorCallbackFunc = void (CALL *)(void (*callback) (const char* error_text, const char* error_title));
 
+
+void custom_callback(const char* text, const char* title)
+{
+	//::MessageBoxA(NULL, text, title, MB_OK | MB_ICONERROR);
+	std::cout << "ERROR!!!:\n" <<
+				 "Title - " << title << "\n" <<
+				 "Text - " << text << "\n\n";
+}
 
 
 int main()
@@ -29,6 +37,10 @@ int main()
 	}
 
 	GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
+	SetErrorCallbackFunc dll_setErrorCB = (SetErrorCallbackFunc) GetProcAddress(dll_load.get(), "SetErrorCallback");
+
+	//set error callback test
+	dll_setErrorCB(custom_callback);
 
 	IStorageFactory* FactoryStorage = dll_getstorage();
 	

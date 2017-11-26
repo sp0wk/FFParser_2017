@@ -1,5 +1,7 @@
 #include "FileAccessorImpl.h"
-#include <Windows.h>	//for registry API and MessageBox
+#include "ErrorHandler.h"
+
+#include <Windows.h>	//for registry API
 
 #include <boost/filesystem.hpp>
 
@@ -47,8 +49,9 @@ namespace FFParser {
 			st = RegOpenKeyExA(HKEY_LOCAL_MACHINE, subkey.c_str(), NULL, KEY_WOW64_32KEY | KEY_READ, &hKey);
 
 			if (st != 0) {
-				//display error
-				MessageBoxA(NULL, "Couldn't open/find Firefox subkey in registry. Either error occured or Firefox is not installed.", "ParserDLL error: \"Error opening registry keys\"", MB_OK | MB_ICONERROR);
+				//handle error
+				ErrorHandler::getInstance().onError("Couldn't open/find Firefox subkey in registry. Either error occured or Firefox is not installed.", 
+													"ParserDLL error: \"Error opening registry keys\"");
 				return result;
 			}
 
@@ -79,8 +82,9 @@ namespace FFParser {
 		}
 
 		if (buf[0] == 0) {
-			//display error
-			MessageBoxA(NULL, "Couldn't detect your Firefox version in registry", "ParserDLL error: \"Firefox version unknown\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError("Couldn't detect your Firefox version in registry", 
+												"ParserDLL error: \"Firefox version unknown\"");
 		}
 
 		RegCloseKey(hKey);
@@ -147,8 +151,8 @@ namespace FFParser {
 			}
 		}
 		catch (const std::exception &ex) {
-			//display error
-			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error during PROFILES.INI parsing occured\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Error during PROFILES.INI parsing occured\"");
 		}
 	}
 
@@ -199,8 +203,8 @@ namespace FFParser {
 			}
 		}
 		catch (const filesystem_error& ex) {
-			//display error
-			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error occured while reading cache folder contents\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Error occured while reading cache folder contents\"");
 		}
 
 		return count;
@@ -225,8 +229,8 @@ namespace FFParser {
 			}
 		}
 		catch (const filesystem_error& ex) {
-			//display error
-			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error occured while reading cache folder contents\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Error occured while reading cache folder contents\"");
 		}
 	}
 

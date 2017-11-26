@@ -20,5 +20,6 @@
 namespace FFParser {
 	
 	extern "C" DLLAPI IStorageFactory* CALL GetStorage();
+	extern "C" DLLAPI void CALL SetErrorCallback(void (*error_callback) (const char* error_text, const char* error_title));
 
 }

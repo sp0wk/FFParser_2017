@@ -1,6 +1,6 @@
 #include "LoginsParser.h"
 
-#include <Windows.h>	//for MessageBox
+#include "ErrorHandler.h"
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -42,8 +42,8 @@ namespace FFParser {
 			return _pt.get_child("logins").size();
 		}
 		catch (const std::exception& ex) {
-			//display error
-			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error during LOGINS.JSON parsing occured\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Error during LOGINS.JSON parsing occured\"");
 		}
 
 		return 0;
@@ -94,8 +94,8 @@ namespace FFParser {
 			}
 		}
 		catch (const std::exception& ex) {
-			//display error
-			MessageBoxA(NULL, ex.what(), "ParserDLL error: \"Error during LOGINS.JSON parsing occured\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Error during LOGINS.JSON parsing occured\"");
 		}
 
 		_decryptor.close();

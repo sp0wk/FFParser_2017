@@ -1,6 +1,6 @@
 #include "LoginsDecryptor.h"
 
-#include <Windows.h>	//for MessageBox
+#include "ErrorHandler.h"
 
 
 namespace FFParser {
@@ -73,17 +73,15 @@ namespace FFParser {
 					_libsLoadSuccess = true;
 				}
 				else {
-					//display error
-					MessageBoxA(NULL, "Program was unable to load all required functions from Firefox decryption libs.", 
-									  "ParserDLL error: \"Couldn't set all function pointers from Firefox decrypt libraries\"", 
-									  MB_OK | MB_ICONERROR);
+					//handle error
+					ErrorHandler::getInstance().onError("Program was unable to load all required functions from Firefox decryption libs.", 
+														"ParserDLL error: \"Couldn't set all function pointers from Firefox decrypt libraries\""); 
 				}
 			}
 			else {
-				//display error
-				MessageBoxA(NULL, "Check if mozglue.dll and nss3.dll are present in \"FFDecryptLibs\" folder OR try running version of this application (32-bit or 64-bit) which match with your Firefox version", 
-								  "ParserDLL error: \"Couldn't find proper Firefox decrypt libraries\"", 
-								  MB_OK | MB_ICONERROR);
+				//handle error
+				ErrorHandler::getInstance().onError("Check if mozglue.dll and nss3.dll are present in \"FFDecryptLibs\" folder OR try running version of this application (32-bit or 64-bit) which match with your Firefox version", 
+													"ParserDLL error: \"Couldn't find proper Firefox decrypt libraries\"");
 			}
 		}
 	}

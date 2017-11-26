@@ -1,6 +1,6 @@
 #include "DBAccessorImpl.h"
+#include "ErrorHandler.h"
 
-#include <Windows.h>	//for MessageBox
 
 namespace FFParser {
 
@@ -20,8 +20,8 @@ namespace FFParser {
 		
 		//if open failed
 		if (res) {
-			//display error
-			MessageBoxA(NULL, sqlite3_errstr(res), "ParserDLL error: \"Error opening places.sqlite database\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(sqlite3_errstr(res), "ParserDLL error: \"Error opening places.sqlite database\"");
 			sqlite3_close(_raw_db);
 		}
 		else {
@@ -44,8 +44,8 @@ namespace FFParser {
 		status = sqlite3_exec(_db.get(), query.c_str(), NULL, 0, &error);
 
 		if (status) {
-			//display error
-			MessageBoxA(NULL, error, "ParserDLL error: \"Database query error occured\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(error, "ParserDLL error: \"Database query error occured\"");
 			sqlite3_free(error);
 		}
 
@@ -67,8 +67,8 @@ namespace FFParser {
 		status = sqlite3_prepare_v2(_db.get(), query.c_str(), query.length(), &stmt, NULL);
 
 		if (status) {
-			//display error
-			MessageBoxA(NULL, sqlite3_errstr(status), "ParserDLL error: \"Database query error occured\"", MB_OK | MB_ICONERROR);
+			//handle error
+			ErrorHandler::getInstance().onError(sqlite3_errstr(status), "ParserDLL error: \"Database query error occured\"");
 			return status;
 		}
 
