@@ -28,15 +28,15 @@ namespace FFParser {
 
 	size_t LoginsParser::getTotalRecords(size_t profile)
 	{
-		std::string profileDir;
+		std::string loginsPath;
 
 		if (auto sh = _file_accessor_ref.lock()) {
-			profileDir = sh->getPathToResource(EResourcePaths::PROFILES, profile);
+			loginsPath = sh->getPathToResource(EResourcePaths::LOGINS, profile);
 		}
 
 		try	{
 			if (_pt.empty()) {
-				boost::property_tree::read_json(profileDir.append("\\logins.json"), _pt);
+				boost::property_tree::read_json(loginsPath, _pt);
 			}
 
 			return _pt.get_child("logins").size();
@@ -54,6 +54,7 @@ namespace FFParser {
 	{
 		size_t count = 0;
 		std::string profileDir;
+		std::string loginsPath;
 		size_t limit_counter = 0;
 		bool nolimit = false;
 		size_t max = from + number;
@@ -64,6 +65,7 @@ namespace FFParser {
 
 		if (auto sh = _file_accessor_ref.lock()) {
 			profileDir = sh->getPathToResource(EResourcePaths::PROFILEPATH, profile);
+			loginsPath = sh->getPathToResource(EResourcePaths::LOGINS, profile);
 		}
 
 		//initialize decryption
@@ -71,7 +73,7 @@ namespace FFParser {
 
 		try	{
 			if (_pt.empty()) {
-				boost::property_tree::read_json(profileDir.append("\\logins.json"), _pt);
+				boost::property_tree::read_json(loginsPath, _pt);
 			}
 
 			//iterate through all logins
