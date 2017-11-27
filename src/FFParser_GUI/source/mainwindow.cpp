@@ -379,25 +379,25 @@ bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const
     switch (indexTab)
     {
     case 0:
-        if (first + step > historyRecord->getTotalRecords())
+        if (first + step >= historyRecord->getTotalRecords())
         {
             flag = true;
         }
         break;
     case 1:
-        if (first + step > bookmarksRecord->getTotalRecords())
+        if (first + step >= bookmarksRecord->getTotalRecords())
         {
             flag = true;
         }
         break;
     case 2:
-        if (first + step > loginRecord->getTotalRecords())
+        if (first + step >= loginRecord->getTotalRecords())
         {
             flag = true;
         }
         break;
     case 3:
-        if (first + step > cacheRecord->getTotalRecords())
+        if (first + step >= cacheRecord->getTotalRecords())
         {
             flag = true;
         }
