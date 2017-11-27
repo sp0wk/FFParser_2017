@@ -12,7 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _firstRecord(0),
     oldStep(25),
     profileNumber(0),
-    m_allAmountProfile(0)
+    m_allAmountProfile(0),
+    _searchFlag(false)
 {
     ui.setupUi(this);
     createLanguageMenu();
@@ -419,6 +420,8 @@ void MainWindow::on_pushButton_clicked()
         _firstRecord += stepForTabs[ui.tabWidget->currentIndex()];
     }
     switchViewRecords(ui.tabWidget->currentIndex());
+    if (_searchFlag == true)
+        search();
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -432,6 +435,8 @@ void MainWindow::on_pushButton_2_clicked()
         _firstRecord -= stepForTabs[ui.tabWidget->currentIndex()];
     }
    switchViewRecords(ui.tabWidget->currentIndex());
+   if (_searchFlag == true)
+           search();
 }
 
 bool MainWindow::checkRecords(const size_t &indexTab)
@@ -471,8 +476,10 @@ bool MainWindow::checkRecords(const size_t &indexTab)
     return flag;
 }
 
-void MainWindow::on_pushButton_4_clicked()
+void MainWindow::search()
 {
+    ui.pushButton_5->setEnabled(true);
+
     QString dataToFind = ui.lineEdit->text().toLower();
     if (dataToFind.size() >= 2)
     {
@@ -480,13 +487,7 @@ void MainWindow::on_pushButton_4_clicked()
         {
             size_t columnCount = ui.tableWidget->columnCount();
             size_t rowCount = ui.tableWidget->rowCount();
-            for (int i = 0; i < rowCount; ++i)
-            {
-                for (int  j = 0; j < columnCount; ++j)
-                {
-                    ui.tableWidget->item(i, j)->setData(Qt::BackgroundRole, QColor (255, 255, 255));
-                }
-            }
+
             for (size_t i = 0; i < rowCount; ++i)
             {
                 for (size_t j = 0; j < columnCount; ++j)
@@ -527,6 +528,13 @@ void MainWindow::on_pushButton_4_clicked()
     }
 }
 
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    search();
+    _searchFlag = true;
+}
+
 void MainWindow::on_comboBox_activated(int index)
 {
     profileNumber = static_cast<size_t>(index);
@@ -556,4 +564,23 @@ void MainWindow::viewCounterRecords(const size_t &first, const size_t &last, IRe
 {
     QString temp = "Records: " + QString::number(first) + '-' + QString::number(last) + '/' + QString::number(ptr->getTotalRecords());
     ui.label_3->setText(temp);
+}
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    _searchFlag = false;
+
+    size_t columnCount = ui.tableWidget->columnCount();
+    size_t rowCount = ui.tableWidget->rowCount();
+
+    for (int i = 0; i < rowCount; ++i)
+    {
+        for (int  j = 0; j < columnCount; ++j)
+        {
+            ui.tableWidget->item(i, j)->setData(Qt::BackgroundRole, QColor (255, 255, 255));
+        }
+    }
+
+    ui.lineEdit->setText("");
+    ui.pushButton_5->setEnabled(false);
 }

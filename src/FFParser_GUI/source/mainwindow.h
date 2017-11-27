@@ -68,6 +68,8 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_pushButton_5_clicked();
+
 private:
     Ui::MainWindow ui;
     void createUI(const QStringList &headers, size_t);
@@ -83,6 +85,7 @@ private:
     bool checkRecords(const size_t &);
     void viewStep(const size_t &);
     void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
+    void search();
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
@@ -100,6 +103,7 @@ private:
     size_t oldStep;
     size_t profileNumber;
     size_t m_allAmountProfile;
+    bool _searchFlag;
 
     std::vector<size_t> stepForTabs;
 
