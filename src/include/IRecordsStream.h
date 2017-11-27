@@ -19,6 +19,9 @@ namespace FFParser {
 		virtual IRecord* CALL getPrevRecord() = 0;
 		virtual IRecord* CALL getNextRecord() = 0;
 		virtual IRecord* CALL getRecordByIndex(size_t index) = 0;
+		//search
+		virtual size_t CALL searchPrevRecord(const char* text) = 0;
+		virtual size_t CALL searchNextRecord(const char* text) = 0;
 		//fields
 		virtual size_t CALL getNumberOfFields() const = 0;
 		virtual const char* CALL getFieldName(size_t index) const = 0;

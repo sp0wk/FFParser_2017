@@ -48,15 +48,23 @@ int main()
 	std::cout << FactoryStorage->getPathToProfile(0) << "\n\n";
 
 	//get records
-	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 0);
+	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
 	
 	size_t from = 0;
-	size_t number = 2;
+	size_t number = 25;
 	size_t cnt = recstr->loadRecords(from, number);
 	size_t cnt2 = recstr->loadNextRecords(number);
 	size_t sz = recstr->getNumberOfRecords();
 	size_t total = recstr->getTotalRecords();
 
+	//TEST search
+	size_t cur = recstr->currentRecord();
+	size_t found = recstr->searchNextRecord("9gAg");
+	size_t found2 = recstr->searchNextRecord("9gAg");
+	size_t found3 = recstr->searchNextRecord("9gAg");
+	size_t foundprev = recstr->searchPrevRecord("9gAg");
+	size_t foundprev2 = recstr->searchPrevRecord("9gAg");
+	IRecord* foundrec = recstr->getRecordByIndex(found);
 
 	// TEST getRecordByIndex
 	IRecord* onerec = recstr->getRecordByIndex(0);

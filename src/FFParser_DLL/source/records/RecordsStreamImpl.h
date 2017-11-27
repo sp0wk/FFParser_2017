@@ -28,6 +28,8 @@ namespace FFParser {
 		virtual IRecord* CALL getPrevRecord() override;
 		virtual IRecord* CALL getNextRecord() override;
 		virtual IRecord* CALL getRecordByIndex(size_t index) override;
+		virtual size_t CALL searchPrevRecord(const char* text) override;
+		virtual size_t CALL searchNextRecord(const char* text) override;
 		virtual size_t CALL getNumberOfFields() const override;
 		virtual const char* CALL getFieldName(size_t index) const override;
 

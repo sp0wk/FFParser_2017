@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <cctype>
 
 #include "include/IRecord.h"
 
@@ -32,6 +34,29 @@ namespace FFParser {
 			if (index < _fields.size())
 				return _fields[index].size(); 
 			return 0;
+		}
+
+		size_t findText(const char* text) const
+		{
+			const char* text_end = text + strlen(text);
+
+			for (size_t i = 0; i < _fields.size(); ++i) {
+				const std::string& str = _fields[i];
+
+				//search substring
+				auto res = std::search(str.cbegin(), str.cend(), text, text_end, 
+				[](char str1, char substr1)
+				{
+					return tolower(str1) == tolower(substr1);
+				});
+				
+				if (res != str.cend()) {
+					//match found in field i
+					return i;
+				}
+			}
+
+			return -1;
 		}
 
 	protected:

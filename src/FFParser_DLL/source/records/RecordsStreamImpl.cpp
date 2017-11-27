@@ -98,6 +98,49 @@ namespace FFParser {
 	}
 
 
+	size_t CALL RecordsStreamImpl::searchPrevRecord(const char* text)
+	{
+		//check if search text is not empty and more than 2 letters long
+		if (text != nullptr && text[0] != '\0' && text[1] != '\0') {
+			if (_current_record != -1 && _records.size() > 0) {
+				for (size_t i = _current_record - 1; i > 0; --i) {
+					size_t found = _records[i].findText(text);
+
+					if (found != -1) {
+						//match found
+						_current_record = i;
+						return _current_record;
+					}
+				}
+
+			}
+		}
+
+		return -1;
+	}
+
+
+	size_t CALL RecordsStreamImpl::searchNextRecord(const char* text)
+	{
+		//check if search text is not empty and more than 2 letters long
+		if (text != nullptr && text[0] != '\0' && text[1] != '\0') {
+			if (_records.size() > 0) {
+				for (size_t i = _current_record + 1; i < _records.size(); ++i) {
+					size_t found = _records[i].findText(text);
+
+					if (found != -1) {
+						//match found
+						_current_record = i;
+						return _current_record;
+					}
+				}
+			}
+		}
+
+		return -1;
+	}
+
+
 	size_t CALL RecordsStreamImpl::getNumberOfFields() const
 	{
 		return _field_names.size();
