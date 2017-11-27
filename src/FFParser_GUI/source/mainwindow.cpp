@@ -105,6 +105,7 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
         if (onerec == nullptr)
             break;
     }
+    viewCounterRecords(_firstRecord, _firstRecord + iterator, ptr);
     oldStep = stepForTabs[ui.tabWidget->currentIndex()];
 }
 
@@ -152,9 +153,10 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
 
     ui.tableWidget->setHorizontalHeaderLabels(headers);
 
-    ui.tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui.tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-
+    for (size_t i = 0; i < number; ++i)
+    {
+        ui.tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
+    }
 }
 
 
@@ -548,4 +550,10 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     _firstRecord = 0;
     switchViewRecords(static_cast<size_t>(index));
     viewStep(static_cast<size_t>(index));
+}
+
+void MainWindow::viewCounterRecords(const size_t &first, const size_t &last, IRecordsStream *ptr)
+{
+    QString temp = "Records: " + QString::number(first) + '-' + QString::number(last) + '/' + QString::number(ptr->getTotalRecords());
+    ui.label_3->setText(temp);
 }
