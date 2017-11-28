@@ -44,6 +44,35 @@ MainWindow::MainWindow(QWidget *parent) :
 
     for (int i = 0; i < ui.tabWidget->count(); ++i)
         stepForTabs.push_back(0);
+
+    //ui.tableWidget->setReadOnly(true);
+    _pmnu = new QMenu(this);
+    _pmnu->addAction("&Red");
+    _pmnu->addAction("&Green");
+    _pmnu->addAction("&Blue");
+    connect(_pmnu, SIGNAL(triggered(QAction*)), SLOT(slotActivated(QAction *)));
+}
+
+void MainWindow::slotActivated(QAction *pAction)
+{
+    QString strColor = pAction->text().remove("&");
+    qDebug() << strColor;
+
+    QList<QTableWidgetItem *> selectedList =  ui.tableWidget->selectedItems();
+    qDebug()<<"Count:"<<selectedList.count();
+
+    QStringList templist1;
+    for (int i=0; i<selectedList.count()/4; i++){
+        templist1.append(ui.tableWidget->item(selectedList.at(i)->row(),0)->text());
+        qDebug()<<ui.tableWidget->item(selectedList.at(i)->row(),0)->text();
+    }
+
+    //setHtml(QString ("<BODY BGCOLOR =%1></BODY>")).arg(strColor));
+}
+
+void MainWindow::contextMenuEvent(QContextMenuEvent *event)
+{
+    _pmnu->exec(event->globalPos());
 }
 
 bool MainWindow::ptrIsNotNull(const size_t &index)
@@ -214,6 +243,7 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
     ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     ui.tableWidget->setHorizontalHeaderLabels(headers);
+
 
     for (size_t i = 0; i < number; ++i)
     {

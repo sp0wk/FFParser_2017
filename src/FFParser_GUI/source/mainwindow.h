@@ -13,6 +13,7 @@
 #include <QAbstractItemModel>
 #include <QApplication>
 #include <vector>
+#include <QMenu>
 
 //for DLL
 #include <windows.h>
@@ -71,6 +72,8 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    void slotActivated(QAction *pAction);
+
 private:
     Ui::MainWindow ui;
     void createUI(const QStringList &headers, size_t);
@@ -88,6 +91,7 @@ private:
     void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
     void search();
     bool ptrIsNotNull(const size_t &);
+    void contextMenuEvent(QContextMenuEvent *event);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
@@ -106,6 +110,7 @@ private:
     size_t profileNumber;
     size_t m_allAmountProfile;
     bool _searchFlag;
+    QMenu *_pmnu;
 
     std::vector<size_t> stepForTabs;
 
