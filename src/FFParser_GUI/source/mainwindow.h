@@ -79,7 +79,7 @@ private:
 
     void createLanguageMenu(void);
 
-    void initialLoadRecord(IRecordsStream *);
+    bool initialLoadRecord(IRecordsStream *);
     void loadNewNextRecords(const size_t &, const size_t &);
     void checkNewRecords(const size_t &, const size_t &, const size_t &);
     bool isOutOfRange(const size_t &, const size_t &, const size_t &);
@@ -87,7 +87,7 @@ private:
     void viewStep(const size_t &);
     void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
     void search();
-    bool ptrIsNotNull();
+    bool ptrIsNotNull(const size_t &);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;

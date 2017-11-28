@@ -46,20 +46,46 @@ MainWindow::MainWindow(QWidget *parent) :
         stepForTabs.push_back(0);
 }
 
-bool MainWindow::ptrIsNotNull()
+bool MainWindow::ptrIsNotNull(const size_t &index)
 {
-    if (historyRecord != nullptr && bookmarksRecord != nullptr
-            && loginRecord != nullptr && cacheRecord != nullptr)
+    bool flag = false;
+
+    switch (index)
     {
-        return true;
+    case 0:
+        if (historyRecord != nullptr)
+        {
+            flag = true;
+        }
+        break;
+    case 1:
+        if (bookmarksRecord != nullptr)
+        {
+            flag = true;
+        }
+        break;
+    case 2:
+        if (loginRecord != nullptr)
+        {
+            flag = true;
+        }
+        break;
+    case 3:
+        if (cacheRecord != nullptr)
+        {
+            flag = true;
+        }
+        break;
+    default:
+        break;
     }
 
-    return false;
+    return flag;
 }
 
 void MainWindow::setNameColumnTable(IRecordsStream *ptr)
 {
-    if (ptrIsNotNull())
+    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
         int counter = 0;
 
@@ -98,36 +124,39 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
 {
     removeRowTable(oldStep);
 
-    initialLoadRecord(ptr);
-    IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
-    if (onerec == nullptr)
-        return;
-
-
-    size_t iterator = 0;
-
-    size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
-    size_t total = ptr->getTotalRecords();
-    if (tempStep > total)
-        stepForTabs[ui.tabWidget->currentIndex()] = total;
-
-    for (size_t i = _firstRecord; i < _firstRecord + stepForTabs[ui.tabWidget->currentIndex()]; ++i)
+    if (initialLoadRecord(ptr))
     {
-        ui.tableWidget->insertRow(iterator);
-        size_t counter = 0;
-        while (onerec->getFieldValue(counter) != nullptr)
-        {
-            ui.tableWidget->setItem(iterator, counter, new QTableWidgetItem(onerec->getFieldValue(counter)));
-            ++counter;
-        }
-        ++iterator;
-        onerec = ptr->getNextRecord();
-
+        IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
         if (onerec == nullptr)
-            break;
+            return;
+
+        size_t iterator = 0;
+
+        size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
+        size_t total = ptr->getTotalRecords();
+        if (tempStep > total)
+            stepForTabs[ui.tabWidget->currentIndex()] = total;
+
+        for (size_t i = _firstRecord; i < _firstRecord + stepForTabs[ui.tabWidget->currentIndex()]; ++i)
+        {
+            ui.tableWidget->insertRow(iterator);
+            size_t counter = 0;
+            while (onerec->getFieldValue(counter) != nullptr)
+            {
+                QTableWidgetItem *item = new QTableWidgetItem(onerec->getFieldValue(counter));
+                item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+                ui.tableWidget->setItem(iterator, counter, item);
+                ++counter;
+            }
+            ++iterator;
+            onerec = ptr->getNextRecord();
+
+            if (onerec == nullptr)
+                break;
+        }
+        viewCounterRecords(_firstRecord, _firstRecord + iterator, ptr);
+        oldStep = stepForTabs[ui.tabWidget->currentIndex()];
     }
-    viewCounterRecords(_firstRecord, _firstRecord + iterator, ptr);
-    oldStep = stepForTabs[ui.tabWidget->currentIndex()];
 }
 
 void MainWindow::setNameProfile()
@@ -142,9 +171,9 @@ void MainWindow::setNameProfile()
 }
 
 
-void MainWindow::initialLoadRecord(IRecordsStream *ptr)
+bool MainWindow::initialLoadRecord(IRecordsStream *ptr)
 {
-    if (ptrIsNotNull())
+    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
         if (ptr->getNumberOfRecords() == 0)
         {
@@ -156,12 +185,15 @@ void MainWindow::initialLoadRecord(IRecordsStream *ptr)
             ptr->loadRecords(0, tempStep);
             stepForTabs[ui.tabWidget->currentIndex()] = tempStep;
         }
+        return true;
     }
     else
     {
         QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
                                                                    tr("Required entries were not found on your computer!\n"),
                                                                    QMessageBox::Ok);
+
+        return false;
     }
 }
 
@@ -395,7 +427,7 @@ void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, co
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    if (ptrIsNotNull())
+    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
         size_t tempStep = ui.spinBox->value();
         size_t tempIndex = ui.tabWidget->currentIndex();
@@ -451,29 +483,35 @@ bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const
 
 void MainWindow::on_pushButton_clicked()
 {
-    checkNewRecords(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]);
-    if (isOutOfRange(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]) == false)
+    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
-        _firstRecord += stepForTabs[ui.tabWidget->currentIndex()];
+        checkNewRecords(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]);
+        if (isOutOfRange(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]) == false)
+        {
+            _firstRecord += stepForTabs[ui.tabWidget->currentIndex()];
+        }
+        switchViewRecords(ui.tabWidget->currentIndex());
+        if (_searchFlag == true)
+            search();
     }
-    switchViewRecords(ui.tabWidget->currentIndex());
-    if (_searchFlag == true)
-        search();
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    if (static_cast<int>(_firstRecord - stepForTabs[ui.tabWidget->currentIndex()]) <= 0)
+    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
-        _firstRecord = 0;
+        if (static_cast<int>(_firstRecord - stepForTabs[ui.tabWidget->currentIndex()]) <= 0)
+        {
+            _firstRecord = 0;
+        }
+        else
+        {
+            _firstRecord -= stepForTabs[ui.tabWidget->currentIndex()];
+        }
+       switchViewRecords(ui.tabWidget->currentIndex());
+       if (_searchFlag == true)
+               search();
     }
-    else
-    {
-        _firstRecord -= stepForTabs[ui.tabWidget->currentIndex()];
-    }
-   switchViewRecords(ui.tabWidget->currentIndex());
-   if (_searchFlag == true)
-           search();
 }
 
 bool MainWindow::checkRecords(const size_t &indexTab)
