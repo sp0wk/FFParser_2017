@@ -1,5 +1,7 @@
 #include "RecordsStreamImpl.h"
 
+#include "helpers/ErrorHandler.h"
+
 #include <string>
 #include <vector>
 
@@ -91,12 +93,24 @@ namespace FFParser {
 	IRecord* CALL RecordsStreamImpl::getRecordByIndex(size_t index)
 	{
 		if (index < _records.size()) {
-			_current_record = index;
-			return &_records[_current_record];
+			return &_records[index];
 		}
 		return nullptr;
 	}
 
+
+	bool CALL RecordsStreamImpl::setCurrentRecord(size_t index)
+	{
+		if (index < _records.size()) {
+			_current_record = index;
+			return true;
+		}
+		else {
+			//handle error
+			ErrorHandler::getInstance().onError("Set current record error: \"Index is out of range\"", "ParserDLL error: \"Record access error\"");
+			return false;
+		}
+	}
 
 	size_t CALL RecordsStreamImpl::searchPrevRecord(const char* text)
 	{
@@ -155,4 +169,15 @@ namespace FFParser {
 		return nullptr;
 	}
 
+
+	size_t CALL RecordsStreamImpl::getStreamProfile() const
+	{
+		return this->_profile;
+	}
+
+
+	ERecordTypes CALL RecordsStreamImpl::getStreamType() const
+	{
+		return this->_stream_type;
+	}
 }

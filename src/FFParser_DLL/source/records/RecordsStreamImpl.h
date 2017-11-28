@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "include/IRecordsStream.h"
-#include "include/ERecordTypes.h"
 
 #include "RecordImpl.h"
 #include "helpers/HelperFacade.h"
@@ -28,6 +27,9 @@ namespace FFParser {
 		virtual IRecord* CALL getPrevRecord() override;
 		virtual IRecord* CALL getNextRecord() override;
 		virtual IRecord* CALL getRecordByIndex(size_t index) override;
+		virtual bool CALL setCurrentRecord(size_t index) override;
+		virtual size_t CALL getStreamProfile() const override;
+		virtual ERecordTypes CALL getStreamType() const override;
 		virtual size_t CALL searchPrevRecord(const char* text) override;
 		virtual size_t CALL searchNextRecord(const char* text) override;
 		virtual size_t CALL getNumberOfFields() const override;

@@ -18,8 +18,6 @@
 
 
 
-// Singleton helper
-
 namespace FFParser {
 
 	class HelperFacade final
@@ -27,8 +25,8 @@ namespace FFParser {
 	public:
 		static HelperFacade& getInstance();
 
-		void getProfileNames(std::vector<std::string>& list) const;
-		std::string getPathToProfile(size_t profile) const;
+		size_t getNumberOfProfiles() const;
+		const ProfileInfo& getProfile(size_t profile) const;
 		void getFieldNames(std::vector<std::string>& list, ERecordTypes type) const;
 		size_t getTotalRecords(ERecordTypes type, size_t profile);
 		size_t parseRecords(ERecordTypes type, size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number);

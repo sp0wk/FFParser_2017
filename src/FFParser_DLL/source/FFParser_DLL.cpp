@@ -3,7 +3,7 @@
 
 #include "include/FFParser_DLL.h"
 #include "storage/StorageFactoryImpl.h"
-#include "ErrorHandler.h"
+#include "helpers/ErrorHandler.h"
 
 
 namespace FFParser {

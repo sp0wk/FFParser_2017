@@ -113,8 +113,11 @@
     <ClInclude Include="source\parsing\LoginsDecryptor.h">
       <Filter>Header Files\Parsing</Filter>
     </ClInclude>
-    <ClInclude Include="source\ErrorHandler.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="source\accessors\ProfileInfo.h">
+      <Filter>Header Files\Accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="source\helpers\ErrorHandler.h">
+      <Filter>Header Files\Helpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -154,8 +157,11 @@
     <ClCompile Include="source\parsing\LoginsDecryptor.cpp">
       <Filter>Source Files\Parsing</Filter>
     </ClCompile>
-    <ClCompile Include="source\ErrorHandler.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\helpers\ErrorHandler.cpp">
+      <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\records\RecordImpl.cpp">
+      <Filter>Source Files\Records</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

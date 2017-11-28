@@ -1,9 +1,10 @@
 #include "StorageFactoryImpl.h"
 
+#include "accessors/ProfileInfo.h"
+
 #include <algorithm>
 
 
-// StorageFactoryImpl
 
 namespace FFParser {
 
@@ -14,10 +15,9 @@ namespace FFParser {
 	}
 
 	//ctor
-	StorageFactoryImpl::StorageFactoryImpl() : _helper_ref(HelperFacade::getInstance())
+	StorageFactoryImpl::StorageFactoryImpl() : 
+		_helper_ref(HelperFacade::getInstance())
 	{
-		//load profiles
-		_helper_ref.getProfileNames(_profiles);
 	}
 
 
@@ -26,20 +26,34 @@ namespace FFParser {
 
 	size_t CALL StorageFactoryImpl::getNumberOfProfiles() const
 	{
-		return _profiles.size();
+		return _helper_ref.getNumberOfProfiles();
 	}
 
 
-	const char* CALL StorageFactoryImpl::getProfileName(size_t index) const
+	const char* CALL StorageFactoryImpl::getProfileName(size_t profile) const
 	{
-		return index < _profiles.size() ? _profiles[index].c_str() : nullptr;
+		if (profile < _helper_ref.getNumberOfProfiles()) {
+			return _helper_ref.getProfile(profile).name.c_str();
+		}
+		return nullptr;
 	}
 
 
-	const char* CALL StorageFactoryImpl::getPathToProfile(size_t index)
+	const char* CALL StorageFactoryImpl::getPathToProfile(size_t profile) const
 	{
-		_temp_profile_path = _helper_ref.getPathToProfile(index);
-		return _temp_profile_path.c_str();
+		if (profile < _helper_ref.getNumberOfProfiles()) {
+			return _helper_ref.getProfile(profile).path.c_str();
+		}
+		return nullptr;
+	}
+
+
+	const char* CALL StorageFactoryImpl::getPathToCache(size_t profile) const
+	{
+		if (profile < _helper_ref.getNumberOfProfiles()) {
+			return _helper_ref.getProfile(profile).cache_path.c_str();
+		}
+		return nullptr;
 	}
 
 
@@ -47,7 +61,7 @@ namespace FFParser {
 	{
 		RecordsStreamImpl* newstream = nullptr;
 
-		if (profile < _profiles.size()) {
+		if (profile < _helper_ref.getNumberOfProfiles()) {
 			_storage.emplace_back(new RecordsStreamImpl(profile, type));	//save to storage
 			newstream = _storage.back().get();
 		}

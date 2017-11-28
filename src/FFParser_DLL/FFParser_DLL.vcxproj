@@ -28,7 +28,8 @@
     <ClInclude Include="source\accessors\FileAccessorImpl.h" />
     <ClInclude Include="source\accessors\IDatabaseAccessor.h" />
     <ClInclude Include="source\accessors\IFileAccessor.h" />
-    <ClInclude Include="source\ErrorHandler.h" />
+    <ClInclude Include="source\accessors\ProfileInfo.h" />
+    <ClInclude Include="source\helpers\ErrorHandler.h" />
     <ClInclude Include="source\helpers\HelperFacade.h" />
     <ClInclude Include="source\parsing\BookmarksParser.h" />
     <ClInclude Include="source\parsing\CacheFilesParser.h" />
@@ -46,14 +47,15 @@
   <ItemGroup>
     <ClCompile Include="source\accessors\DBAccessorImpl.cpp" />
     <ClCompile Include="source\accessors\FileAccessorImpl.cpp" />
-    <ClCompile Include="source\ErrorHandler.cpp" />
     <ClCompile Include="source\FFParser_DLL.cpp" />
+    <ClCompile Include="source\helpers\ErrorHandler.cpp" />
     <ClCompile Include="source\helpers\HelperFacade.cpp" />
     <ClCompile Include="source\parsing\BookmarksParser.cpp" />
     <ClCompile Include="source\parsing\CacheFilesParser.cpp" />
     <ClCompile Include="source\parsing\HistoryParser.cpp" />
     <ClCompile Include="source\parsing\LoginsDecryptor.cpp" />
     <ClCompile Include="source\parsing\LoginsParser.cpp" />
+    <ClCompile Include="source\records\RecordImpl.cpp" />
     <ClCompile Include="source\records\RecordsStreamImpl.cpp" />
     <ClCompile Include="source\storage\StorageFactoryImpl.cpp" />
     <ClCompile Include="sqlite3\sqlite3.c" />

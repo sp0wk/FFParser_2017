@@ -19,10 +19,10 @@ using SetErrorCallbackFunc = void (CALL *)(void (*callback) (const char* error_t
 
 void custom_callback(const char* text, const char* title)
 {
-	//::MessageBoxA(NULL, text, title, MB_OK | MB_ICONERROR);
-	std::cout << "ERROR!!!:\n" <<
+	::MessageBoxA(NULL, text, title, MB_OK | MB_ICONERROR);
+	/*std::cout << "ERROR!!!:\n" <<
 				 "Title - " << title << "\n" <<
-				 "Text - " << text << "\n\n";
+				 "Text - " << text << "\n\n";*/
 }
 
 
@@ -49,14 +49,14 @@ int main()
 
 	//get records
 	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
-	
+
 	size_t from = 0;
 	size_t number = 25;
 	size_t cnt = recstr->loadRecords(from, number);
 	size_t cnt2 = recstr->loadNextRecords(number);
 	size_t sz = recstr->getNumberOfRecords();
 	size_t total = recstr->getTotalRecords();
-
+	
 	//TEST search
 	size_t cur = recstr->currentRecord();
 	size_t found = recstr->searchNextRecord("9gAg");

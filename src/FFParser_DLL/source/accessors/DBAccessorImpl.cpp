@@ -1,5 +1,5 @@
 #include "DBAccessorImpl.h"
-#include "ErrorHandler.h"
+#include "helpers/ErrorHandler.h"
 
 
 namespace FFParser {
@@ -16,16 +16,18 @@ namespace FFParser {
 
 	int DBAccessorImpl::connectToDB(const std::string& db_path)
 	{
-		int res = sqlite3_open_v2(db_path.c_str(), &_raw_db, SQLITE_OPEN_READONLY, NULL);
+		sqlite3* raw_db;
+
+		int res = sqlite3_open_v2(db_path.c_str(), &raw_db, SQLITE_OPEN_READONLY, NULL);
 		
 		//if open failed
 		if (res) {
 			//handle error
 			ErrorHandler::getInstance().onError(sqlite3_errstr(res), "ParserDLL error: \"Error opening places.sqlite database\"");
-			sqlite3_close(_raw_db);
+			sqlite3_close(raw_db);
 		}
 		else {
-			_db.reset(_raw_db);		//set RAII pointer
+			_db.reset(raw_db);		//set RAII pointer
 		}
 
 		return res;

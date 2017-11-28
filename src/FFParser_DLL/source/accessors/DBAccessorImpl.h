@@ -27,7 +27,6 @@ namespace FFParser {
 		virtual void disconnectFromDB() override;
 
 	private:
-		sqlite3* _raw_db;
 		std::unique_ptr<sqlite3, std::function<void(sqlite3*)>> _db;
 	};
 

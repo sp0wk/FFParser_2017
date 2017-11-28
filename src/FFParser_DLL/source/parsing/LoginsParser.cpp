@@ -1,6 +1,6 @@
 #include "LoginsParser.h"
 
-#include "ErrorHandler.h"
+#include "helpers/ErrorHandler.h"
 
 #include <boost/property_tree/json_parser.hpp>
 

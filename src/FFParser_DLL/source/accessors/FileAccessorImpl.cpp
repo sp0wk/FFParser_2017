@@ -1,5 +1,5 @@
 #include "FileAccessorImpl.h"
-#include "ErrorHandler.h"
+#include "helpers/ErrorHandler.h"
 
 #include <Windows.h>	//for registry API
 
@@ -248,4 +248,11 @@ namespace FFParser {
 	{
 		return _profile_list.size();
 	}
+
+
+	const ProfileInfo& FileAccessorImpl::getProfile(size_t profile) const
+	{
+		return _profile_list[profile];
+	}
+	
 }

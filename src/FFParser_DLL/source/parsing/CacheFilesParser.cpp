@@ -158,10 +158,10 @@ namespace FFParser {
 			}
 
 			//check bounds
-			if (from > maxsz) {
+			if (from >= maxsz) {
 				return 0;
 			}
-			if (last > maxsz) {
+			if (last >= maxsz || number == 0) {
 				last = maxsz;
 				number = last - from;
 			}

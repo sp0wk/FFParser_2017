@@ -31,15 +31,15 @@ namespace FFParser {
 
 	//methods
 
-	void HelperFacade::getProfileNames(std::vector<std::string>& list) const
+	size_t HelperFacade::getNumberOfProfiles() const
 	{
-		_file_accessor->getProfiles(list);
+		return _file_accessor->getNumberOfProfiles();
 	}
 
 
-	std::string HelperFacade::getPathToProfile(size_t profile) const
+	const ProfileInfo& HelperFacade::getProfile(size_t profile) const
 	{
-		return _file_accessor->getPathToResource(EResourcePaths::PROFILEPATH, profile);
+		return _file_accessor->getProfile(profile);
 	}
 
 

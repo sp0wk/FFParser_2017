@@ -22,15 +22,9 @@ namespace FFParser {
 		virtual void getFileList(std::vector<std::string>& list, const std::string& dir_path) const override;
 		virtual void getProfiles(std::vector<std::string>& list) const override;
 		virtual size_t getNumberOfProfiles() const override;
+		virtual const ProfileInfo& getProfile(size_t profile) const override;
 
 	private:
-		struct ProfileInfo
-		{
-			std::string name;
-			std::string path;
-			std::string cache_path;
-		};
-
 		std::array<std::string, size_t(EResourcePaths::NUMBER_OF_PATHS)> _resource_paths;
 		std::vector<ProfileInfo> _profile_list;
 

@@ -1,6 +1,6 @@
 #include "LoginsDecryptor.h"
 
-#include "ErrorHandler.h"
+#include "helpers/ErrorHandler.h"
 
 
 namespace FFParser {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ProfileInfo.h"
+
 #include <vector>
 #include <string>
 
@@ -28,6 +30,7 @@ namespace FFParser {
 		virtual void getFileList(std::vector<std::string>& list, const std::string& path) const = 0;
 		virtual void getProfiles(std::vector<std::string>& list) const = 0;
 		virtual size_t getNumberOfProfiles() const = 0;
+		virtual const ProfileInfo& getProfile(size_t profile) const = 0;
 		virtual ~IFileAccessor() {}
 	};
 
