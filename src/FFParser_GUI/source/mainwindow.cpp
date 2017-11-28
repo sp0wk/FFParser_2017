@@ -46,18 +46,38 @@ MainWindow::MainWindow(QWidget *parent) :
         stepForTabs.push_back(0);
 }
 
-void MainWindow::setNameColumnTable(IRecordsStream *ptr)
+bool MainWindow::ptrIsNotNull()
 {
-    int counter = 0;
-
-    QStringList temp;
-    while (ptr->getFieldName(counter) != nullptr)
+    if (historyRecord != nullptr && bookmarksRecord != nullptr
+            && loginRecord != nullptr && cacheRecord != nullptr)
     {
-        temp += ptr->getFieldName(counter);
-        ++counter;
+        return true;
     }
 
-    createUI(temp, counter);
+    return false;
+}
+
+void MainWindow::setNameColumnTable(IRecordsStream *ptr)
+{
+    if (ptrIsNotNull())
+    {
+        int counter = 0;
+
+        QStringList temp;
+        while (ptr->getFieldName(counter) != nullptr)
+        {
+            temp += ptr->getFieldName(counter);
+            ++counter;
+        }
+
+        createUI(temp, counter);
+    }
+    else
+    {
+        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
+                                                                   tr("Required entries were not found on your computer!\n"),
+                                                                   QMessageBox::Ok);
+    }
 
 }
 
@@ -124,15 +144,24 @@ void MainWindow::setNameProfile()
 
 void MainWindow::initialLoadRecord(IRecordsStream *ptr)
 {
-    if (ptr->getNumberOfRecords() == 0)
+    if (ptrIsNotNull())
     {
-        size_t tempStep = ui.spinBox->value();
-        size_t total = ptr->getTotalRecords();
+        if (ptr->getNumberOfRecords() == 0)
+        {
+            size_t tempStep = ui.spinBox->value();
+            size_t total = ptr->getTotalRecords();
 
-        if (tempStep > total)
-            tempStep = total;
-        ptr->loadRecords(0, tempStep);
-        stepForTabs[ui.tabWidget->currentIndex()] = tempStep;
+            if (tempStep > total)
+                tempStep = total;
+            ptr->loadRecords(0, tempStep);
+            stepForTabs[ui.tabWidget->currentIndex()] = tempStep;
+        }
+    }
+    else
+    {
+        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
+                                                                   tr("Required entries were not found on your computer!\n"),
+                                                                   QMessageBox::Ok);
     }
 }
 
@@ -366,13 +395,21 @@ void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, co
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    size_t tempStep = ui.spinBox->value();
-    size_t tempIndex = ui.tabWidget->currentIndex();
+    if (ptrIsNotNull())
+    {
+        size_t tempStep = ui.spinBox->value();
+        size_t tempIndex = ui.tabWidget->currentIndex();
 
-    checkNewRecords(tempIndex, 0, tempStep);
-    stepForTabs[tempIndex] = tempStep;
-    switchViewRecords(tempIndex);
-
+        checkNewRecords(tempIndex, 0, tempStep);
+        stepForTabs[tempIndex] = tempStep;
+        switchViewRecords(tempIndex);
+    }
+    else
+    {
+            QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
+                                                                       tr("Required entries were not found on your computer!\n"),
+                                                                       QMessageBox::Ok);
+    }
 }
 
 bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const size_t &step)

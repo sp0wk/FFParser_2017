@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QAbstractItemModel>
+#include <QApplication>
 #include <vector>
 
 //for DLL
@@ -86,6 +87,7 @@ private:
     void viewStep(const size_t &);
     void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
     void search();
+    bool ptrIsNotNull();
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
