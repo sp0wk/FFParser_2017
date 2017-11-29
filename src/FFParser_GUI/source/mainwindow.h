@@ -14,6 +14,8 @@
 #include <QApplication>
 #include <vector>
 #include <QMenu>
+#include <QDesktopServices>
+#include <QUrl>
 
 //for DLL
 #include <windows.h>
@@ -72,7 +74,10 @@ private slots:
 
     void on_pushButton_5_clicked();
 
-    void slotActivated(QAction *pAction);
+    void slotOpenFile();
+    void slotOpenUrl();
+    void slotExport();
+    void slotCustomMenuRequested(QPoint pos);
 
 private:
     Ui::MainWindow ui;
@@ -91,7 +96,6 @@ private:
     void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
     void search();
     bool ptrIsNotNull(const size_t &);
-    void contextMenuEvent(QContextMenuEvent *event);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;

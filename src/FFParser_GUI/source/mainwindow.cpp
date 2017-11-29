@@ -45,34 +45,6 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < ui.tabWidget->count(); ++i)
         stepForTabs.push_back(0);
 
-    //ui.tableWidget->setReadOnly(true);
-    _pmnu = new QMenu(this);
-    _pmnu->addAction("&Red");
-    _pmnu->addAction("&Green");
-    _pmnu->addAction("&Blue");
-    connect(_pmnu, SIGNAL(triggered(QAction*)), SLOT(slotActivated(QAction *)));
-}
-
-void MainWindow::slotActivated(QAction *pAction)
-{
-    QString strColor = pAction->text().remove("&");
-    qDebug() << strColor;
-
-    QList<QTableWidgetItem *> selectedList =  ui.tableWidget->selectedItems();
-    qDebug()<<"Count:"<<selectedList.count();
-
-    QStringList templist1;
-    for (int i=0; i<selectedList.count()/4; i++){
-        templist1.append(ui.tableWidget->item(selectedList.at(i)->row(),0)->text());
-        qDebug()<<ui.tableWidget->item(selectedList.at(i)->row(),0)->text();
-    }
-
-    //setHtml(QString ("<BODY BGCOLOR =%1></BODY>")).arg(strColor));
-}
-
-void MainWindow::contextMenuEvent(QContextMenuEvent *event)
-{
-    _pmnu->exec(event->globalPos());
 }
 
 bool MainWindow::ptrIsNotNull(const size_t &index)
@@ -249,8 +221,59 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
     {
         ui.tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
     }
+
+    ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(ui.tableWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
 }
 
+void MainWindow::slotCustomMenuRequested(QPoint pos)
+{
+    QMenu *menu = new QMenu(this);
+
+    QAction *openFile = new QAction(trUtf8("Open File"), this);
+    QAction *openUrl = new QAction(trUtf8("Open URL"), this);
+    QAction *exports = new QAction(trUtf8("EXport"), this);
+
+    connect(openFile, SIGNAL(triggered(bool)), this, SLOT(slotOpenFile()));
+    connect(openUrl, SIGNAL(triggered(bool)), this, SLOT(slotOpenUrl()));
+    connect(exports, SIGNAL(triggered(bool)), this, SLOT(slotExport()));
+
+    menu->addAction(openFile);
+    menu->addAction(openUrl);
+    menu->addAction(exports);
+
+    menu->popup(ui.tableWidget->viewport()->mapToGlobal(pos));
+}
+
+
+void MainWindow::slotOpenFile()
+{
+    qDebug() << "row: " << ui.tableWidget->selectionModel()->currentIndex().row();
+    qDebug() << "column: " << ui.tableWidget->selectionModel()->currentIndex().column();
+}
+
+void MainWindow::slotOpenUrl()
+{
+    size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
+    size_t column = ui.tableWidget->selectionModel()->currentIndex().column();
+
+    QTableWidgetItem *item =  ui.tableWidget->item(row, column);
+    QUrl temp = item->text();
+
+    if (!QDesktopServices::openUrl(temp))
+    {
+        QMessageBox::warning(this, "Warning",
+                             tr("This is not URL address!\n"),
+                             QMessageBox::Ok);
+    }
+}
+
+void MainWindow::slotExport()
+{
+    qDebug() << "row: " << ui.tableWidget->selectionModel()->currentIndex().row();
+    qDebug() << "column: " << ui.tableWidget->selectionModel()->currentIndex().column();
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -468,9 +491,9 @@ void MainWindow::on_pushButton_3_clicked()
     }
     else
     {
-            QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
-                                                                       tr("Required entries were not found on your computer!\n"),
-                                                                       QMessageBox::Ok);
+            QMessageBox::warning(this, "Warning",
+                                 tr("Required entries were not found on your computer!\n"),
+                                 QMessageBox::Ok);
     }
 }
 
@@ -604,6 +627,8 @@ void MainWindow::search()
 
                     size_t counter = 0;
 
+                    bool tempFlag = false;
+
                     while (temp.indexOf(dataToFind, counter) != -1)
                     {
                         ++counter;
@@ -613,6 +638,14 @@ void MainWindow::search()
                             ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (250,0,0));
                             ++currCounter;
                         }
+                        tempFlag = true;
+                    }
+
+                    if (!tempFlag)
+                    {
+                        QMessageBox::warning(this, "Result",
+                                             tr("Nothing found!\n"),
+                                             QMessageBox::Ok);
                     }
 
                 }
@@ -620,16 +653,16 @@ void MainWindow::search()
         }
         else
         {
-            QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
-                                                                   tr("The records are not load!\n"),
-                                                                   QMessageBox::Ok);
+            QMessageBox::warning(this, "Warning",
+                                 tr("The records are not load!\n"),
+                                 QMessageBox::Ok);
         }
     }
     else
     {
-        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
-                                                                   tr("Input value very small!\n"),
-                                                                   QMessageBox::Ok);
+        QMessageBox::warning(this, "Warning",
+                             tr("Input value very small!\n"),
+                             QMessageBox::Ok);
     }
 }
 
