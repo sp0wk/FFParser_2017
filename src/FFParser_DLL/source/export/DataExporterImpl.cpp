@@ -2,10 +2,16 @@
 
 #include "helpers/ErrorHandler.h"
 
+#include <fstream>
+#include <vector>
+
 #include <chrono>
 #include <iomanip>
 
 #include <boost/property_tree/json_parser.hpp>
+
+#include <wincrypt.h>	//for MD5
+#include <regex>
 
 
 namespace FFParser {
@@ -113,17 +119,147 @@ namespace FFParser {
 
 	bool DataExporterImpl::createMD5fromFile(const char* filename) const
 	{
-		//TODO:
-		//open file, calculate md5 and write to file "filename".md5
+		if ((filename != nullptr && filename[0] != '\0') == false) {
+			//handle error
+			ErrorHandler::getInstance().onError("Passed file name is empty", "ParserDLL error: \"Generate MD5 error\"");
+			return false;
+		}
+
+		//try to open file
+		std::ifstream file(filename, std::ios::ate | std::ios::binary);
+		if (!file.is_open()) {
+			//handle error
+			std::string error = "Couldn't open file:\n";
+			error.append(filename);
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return false;
+		}
+
+		//read file to buffer
+		size_t fsz = static_cast<size_t>(file.tellg());
+		file.seekg(0, file.beg);
+
+		std::vector<char> buffer(fsz);
+		if (!file.read(buffer.data(), fsz)) {
+			file.close();
+			//handle error
+			std::string error = "Error occured while reading file:\n";
+			error.append(filename);
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return false;
+		}
+		
+		file.close();
+
+		//calculate MD5 from file data
+		std::string fileHashStr = calculateMD5(reinterpret_cast<BYTE*>(buffer.data()), buffer.size());
+		if (fileHashStr.empty()) {
+			return false;
+		}
+		
+		//create md5 file
+		std::string md5filename = filename;
+		md5filename.append(".md5");
+
+		std::ofstream md5file(md5filename, std::ios::out);
+		if (!md5file.is_open()) {
+			//handle error
+			std::string error = "Couldn't create MD5 file:\n";
+			error.append(md5filename);
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Create file error\"");
+			return false;
+		}
+
+		//write computed hash to file
+		md5file << fileHashStr;
+		md5file << " *";
+
+		//write file name w/o path
+		std::string fn = filename;
+		std::smatch m;
+		std::regex fn_rgx("(?:[-[:w:]]+\\.)+[[:w:]]+");
+		std::regex_search(fn, m, fn_rgx);
+
+		md5file << m[0].str();
+		md5file.close();
+		
+
 		return true;
 	}
 
 
-	std::string DataExporterImpl::calculateMD5(unsigned char* data, size_t data_size) const
+	std::string DataExporterImpl::calculateMD5(const unsigned char* data, size_t data_size) const
 	{
-		//TODO:
-		//calculate data's md5
-		return "";
+		HCRYPTPROV hProv = NULL;
+		HCRYPTPROV hHash = NULL;
+		DWORD cbHashSize = 0;
+		DWORD dwCount = sizeof(DWORD);
+		
+		std::vector<BYTE> buffer;
+		std::ostringstream oss;
+
+
+		//initialization
+		if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+			//handle error
+			std::string error = "CryptAcquireContext failed: " + std::to_string(GetLastError());
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return "";
+		}
+			
+		if (!CryptCreateHash(hProv, CALG_MD5, 0, 0, &hHash)) {
+			CryptReleaseContext(hProv, 0);
+			//handle error
+			std::string error = "CryptCreateHash failed: " + std::to_string(GetLastError());
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return "";
+		}
+
+		//create hash from data
+		if (!CryptHashData(hHash, (BYTE*)data, data_size, 0)) {
+			CryptDestroyHash(hHash);
+			CryptReleaseContext(hProv, 0);
+			//handle error
+			std::string error = "CryptCreateHash failed: " + std::to_string(GetLastError());
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return "";
+		}
+		
+		//get required size for hash
+		if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE*)&cbHashSize, &dwCount, 0)) {
+			CryptDestroyHash(hHash);
+			CryptReleaseContext(hProv, 0);
+			//handle error
+			std::string error = "CryptGetHashParam failed: " + std::to_string(GetLastError());
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return "";
+		}
+		
+		//reserve buffer for hash
+		buffer.resize(cbHashSize);
+
+		//write hash to buffer
+		if (!CryptGetHashParam(hHash, HP_HASHVAL, &buffer[0], &cbHashSize, 0)) {
+			CryptDestroyHash(hHash);
+			CryptReleaseContext(hProv, 0);
+			//handle error
+			std::string error = "CryptGetHashParam failed: " + std::to_string(GetLastError());
+			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Generate MD5 error\"");
+			return "";
+		}
+			
+		//output hash to stream
+		for (auto iter = buffer.begin(); iter != buffer.end(); ++iter ) {
+			oss.fill('0');
+			oss.width(2);
+			oss << std::hex << static_cast<int>(*iter);
+		}
+		
+		//cleanup
+		CryptDestroyHash(hHash);
+		CryptReleaseContext(hProv, 0);
+
+		return oss.str();
 	}
 
 }

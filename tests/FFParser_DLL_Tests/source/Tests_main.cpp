@@ -59,7 +59,7 @@ int main()
 	
 	//TEST export
 	IDataExporter* exp = FactoryStorage->getDataExporter();
-	exp->exportRecords(recstr, "D:\\exported.json", false);
+	exp->exportRecords(recstr, "D:\\exported.json", true);
 
 	//TEST search
 	size_t cur = recstr->currentRecord();

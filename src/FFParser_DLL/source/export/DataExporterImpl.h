@@ -26,7 +26,7 @@ namespace FFParser {
 		//methods
 		void createExportPtree(IRecordsStream* rstream, boost::property_tree::ptree& pt) const;
 		bool createMD5fromFile(const char* filename) const;
-		std::string calculateMD5(unsigned char* data, size_t data_size) const;
+		std::string calculateMD5(const unsigned char* data, size_t data_size) const;
 	};
 
 }

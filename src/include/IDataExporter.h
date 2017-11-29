@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include/IRecordsStream.h"
+#include "IRecordsStream.h"
 
 
 #define CALL __cdecl
