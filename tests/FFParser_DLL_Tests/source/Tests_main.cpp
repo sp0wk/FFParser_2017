@@ -57,6 +57,10 @@ int main()
 	size_t sz = recstr->getNumberOfRecords();
 	size_t total = recstr->getTotalRecords();
 	
+	//TEST export
+	IDataExporter* exp = FactoryStorage->getDataExporter();
+	exp->exportRecords(recstr, "D:\\exported.json", false);
+
 	//TEST search
 	size_t cur = recstr->currentRecord();
 	size_t found = recstr->searchNextRecord("9gAg");

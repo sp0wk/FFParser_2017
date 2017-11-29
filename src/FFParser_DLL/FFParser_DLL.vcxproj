@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\ERecordTypes.h" />
     <ClInclude Include="..\include\FFParser_DLL.h" />
+    <ClInclude Include="..\include\IDataExporter.h" />
     <ClInclude Include="..\include\IRecord.h" />
     <ClInclude Include="..\include\IRecordsStream.h" />
     <ClInclude Include="..\include\IStorageFactory.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="source\accessors\IDatabaseAccessor.h" />
     <ClInclude Include="source\accessors\IFileAccessor.h" />
     <ClInclude Include="source\accessors\ProfileInfo.h" />
+    <ClInclude Include="source\export\DataExporterImpl.h" />
     <ClInclude Include="source\helpers\ErrorHandler.h" />
     <ClInclude Include="source\helpers\HelperFacade.h" />
     <ClInclude Include="source\parsing\BookmarksParser.h" />
@@ -47,6 +49,7 @@
   <ItemGroup>
     <ClCompile Include="source\accessors\DBAccessorImpl.cpp" />
     <ClCompile Include="source\accessors\FileAccessorImpl.cpp" />
+    <ClCompile Include="source\export\DataExporterImpl.cpp" />
     <ClCompile Include="source\FFParser_DLL.cpp" />
     <ClCompile Include="source\helpers\ErrorHandler.cpp" />
     <ClCompile Include="source\helpers\HelperFacade.cpp" />

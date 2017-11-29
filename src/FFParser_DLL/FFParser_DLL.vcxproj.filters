@@ -45,6 +45,12 @@
     <Filter Include="sqlite3">
       <UniqueIdentifier>{cc605a17-1b60-4fab-8a7f-d21c42da289e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Export">
+      <UniqueIdentifier>{55959dec-e4ff-4e7f-888a-6a4f53742b37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Export">
+      <UniqueIdentifier>{d595638b-b55b-46b9-8773-314b7d7eda3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\accessors\DBAccessorImpl.h">
@@ -119,6 +125,12 @@
     <ClInclude Include="source\helpers\ErrorHandler.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="source\export\DataExporterImpl.h">
+      <Filter>Header Files\Export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\IDataExporter.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\accessors\DBAccessorImpl.cpp">
@@ -162,6 +174,9 @@
     </ClCompile>
     <ClCompile Include="source\records\RecordImpl.cpp">
       <Filter>Source Files\Records</Filter>
+    </ClCompile>
+    <ClCompile Include="source\export\DataExporterImpl.cpp">
+      <Filter>Source Files\Export</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

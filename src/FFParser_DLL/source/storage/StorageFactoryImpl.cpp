@@ -16,7 +16,8 @@ namespace FFParser {
 
 	//ctor
 	StorageFactoryImpl::StorageFactoryImpl() : 
-		_helper_ref(HelperFacade::getInstance())
+		_helper_ref(HelperFacade::getInstance()),
+		_exporter(new DataExporterImpl(*this))
 	{
 	}
 
@@ -74,6 +75,11 @@ namespace FFParser {
 	{
 		_storage.remove_if( [&](std::unique_ptr<RecordsStreamImpl>& elem) { return record == elem.get(); } );
 		record = nullptr;
+	}
+
+	IDataExporter* CALL StorageFactoryImpl::getDataExporter() const
+	{
+		return _exporter.get();
 	}
 
 }
