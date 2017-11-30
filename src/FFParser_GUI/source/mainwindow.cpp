@@ -231,7 +231,7 @@ void MainWindow::slotCustomMenuRequested(QPoint pos)
 
     QAction *openFile = new QAction(trUtf8("Open File"), this);
     QAction *openUrl = new QAction(trUtf8("Open URL"), this);
-    QAction *exports = new QAction(trUtf8("EXport"), this);
+    QAction *exports = new QAction(trUtf8("Export"), this);
 
     connect(openFile, SIGNAL(triggered(bool)), this, SLOT(slotOpenFile()));
     connect(openUrl, SIGNAL(triggered(bool)), this, SLOT(slotOpenUrl()));
@@ -247,8 +247,39 @@ void MainWindow::slotCustomMenuRequested(QPoint pos)
 
 void MainWindow::slotOpenFile()
 {
-    qDebug() << "row: " << ui.tableWidget->selectionModel()->currentIndex().row();
-    qDebug() << "column: " << ui.tableWidget->selectionModel()->currentIndex().column();
+    size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
+    //size_t column = ui.tableWidget->selectionModel()->currentIndex().column();
+    size_t column = 0;
+
+    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    {
+        int counter = 0;
+
+        while (cacheRecord->getFieldName(counter) != nullptr)
+        {
+            if (std::strcmp(cacheRecord->getFieldName(counter), "path") == 0)
+            {
+                column = counter;
+                break;
+            }
+            ++counter;
+        }
+
+        QTableWidgetItem *item =  ui.tableWidget->item(row, column);
+        QUrl temp = QUrl::fromLocalFile(item->text());
+
+
+
+        if (!QDesktopServices::openUrl(temp))
+        {
+            QMessageBox::warning(this, "Warning",
+                                 tr("This is not URL address!\n"),
+                                 QMessageBox::Ok);
+        }
+
+    }
+
+
 }
 
 void MainWindow::slotOpenUrl()
@@ -678,6 +709,8 @@ void MainWindow::viewStep(const size_t &indexTab)
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     _firstRecord = 0;
+    if (_searchFlag)
+        _searchFlag = false;
     switchViewRecords(static_cast<size_t>(index));
     viewStep(static_cast<size_t>(index));
 }

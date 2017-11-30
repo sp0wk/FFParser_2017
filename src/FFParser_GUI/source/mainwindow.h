@@ -16,6 +16,7 @@
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>
+#include <cstring>
 
 //for DLL
 #include <windows.h>
