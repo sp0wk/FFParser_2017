@@ -41,52 +41,45 @@ MainWindow::MainWindow(QWidget *parent) :
     loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, _profileNumber);
     cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, _profileNumber);
 
-
-    for (int i = 0; i < ui.tabWidget->count(); ++i)
-        stepForTabs.push_back(0);
-
+    stepForTabs.resize(ui.tabWidget->count());
 }
 
-bool MainWindow::ptrIsNotNull(const size_t &index)
+IRecordsStream *MainWindow::getPtr(const size_t &index)
 {
-    bool flag = false;
-
     switch (index)
     {
     case 0:
-        if (historyRecord != nullptr)
-        {
-            flag = true;
-        }
+        return historyRecord;
         break;
     case 1:
-        if (bookmarksRecord != nullptr)
-        {
-            flag = true;
-        }
+        return bookmarksRecord;
         break;
     case 2:
-        if (loginRecord != nullptr)
-        {
-            flag = true;
-        }
+        return loginRecord;
         break;
     case 3:
-        if (cacheRecord != nullptr)
-        {
-            flag = true;
-        }
+        return cacheRecord;
         break;
     default:
+        return nullptr;
         break;
     }
+}
 
-    return flag;
+
+bool MainWindow::ptrIsNotNull(const size_t &index)
+{
+    IRecordsStream *tempPtr = getPtr(index);
+
+    if (tempPtr != nullptr)
+        return true;
+
+    return false;
 }
 
 void MainWindow::setNameColumnTable(IRecordsStream *ptr)
 {
-    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    if (ptr != nullptr)
     {
         int counter = 0;
 
@@ -174,7 +167,7 @@ void MainWindow::setNameProfile()
 
 bool MainWindow::initialLoadRecord(IRecordsStream *ptr)
 {
-    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    if (ptr != nullptr)
     {
         if (ptr->getNumberOfRecords() == 0)
         {
@@ -248,16 +241,17 @@ void MainWindow::slotCustomMenuRequested(QPoint pos)
 void MainWindow::slotOpenFile()
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
-    //size_t column = ui.tableWidget->selectionModel()->currentIndex().column();
     size_t column = 0;
 
-    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
+
+    if (currPtr != nullptr)
     {
         int counter = 0;
 
-        while (cacheRecord->getFieldName(counter) != nullptr)
+        while (currPtr->getFieldName(counter) != nullptr)
         {
-            if (std::strcmp(cacheRecord->getFieldName(counter), "path") == 0)
+            if (std::strcmp(currPtr->getFieldName(counter), "path") == 0)
             {
                 column = counter;
                 break;
@@ -268,7 +262,39 @@ void MainWindow::slotOpenFile()
         QTableWidgetItem *item =  ui.tableWidget->item(row, column);
         QUrl temp = QUrl::fromLocalFile(item->text());
 
+        if (!QDesktopServices::openUrl(temp))
+        {
+            QMessageBox::warning(this, "Warning",
+                                 tr("This is not path file!\n"),
+                                 QMessageBox::Ok);
+        }
 
+    }
+}
+
+void MainWindow::slotOpenUrl()
+{
+    size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
+    size_t column = 0;
+
+    IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
+
+    if (currPtr != nullptr)
+    {
+        int counter = 0;
+
+        while (currPtr->getFieldName(counter) != nullptr)
+        {
+            if (std::strcmp(currPtr->getFieldName(counter), "url") == 0
+                    || std::strcmp(currPtr->getFieldName(counter), "hostname") == 0)
+            {
+                column = counter;
+                break;
+            }
+            ++counter;
+        }
+        QTableWidgetItem *item =  ui.tableWidget->item(row, column);
+        QUrl temp = item->text();
 
         if (!QDesktopServices::openUrl(temp))
         {
@@ -276,25 +302,6 @@ void MainWindow::slotOpenFile()
                                  tr("This is not URL address!\n"),
                                  QMessageBox::Ok);
         }
-
-    }
-
-
-}
-
-void MainWindow::slotOpenUrl()
-{
-    size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
-    size_t column = ui.tableWidget->selectionModel()->currentIndex().column();
-
-    QTableWidgetItem *item =  ui.tableWidget->item(row, column);
-    QUrl temp = item->text();
-
-    if (!QDesktopServices::openUrl(temp))
-    {
-        QMessageBox::warning(this, "Warning",
-                             tr("This is not URL address!\n"),
-                             QMessageBox::Ok);
     }
 }
 
@@ -425,85 +432,18 @@ void MainWindow::changeEvent(QEvent* event)
 
 void MainWindow::switchViewRecords(size_t index)
 {
-    switch (index)
-    {
-    case 0:
-        setNameColumnTable(historyRecord);
-        viewRecord(historyRecord);
-        break;
-    case 1:
-        setNameColumnTable(bookmarksRecord);
-        viewRecord(bookmarksRecord);
-        break;
-    case 2:
-        setNameColumnTable(loginRecord);
-        viewRecord(loginRecord);
-        break;
-    case 3:
-        setNameColumnTable(cacheRecord);
-        viewRecord(cacheRecord);
-        break;
-    default:
-        qDebug() << "Out of range!\n";
-        break;
-    }
-}
-
-void MainWindow::loadNewNextRecords(const size_t &indexTab, const size_t &counterElement)
-{
-    switch (indexTab) {
-
-    case 0:
-        historyRecord->loadNextRecords(counterElement);
-        break;
-    case 1:
-        bookmarksRecord->loadNextRecords(counterElement);
-        break;
-    case 2:
-        loginRecord->loadNextRecords(counterElement);
-        break;
-    case 3:
-        cacheRecord->loadNextRecords(counterElement);
-        break;
-    default:
-        break;
-    }
+    IRecordsStream *currPtr = getPtr(index);
+    setNameColumnTable(currPtr);
+    viewRecord(currPtr);
 }
 
 void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, const size_t &step)
 {
-    switch (indexTab)
+    IRecordsStream *currPtr = getPtr(indexTab);
+    if (first + step >= currPtr->getNumberOfRecords())
     {
-    case 0:
-        if (first + step >= historyRecord->getNumberOfRecords())
-        {
-            size_t temp = (first + step) - historyRecord->getNumberOfRecords();
-            loadNewNextRecords(indexTab, temp);
-        }
-        break;
-    case 1:
-        if (first + step >= bookmarksRecord->getNumberOfRecords())
-        {
-            size_t temp = (first + step) - bookmarksRecord->getNumberOfRecords();
-            loadNewNextRecords(indexTab, temp);
-        }
-        break;
-    case 2:
-        if (first + step >= loginRecord->getNumberOfRecords())
-        {
-            size_t temp = (first + step) - loginRecord->getNumberOfRecords();
-            loadNewNextRecords(indexTab, temp);
-        }
-        break;
-    case 3:
-        if (first + step >= cacheRecord->getNumberOfRecords())
-        {
-            size_t temp = (first + step) - cacheRecord->getNumberOfRecords();
-            loadNewNextRecords(indexTab, temp);
-        }
-        break;
-    default:
-        break;
+        size_t temp = (first + step) - currPtr->getNumberOfRecords();
+        currPtr->loadNextRecords(temp);
     }
 }
 
@@ -529,36 +469,9 @@ void MainWindow::on_setRecordButton_clicked()
 bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const size_t &step)
 {
     bool flag = false;
-
-    switch (indexTab)
-    {
-    case 0:
-        if (first + step >= historyRecord->getTotalRecords())
-        {
-            flag = true;
-        }
-        break;
-    case 1:
-        if (first + step >= bookmarksRecord->getTotalRecords())
-        {
-            flag = true;
-        }
-        break;
-    case 2:
-        if (first + step >= loginRecord->getTotalRecords())
-        {
-            flag = true;
-        }
-        break;
-    case 3:
-        if (first + step >= cacheRecord->getTotalRecords())
-        {
-            flag = true;
-        }
-        break;
-    default:
-        break;
-    }
+    IRecordsStream *currPtr = getPtr(indexTab);
+    if (first + step >= currPtr->getTotalRecords())
+        flag = true;
 
     return flag;
 }
@@ -599,35 +512,10 @@ void MainWindow::on_prevPageButton_clicked()
 bool MainWindow::checkRecords(const size_t &indexTab)
 {
     bool flag = false;
-
-    switch (indexTab)
+    IRecordsStream *currPtr = getPtr(indexTab);
+    if (currPtr->getNumberOfRecords() != 0)
     {
-    case 0:
-        if (historyRecord->getNumberOfRecords() != 0)
-        {
-            flag = true;
-        }
-        break;
-    case 1:
-        if (bookmarksRecord->getNumberOfRecords() != 0)
-        {
-            flag = true;
-        }
-        break;
-    case 2:
-        if (loginRecord->getNumberOfRecords() != 0)
-        {
-            flag = true;
-        }
-        break;
-    case 3:
-        if (cacheRecord->getNumberOfRecords() != 0)
-        {
-            flag = true;
-        }
-        break;
-    default:
-        break;
+        flag = true;
     }
 
     return flag;
