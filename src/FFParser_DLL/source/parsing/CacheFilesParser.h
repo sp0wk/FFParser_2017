@@ -17,6 +17,15 @@ namespace FFParser {
 	class CacheFilesParser final : public FileParserBase
 	{
 	public:
+		struct FileTypeAndExt
+		{
+			std::string type;
+			std::string ext;
+		};
+
+		using FileTypesArray = std::vector<FileTypeAndExt>;
+
+		//ctors and dtor
 		CacheFilesParser(const std::shared_ptr<IFileAccessor>& fa);
 		virtual ~CacheFilesParser() = default;
 
@@ -38,14 +47,8 @@ namespace FFParser {
 		static std::regex s_lastModifiedRegex;
 		static std::regex s_expiresRegex;
 
-		//generic file extension types
-		static std::string s_textType;
-		static std::string s_jsType;
-		static std::string s_htmlType;
-		static std::string s_cssType;
-		static std::string s_jsonType;
-		static std::string s_iconType;
-		static std::string s_svgType;
+		//generic file types and extensions
+		static const FileTypesArray s_fileTypes;
 
 		//methods
 		void parseCacheFile(const std::string& filename, std::vector<std::string>& output);

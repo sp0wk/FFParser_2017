@@ -1,5 +1,7 @@
 #include "CacheFilesParser.h"
 
+#include <cctype>
+
 
 namespace FFParser {
 
@@ -10,21 +12,27 @@ namespace FFParser {
 	//patterns
 	std::regex CacheFilesParser::s_parseRegionRegex(":http", icase);
 	std::regex CacheFilesParser::s_urlRegex("(.*?)\\0", icase);
-	std::regex CacheFilesParser::s_filenameRegex(".+/(([-[:w:]](?:\\.)?)+)[^-[:w:]]?.*$");
+	std::regex CacheFilesParser::s_filenameRegex("/([-[:w:]]+(?:\\.[-[:w:]]+)*)(?:\\?)?");
 	std::regex CacheFilesParser::s_fnWithExtRegex("([-[:w:]]+\\.)+[[:w:]]+");
-	std::regex CacheFilesParser::s_contentTypeRegex("Content-Type:\\s*(.*?)\\r\\n", icase);
+	std::regex CacheFilesParser::s_contentTypeRegex("Content-Type:\\s*(.*?)(?:\\r\\n|;)", icase);
 	std::regex CacheFilesParser::s_contentEncodingRegex("Content-Encoding:\\s*(.*?)\\r\\n", icase);
 	std::regex CacheFilesParser::s_dateRegex("Date:\\s*(.*?)\\r\\n", icase);
 	std::regex CacheFilesParser::s_lastModifiedRegex("Last-Modified:\\s*(.*?)\\r\\n", icase);
 	std::regex CacheFilesParser::s_expiresRegex("Expires:\\s*(.*?)\\r\\n", icase);
-	//file extensions
-	std::string CacheFilesParser::s_textType("plain");
-	std::string CacheFilesParser::s_jsType("javascript");
-	std::string CacheFilesParser::s_htmlType("html");
-	std::string CacheFilesParser::s_cssType("css");
-	std::string CacheFilesParser::s_jsonType("json");
-	std::string CacheFilesParser::s_iconType("icon");
-	std::string CacheFilesParser::s_svgType("svg");
+
+	//file types
+	const CacheFilesParser::FileTypesArray CacheFilesParser::s_fileTypes = 
+	{{
+		{ "plain", "txt" },
+		{ "javascript", "js" },
+		{ "html", "htm" },
+		{ "icon", "ico" },
+		{ "svg", "svg" },
+		{ "jpeg", "jpg" },
+		{ "wav", "wav" },
+		{ "mpeg", "mp3" },
+		{ "xpi", "xpi" }
+	}};
 
 
 	//ctor
@@ -48,6 +56,9 @@ namespace FFParser {
 
 	void CacheFilesParser::parseCacheFile(const std::string& filename, std::vector<std::string>& output)
 	{
+		static const size_t LEFTOVER = 38;
+		static const size_t MAXFILENAME = 50;
+
 		std::smatch parseRegionMatch;
 		std::smatch urlMatch;
 		std::smatch filenameMatch;
@@ -69,49 +80,82 @@ namespace FFParser {
 		std::string parseRegionStr = parseRegionMatch.suffix().str();
 		//cached file contents
 		std::string main_content = parseRegionMatch.prefix().str();
-		if (main_content.size() > 38) {
-			main_content.erase(main_content.size() - 38);		//remove left over bytes from cache info
+		if (main_content.size() > LEFTOVER) {
+			main_content.erase(main_content.size() - LEFTOVER);		//remove left over bytes from cache info
 		}
-		
-		//file size
+
+		//"file size"
 		std::string fileSizeStr = std::to_string(main_content.size());
 
-		//url
+		//"url"
 		std::regex_search(parseRegionStr, urlMatch, s_urlRegex);
 		std::string urlStr = "http" + urlMatch[1].str();
 
-		//content type
+		//reduce parseRegion
+		parseRegionStr = std::move( urlMatch.suffix().str() );
+
+		//"content type"
 		std::regex_search(parseRegionStr, contentTypeMatch, s_contentTypeRegex);
 		std::string contentTypeStr = contentTypeMatch[1].str();
 
-		//filename
-		std::regex_search(urlStr, filenameMatch, s_filenameRegex);
-		std::string filenameStr = filenameMatch[1].str();
-		//.. and extension
-		if (!std::regex_match(filenameStr, s_fnWithExtRegex)) {
-			if (contentTypeStr.find(s_textType) != std::string::npos) filenameStr.append(".txt");
-			else if (contentTypeStr.find(s_jsType) != std::string::npos) filenameStr.append(".js");
-			else if (contentTypeStr.find(s_htmlType) != std::string::npos) filenameStr.append(".htm");
-			else if (contentTypeStr.find(s_cssType) != std::string::npos) filenameStr.append(".css");
-			else if (contentTypeStr.find(s_jsonType) != std::string::npos) filenameStr.append(".json");
-			else if (contentTypeStr.find(s_iconType) != std::string::npos) filenameStr.append(".ico");
-			else if (contentTypeStr.find(s_svgType) != std::string::npos) filenameStr.append(".svg");
-			else filenameStr.append("." + contentTypeStr.substr(contentTypeStr.find("/") + 1));		//unknown type or content type is extension itself
+		//"filename"
+		std::string filenameStr;
+		auto fn_begin = std::sregex_iterator(urlStr.begin(), urlStr.end(), s_filenameRegex);
+		auto fn_end = std::sregex_iterator();
+		for (auto i = fn_begin; i != fn_end; ++i) {
+			auto t = i;
+			if (++t == fn_end) {
+				filenameStr = (*i)[1].str();
+				break;
+			}
 		}
 
-		//content encoding
+		if (filenameStr.size() > MAXFILENAME) {	//if name is too long
+			size_t pos = MAXFILENAME;
+
+			//find first word character from the end
+			while( (--pos > 0) && !std::isalnum(static_cast<unsigned char>(filenameStr[pos])) ) {}
+
+			filenameStr.erase(pos < 0 ? MAXFILENAME : pos+1);
+		}
+
+		//.. and extension
+		if (!contentTypeStr.empty()) {
+			std::string fileExtStr = ".";
+			std::string contentTypeExt = contentTypeStr.substr(contentTypeStr.find("/") + 1);
+
+			//derive extension from content-type
+			for (const auto& it : s_fileTypes) {
+				if (contentTypeExt.find(it.type) != std::string::npos) {
+					fileExtStr.append(it.ext);
+					break;
+				}
+			}
+
+			if (fileExtStr.size() == 1) {	//unknown type or content type is extension itself
+				fileExtStr.append(contentTypeExt);
+			}
+
+			//check if filename contains correct extension
+			std::regex correctExtRegex(".+\\" + fileExtStr + "$");
+			if (!std::regex_match(filenameStr, correctExtRegex)) {
+				filenameStr.append(fileExtStr);
+			}
+		}
+
+		//"content encoding"
 		std::regex_search(parseRegionStr, contentEncodingMatch, s_contentEncodingRegex);
 		std::string contentEncodingStr = contentEncodingMatch[1].str();
 
-		//creation date
+		//"creation date"
 		std::regex_search(parseRegionStr, dateMatch, s_dateRegex);
 		std::string dateStr = dateMatch[1].str();
 
-		//last-modified date
+		//"last-modified date"
 		std::regex_search(parseRegionStr, lastModifiedMatch, s_lastModifiedRegex);
 		std::string lastModifiedStr = lastModifiedMatch[1].str();
 
-		//expires date
+		//"expires date"
 		std::regex_search(parseRegionStr, expiresMatch, s_expiresRegex);
 		std::string expiresStr = expiresMatch[1].str();
 	
