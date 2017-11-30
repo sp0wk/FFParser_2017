@@ -11,8 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     cacheRecord(0),
     _firstRecord(0),
     oldStep(25),
-    profileNumber(0),
-    m_allAmountProfile(0),
+    _profileNumber(0),
+    _allAmountProfile(0),
     _searchFlag(false)
 {
     ui.setupUi(this);
@@ -32,14 +32,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     DLLStorage = dll_getstorage();
 
-    m_allAmountProfile = DLLStorage->getNumberOfProfiles();
+    _allAmountProfile = DLLStorage->getNumberOfProfiles();
     setNameProfile();
 
     //get history example
-    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, profileNumber);
-    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, profileNumber);
-    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, profileNumber);
-    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, profileNumber);
+    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, _profileNumber);
+    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, _profileNumber);
+    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, _profileNumber);
+    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, _profileNumber);
 
 
     for (int i = 0; i < ui.tabWidget->count(); ++i)
@@ -101,9 +101,9 @@ void MainWindow::setNameColumnTable(IRecordsStream *ptr)
     }
     else
     {
-        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
-                                                                   tr("Required entries were not found on your computer!\n"),
-                                                                   QMessageBox::Ok);
+        QMessageBox::warning(this, "Warning",
+                             tr("Required entries were not found on your computer!\n"),
+                             QMessageBox::Ok);
     }
 
 }
@@ -131,6 +131,8 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
         if (onerec == nullptr)
             return;
 
+        ptr->setCurrentRecord(_firstRecord);
+
         size_t iterator = 0;
 
         size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
@@ -144,9 +146,7 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
             size_t counter = 0;
             while (onerec->getFieldValue(counter) != nullptr)
             {
-                QTableWidgetItem *item = new QTableWidgetItem(onerec->getFieldValue(counter));
-                item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-                ui.tableWidget->setItem(iterator, counter, item);
+                ui.tableWidget->setItem(iterator, counter, new QTableWidgetItem(onerec->getFieldValue(counter)));
                 ++counter;
             }
             ++iterator;
@@ -163,9 +163,9 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
 void MainWindow::setNameProfile()
 {
     size_t counter = 0;
-    while (counter < m_allAmountProfile)
+    while (counter < _allAmountProfile)
     {
-        ui.comboBox->addItem(DLLStorage->getProfileName(counter), counter);
+        ui.chooseProfile->addItem(DLLStorage->getProfileName(counter), counter);
         ++counter;
     }
 
@@ -190,9 +190,9 @@ bool MainWindow::initialLoadRecord(IRecordsStream *ptr)
     }
     else
     {
-        QMessageBox::StandardButton resBtn = QMessageBox::warning(this, "Warning",
-                                                                   tr("Required entries were not found on your computer!\n"),
-                                                                   QMessageBox::Ok);
+        QMessageBox::warning(this, "Warning",
+                             tr("Required entries were not found on your computer!\n"),
+                             QMessageBox::Ok);
 
         return false;
     }
@@ -215,12 +215,10 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
     ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     ui.tableWidget->setHorizontalHeaderLabels(headers);
-
+    ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     for (size_t i = 0; i < number; ++i)
-    {
-        ui.tableWidget->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Stretch);
-    }
+        ui.tableWidget->setColumnWidth(i, ui.tableWidget->width() / number);
 
     ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -478,7 +476,7 @@ void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, co
     }
 }
 
-void MainWindow::on_pushButton_3_clicked()
+void MainWindow::on_setRecordButton_clicked()
 {
     if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
@@ -534,7 +532,7 @@ bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const
     return flag;
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_nextPageButton_clicked()
 {
     if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
@@ -549,7 +547,7 @@ void MainWindow::on_pushButton_clicked()
     }
 }
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_prevPageButton_clicked()
 {
     if (ptrIsNotNull(ui.tabWidget->currentIndex()))
     {
@@ -606,7 +604,8 @@ bool MainWindow::checkRecords(const size_t &indexTab)
 
 void MainWindow::search()
 {
-    ui.pushButton_5->setEnabled(true);
+    ui.clearSearchRecord->setEnabled(true);
+    _searchFlag = true;
 
     QString dataToFind = ui.lineEdit->text().toLower();
     if (dataToFind.size() >= 2)
@@ -621,13 +620,8 @@ void MainWindow::search()
                 for (size_t j = 0; j < columnCount; ++j)
                 {
                     QTableWidgetItem *item =  ui.tableWidget->item(i, j);
-
-
                     QString temp = item->text().toLower();
-
                     size_t counter = 0;
-
-                    bool tempFlag = false;
 
                     while (temp.indexOf(dataToFind, counter) != -1)
                     {
@@ -635,19 +629,10 @@ void MainWindow::search()
                         size_t currCounter = 0;
                         while (currCounter < columnCount)
                         {
-                            ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (250,0,0));
+                            ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (125, 237, 151));
                             ++currCounter;
                         }
-                        tempFlag = true;
                     }
-
-                    if (!tempFlag)
-                    {
-                        QMessageBox::warning(this, "Result",
-                                             tr("Nothing found!\n"),
-                                             QMessageBox::Ok);
-                    }
-
                 }
             }
         }
@@ -667,20 +652,19 @@ void MainWindow::search()
 }
 
 
-void MainWindow::on_pushButton_4_clicked()
+void MainWindow::on_searchButton_clicked()
 {
     search();
-    _searchFlag = true;
 }
 
-void MainWindow::on_comboBox_activated(int index)
+void MainWindow::on_chooseProfile_activated(int index)
 {
-    profileNumber = static_cast<size_t>(index);
+    _profileNumber = static_cast<size_t>(index);
 
-    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, profileNumber);
-    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, profileNumber);
-    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, profileNumber);
-    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, profileNumber);
+    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, _profileNumber);
+    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, _profileNumber);
+    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, _profileNumber);
+    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, _profileNumber);
 
     _firstRecord = 0;
     switchViewRecords(ui.tabWidget->currentIndex());
@@ -700,11 +684,11 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
 void MainWindow::viewCounterRecords(const size_t &first, const size_t &last, IRecordsStream *ptr)
 {
-    QString temp = "Records: " + QString::number(first) + '-' + QString::number(last) + '/' + QString::number(ptr->getTotalRecords());
+    QString temp = "Records: " + QString::number(first) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
     ui.label_3->setText(temp);
 }
 
-void MainWindow::on_pushButton_5_clicked()
+void MainWindow::on_clearSearchRecord_clicked()
 {
     _searchFlag = false;
 
@@ -720,5 +704,5 @@ void MainWindow::on_pushButton_5_clicked()
     }
 
     ui.lineEdit->setText("");
-    ui.pushButton_5->setEnabled(false);
+    ui.clearSearchRecord->setEnabled(false);
 }

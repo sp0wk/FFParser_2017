@@ -60,19 +60,19 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_3_clicked();
+    void on_setRecordButton_clicked();
 
-    void on_pushButton_clicked();
+    void on_nextPageButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_prevPageButton_clicked();
 
-    void on_pushButton_4_clicked();
+    void on_searchButton_clicked();
 
-    void on_comboBox_activated(int index);
+    void on_chooseProfile_activated(int index);
 
     void on_tabWidget_currentChanged(int index);
 
-    void on_pushButton_5_clicked();
+    void on_clearSearchRecord_clicked();
 
     void slotOpenFile();
     void slotOpenUrl();
@@ -111,10 +111,10 @@ private:
 
     size_t _firstRecord;
     size_t oldStep;
-    size_t profileNumber;
-    size_t m_allAmountProfile;
+    size_t _profileNumber;
+    size_t _allAmountProfile;
     bool _searchFlag;
-    QMenu *_pmnu;
+
 
     std::vector<size_t> stepForTabs;
 

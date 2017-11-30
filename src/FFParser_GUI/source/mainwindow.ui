@@ -10,6 +10,12 @@
     <height>700</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>944</width>
@@ -25,8 +31,11 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="nextPageButton">
     <property name="geometry">
      <rect>
       <x>474</x>
@@ -39,7 +48,7 @@
      <string>Next</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="prevPageButton">
     <property name="geometry">
      <rect>
       <x>394</x>
@@ -65,7 +74,7 @@
      <string>Choose profile:</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="chooseProfile">
     <property name="geometry">
      <rect>
       <x>95</x>
@@ -127,7 +136,7 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="setRecordButton">
     <property name="geometry">
      <rect>
       <x>187</x>
@@ -150,10 +159,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Number of records  to be displayed in one table</string>
+     <string>Number of records to be displayed in one table</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="searchButton">
     <property name="geometry">
      <rect>
       <x>846</x>
@@ -211,7 +220,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="clearSearchRecord">
     <property name="enabled">
      <bool>false</bool>
     </property>
