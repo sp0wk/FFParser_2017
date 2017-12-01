@@ -112,22 +112,27 @@ namespace FFParser {
 		}
 	}
 
+
 	size_t CALL RecordsStreamImpl::searchPrevRecord(const char* text)
 	{
-		//check if search text is not empty and more than 2 letters long
-		if (text != nullptr && text[0] != '\0' && text[1] != '\0') {
-			if (_current_record != -1 && _records.size() > 0) {
-				for (size_t i = _current_record - 1; i > 0; --i) {
-					size_t found = _records[i].findText(text);
+		//check if search text is not empty
+		if (!(text != nullptr && text[0] != '\0')) {
+			//handle error
+			ErrorHandler::getInstance().onError("Search text is empty", "ParserDLL error: \"Search text in records error\"");
+			return -1;
+		}
 
-					if (found != -1) {
-						//match found
-						_current_record = i;
-						return _current_record;
-					}
+		if (_current_record != -1 && _records.size() > 0) {
+			for (size_t i = _current_record - 1; i > 0; --i) {
+				size_t found = _records[i].findText(text);
+
+				if (found != -1) {
+					//match found
+					_current_record = i;
+					return _current_record;
 				}
-
 			}
+
 		}
 
 		return -1;
@@ -136,17 +141,21 @@ namespace FFParser {
 
 	size_t CALL RecordsStreamImpl::searchNextRecord(const char* text)
 	{
-		//check if search text is not empty and more than 2 letters long
-		if (text != nullptr && text[0] != '\0' && text[1] != '\0') {
-			if (_records.size() > 0) {
-				for (size_t i = _current_record + 1; i < _records.size(); ++i) {
-					size_t found = _records[i].findText(text);
+		//check if search text is not empty
+		if (!(text != nullptr && text[0] != '\0')) {
+			//handle error
+			ErrorHandler::getInstance().onError("Search text is empty", "ParserDLL error: \"Search text in records error\"");
+			return -1;
+		}
 
-					if (found != -1) {
-						//match found
-						_current_record = i;
-						return _current_record;
-					}
+		if (_records.size() > 0) {
+			for (size_t i = _current_record + 1; i < _records.size(); ++i) {
+				size_t found = _records[i].findText(text);
+
+				if (found != -1) {
+					//match found
+					_current_record = i;
+					return _current_record;
 				}
 			}
 		}
