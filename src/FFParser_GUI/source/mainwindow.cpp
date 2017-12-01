@@ -50,19 +50,14 @@ IRecordsStream *MainWindow::getPtr(const size_t &index)
     {
     case 0:
         return historyRecord;
-        break;
     case 1:
         return bookmarksRecord;
-        break;
     case 2:
         return loginRecord;
-        break;
     case 3:
         return cacheRecord;
-        break;
     default:
         return nullptr;
-        break;
     }
 }
 
@@ -440,10 +435,14 @@ void MainWindow::switchViewRecords(size_t index)
 void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, const size_t &step)
 {
     IRecordsStream *currPtr = getPtr(indexTab);
-    if (first + step >= currPtr->getNumberOfRecords())
+    size_t totalLoadRecords = currPtr->getNumberOfRecords();
+    if (first + step >= totalLoadRecords)
     {
-        size_t temp = (first + step) - currPtr->getNumberOfRecords();
-        currPtr->loadNextRecords(temp);
+        size_t temp = (first + step) - totalLoadRecords;
+        if (temp != 0)
+            currPtr->loadNextRecords(temp);
+        else
+            currPtr->loadNextRecords(step);
     }
 }
 
@@ -470,7 +469,7 @@ bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const
 {
     bool flag = false;
     IRecordsStream *currPtr = getPtr(indexTab);
-    if (first + step >= currPtr->getTotalRecords())
+    if (first + step > currPtr->getTotalRecords())
         flag = true;
 
     return flag;
@@ -605,7 +604,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
 void MainWindow::viewCounterRecords(const size_t &first, const size_t &last, IRecordsStream *ptr)
 {
-    QString temp = "Records: " + QString::number(first) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
+    QString temp = "Records: " + QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
     ui.label_3->setText(temp);
 }
 
