@@ -232,30 +232,29 @@ void MainWindow::slotCustomMenuRequested(QPoint pos)
     menu->popup(ui.tableWidget->viewport()->mapToGlobal(pos));
 }
 
+const char *MainWindow::getColumnTableName(IRecordsStream *ptr, const char *string, const size_t &row)
+{
+    if (ptr != nullptr)
+    {
+        IRecord *recordPtr = ptr->getRecordByIndex(row);
+        const char *foundString = recordPtr->getFieldByName(string);
+        return foundString;
+    }
 
+    return nullptr;
+}
 void MainWindow::slotOpenFile()
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
-    size_t column = 0;
 
     IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
 
     if (currPtr != nullptr)
     {
-        int counter = 0;
+        const char *found = getColumnTableName(currPtr, "path", row);
 
-        while (currPtr->getFieldName(counter) != nullptr)
-        {
-            if (std::strcmp(currPtr->getFieldName(counter), "path") == 0)
-            {
-                column = counter;
-                break;
-            }
-            ++counter;
-        }
 
-        QTableWidgetItem *item =  ui.tableWidget->item(row, column);
-        QUrl temp = QUrl::fromLocalFile(item->text());
+        QUrl temp = QUrl::fromLocalFile(found);
 
         if (!QDesktopServices::openUrl(temp))
         {
@@ -263,33 +262,24 @@ void MainWindow::slotOpenFile()
                                  tr("This is not path file!\n"),
                                  QMessageBox::Ok);
         }
-
     }
 }
 
 void MainWindow::slotOpenUrl()
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
-    size_t column = 0;
 
     IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
 
     if (currPtr != nullptr)
     {
-        int counter = 0;
 
-        while (currPtr->getFieldName(counter) != nullptr)
-        {
-            if (std::strcmp(currPtr->getFieldName(counter), "url") == 0
-                    || std::strcmp(currPtr->getFieldName(counter), "hostname") == 0)
-            {
-                column = counter;
-                break;
-            }
-            ++counter;
-        }
-        QTableWidgetItem *item =  ui.tableWidget->item(row, column);
-        QUrl temp = item->text();
+        const char *found = getColumnTableName(currPtr, "url", row);
+        if (found == nullptr)
+            found = getColumnTableName(currPtr, "hostname", row);
+
+
+        QUrl temp = QString(found);
 
         if (!QDesktopServices::openUrl(temp))
         {
@@ -443,6 +433,7 @@ void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, co
             currPtr->loadNextRecords(temp);
         else
             currPtr->loadNextRecords(step);
+
     }
 }
 
@@ -467,12 +458,7 @@ void MainWindow::on_setRecordButton_clicked()
 
 bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const size_t &step)
 {
-    bool flag = false;
-    IRecordsStream *currPtr = getPtr(indexTab);
-    if (first + step > currPtr->getTotalRecords())
-        flag = true;
-
-    return flag;
+    return (first + step >= getPtr(indexTab)->getTotalRecords());
 }
 
 void MainWindow::on_nextPageButton_clicked()
@@ -532,9 +518,11 @@ void MainWindow::search()
         {
             size_t columnCount = ui.tableWidget->columnCount();
             size_t rowCount = ui.tableWidget->rowCount();
+            size_t counterSearchRecords = 0;
 
             for (size_t i = 0; i < rowCount; ++i)
             {
+                bool tempSearchFlag = false;
                 for (size_t j = 0; j < columnCount; ++j)
                 {
                     QTableWidgetItem *item =  ui.tableWidget->item(i, j);
@@ -550,9 +538,14 @@ void MainWindow::search()
                             ui.tableWidget->item(i, currCounter)->setData(Qt::BackgroundRole, QColor (125, 237, 151));
                             ++currCounter;
                         }
+                        tempSearchFlag = true;
                     }
                 }
+                if (tempSearchFlag)
+                    ++counterSearchRecords;
             }
+            ui.label_4->setText("Found: " + QString::number(counterSearchRecords));
+            ui.label_4->show();
         }
         else
         {
@@ -604,13 +597,14 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
 void MainWindow::viewCounterRecords(const size_t &first, const size_t &last, IRecordsStream *ptr)
 {
-    QString temp = "Records: " + QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
+    QString temp = QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
     ui.label_3->setText(temp);
 }
 
 void MainWindow::on_clearSearchRecord_clicked()
 {
     _searchFlag = false;
+    ui.label_4->hide();
 
     size_t columnCount = ui.tableWidget->columnCount();
     size_t rowCount = ui.tableWidget->rowCount();

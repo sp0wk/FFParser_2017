@@ -97,6 +97,7 @@ private:
     void search();
     bool ptrIsNotNull(const size_t &);
     IRecordsStream *getPtr(const size_t &);
+    const char *getColumnTableName(IRecordsStream *, const char*, const size_t &);
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
