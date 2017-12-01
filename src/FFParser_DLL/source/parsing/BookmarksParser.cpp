@@ -66,7 +66,7 @@ namespace FFParser {
 	size_t BookmarksParser::parse(size_t profile, std::vector<std::vector<std::string>>& output, size_t from, size_t number)
 	{
 		size_t count = 0;
-		std::string query = _bookmarks_query + std::to_string(from) + ", " + (number ? std::to_string(number) : "-1") + ";";
+		std::string query = _bookmarks_query + std::to_string(from) + ", " + (number == -1 ? "-1" : std::to_string(number)) + ";";
 
 		if (auto file_sh = _file_accessor_ref.lock()) {
 			getRecordsFromDB(file_sh->getPathToResource(EResourcePaths::DATABASE, profile), query);

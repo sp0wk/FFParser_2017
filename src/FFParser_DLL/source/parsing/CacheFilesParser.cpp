@@ -205,7 +205,7 @@ namespace FFParser {
 			if (from >= maxsz) {
 				return 0;
 			}
-			if (last >= maxsz || number == 0) {
+			if (last >= maxsz || number == -1) {
 				last = maxsz;
 				number = last - from;
 			}

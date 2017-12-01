@@ -59,7 +59,7 @@ namespace FFParser {
 		bool nolimit = false;
 		size_t max = from + number;
 
-		if (number == 0) {
+		if (number == -1) {
 			nolimit = true;
 		}
 
