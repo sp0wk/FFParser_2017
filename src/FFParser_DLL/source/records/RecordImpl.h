@@ -4,6 +4,7 @@
 #include <string>
 
 #include "include/IRecord.h"
+#include "include/IRecordsStream.h"
 
 
 namespace FFParser {
@@ -14,8 +15,8 @@ namespace FFParser {
 		using Fields = std::vector<std::string>;
 
 		//ctors and dtor
-		RecordImpl(const Fields& field_names, const Fields& fields);
-		RecordImpl(const Fields& field_names, Fields&& fields);
+		RecordImpl(IRecordsStream& parent, const Fields& fields);
+		RecordImpl(IRecordsStream& parent, Fields&& fields);
 		virtual ~RecordImpl() = default;
 
 		//Interface methods
@@ -25,7 +26,7 @@ namespace FFParser {
 		virtual size_t CALL findText(const char* text) const override;
 
 	protected:
-		const Fields& _field_names_ref;
+		IRecordsStream& _parent_ref;
 		Fields _fields;
 	};
 

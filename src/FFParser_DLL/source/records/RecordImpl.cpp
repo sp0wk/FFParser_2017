@@ -11,18 +11,18 @@ namespace FFParser {
 
 	//ctors
 
-	RecordImpl::RecordImpl(const std::vector<std::string>& field_names, const std::vector<std::string>& fields) :
-		_field_names_ref(field_names),
+	RecordImpl::RecordImpl(IRecordsStream& parent, const std::vector<std::string>& fields) :
+		_parent_ref(parent),
 		_fields(fields)
 	{
-		assert(_field_names_ref.size() == _fields.size());
+		assert(parent.getNumberOfFields() == _fields.size());
 	}
 
-	RecordImpl::RecordImpl(const std::vector<std::string>& field_names, std::vector<std::string>&& fields) :
-		_field_names_ref(field_names),
+	RecordImpl::RecordImpl(IRecordsStream& parent, std::vector<std::string>&& fields) :
+		_parent_ref(parent),
 		_fields(std::move(fields))
 	{
-		assert(_field_names_ref.size() == _fields.size());
+		assert(parent.getNumberOfFields() == _fields.size());
 	}
 
 
@@ -36,9 +36,11 @@ namespace FFParser {
 			return nullptr;
 		}
 
+		size_t nfields = _parent_ref.getNumberOfFields();
+
 		//find field name
-		for (size_t i = 0; i < _field_names_ref.size(); ++i) {
-			if (!strcmp(_field_names_ref[i].c_str(), name)) {
+		for (size_t i = 0; i < nfields; ++i) {
+			if (!strcmp(_parent_ref.getFieldName(i), name)) {
 				//found
 				return _fields[i].c_str();		//return corresponding field data
 			}

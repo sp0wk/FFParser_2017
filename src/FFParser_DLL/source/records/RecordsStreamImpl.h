@@ -15,7 +15,7 @@ namespace FFParser {
 	{
 	public:
 		//ctors and dtor
-		RecordsStreamImpl(size_t profile, ERecordTypes type);
+		RecordsStreamImpl(HelperFacade& helper, size_t profile, ERecordTypes type);
 		virtual ~RecordsStreamImpl() = default;
 
 		//Interface methods
@@ -34,6 +34,9 @@ namespace FFParser {
 		virtual size_t CALL searchNextRecord(const char* text) override;
 		virtual size_t CALL getNumberOfFields() const override;
 		virtual const char* CALL getFieldName(size_t index) const override;
+		virtual void CALL release() override;
+
+		void operator delete(void* ptr) { ::operator delete(ptr); }
 
 	protected:
 		HelperFacade& _helper_ref;

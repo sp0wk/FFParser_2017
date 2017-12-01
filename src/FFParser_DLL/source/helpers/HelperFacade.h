@@ -23,8 +23,11 @@ namespace FFParser {
 	class HelperFacade final
 	{
 	public:
-		static HelperFacade& getInstance();
+		//ctors and dtor
+		HelperFacade();
+		~HelperFacade() = default;
 
+		//methods
 		size_t getNumberOfProfiles() const;
 		const ProfileInfo& getProfile(size_t profile) const;
 		void getFieldNames(std::vector<std::string>& list, ERecordTypes type) const;
@@ -38,10 +41,6 @@ namespace FFParser {
 
 		//parsers
 		std::vector<std::vector<std::unique_ptr<ParserBase>>> _parsers;
-
-		//private ctor and dtor
-		HelperFacade();
-		~HelperFacade() = default;
 	};
 
 }

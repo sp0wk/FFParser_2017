@@ -30,9 +30,15 @@ namespace FFParser {
 		//fields
 		virtual size_t CALL getNumberOfFields() const = 0;
 		virtual const char* CALL getFieldName(size_t index) const = 0;
+		//release
+		virtual void CALL release() = 0;
 
-	protected:
-		~IRecordsStream() {}
+		//overloaded delete for convenience
+		void operator delete(void* ptr) {
+			if(ptr != nullptr) {
+				static_cast<IRecordsStream*>(ptr)->release();
+			}
+		}
 	};
 
 }

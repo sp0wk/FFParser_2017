@@ -9,8 +9,8 @@
 namespace FFParser {
 
 	//ctor
-	RecordsStreamImpl::RecordsStreamImpl(size_t profile, ERecordTypes type) :
-		_helper_ref(HelperFacade::getInstance()),
+	RecordsStreamImpl::RecordsStreamImpl(HelperFacade& helper, size_t profile, ERecordTypes type) :
+		_helper_ref(helper),
 		_profile(profile),
 		_stream_type(type),
 		_current_record(-1),
@@ -37,7 +37,7 @@ namespace FFParser {
 		count = _helper_ref.parseRecords(_stream_type, _profile, tmp, _last_from + _records.size(), number);
 
 		for (auto& iter : tmp) {
-			_records.emplace_back(_field_names, std::move(iter));
+			_records.emplace_back(*this, std::move(iter));
 		}
 
 		return count;
@@ -53,7 +53,7 @@ namespace FFParser {
 		count = _helper_ref.parseRecords(_stream_type, _profile, tmp, from, number);
 
 		for (auto& iter : tmp) {
-			_records.emplace_back(_field_names, std::move(iter));
+			_records.emplace_back(*this, std::move(iter));
 		}
 
 		return count;
@@ -189,4 +189,11 @@ namespace FFParser {
 	{
 		return this->_stream_type;
 	}
+
+
+	void CALL RecordsStreamImpl::release()
+	{
+		delete this;
+	}
+
 }

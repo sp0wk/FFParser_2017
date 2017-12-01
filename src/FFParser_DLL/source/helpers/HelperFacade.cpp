@@ -4,13 +4,6 @@
 
 namespace FFParser {
 
-	HelperFacade& HelperFacade::getInstance()
-	{
-		static HelperFacade s_instance;
-		return s_instance;
-	}
-
-
 	//ctor
 	HelperFacade::HelperFacade() :
 		_file_accessor(new FileAccessorImpl),

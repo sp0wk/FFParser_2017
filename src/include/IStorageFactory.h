@@ -16,7 +16,6 @@ namespace FFParser {
 		virtual const char* CALL getPathToProfile(size_t profile = 0) const = 0;
 		virtual const char* CALL getPathToCache(size_t profile = 0) const = 0;
 		virtual IRecordsStream* CALL createRecordsStream(ERecordTypes type, size_t profile = 0) = 0;
-		virtual void CALL freeRecordsStream(IRecordsStream* &record) = 0;
 		virtual IDataExporter* CALL getDataExporter() const = 0;
 
 	protected:
