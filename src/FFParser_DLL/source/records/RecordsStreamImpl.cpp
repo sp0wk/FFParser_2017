@@ -37,7 +37,7 @@ namespace FFParser {
 		count = _helper_ref.parseRecords(_stream_type, _profile, tmp, _last_from + _records.size(), number);
 
 		for (auto& iter : tmp) {
-			_records.emplace_back(std::move(iter));
+			_records.emplace_back(_field_names, std::move(iter));
 		}
 
 		return count;
@@ -53,7 +53,7 @@ namespace FFParser {
 		count = _helper_ref.parseRecords(_stream_type, _profile, tmp, from, number);
 
 		for (auto& iter : tmp) {
-			_records.emplace_back(std::move(iter));
+			_records.emplace_back(_field_names, std::move(iter));
 		}
 
 		return count;
