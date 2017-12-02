@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     createLanguageMenu();
     createFileMenu();
 
-
     //dll load
     dllname = L"FFParser_DLL.dll";
 
@@ -223,12 +222,13 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
 
     ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    connect(ui.tableWidget, SIGNAL(clicked(QModelIndex)), this, SLOT(slotCloseContextMenu()));
     connect(ui.tableWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
 }
 
 void MainWindow::slotCustomMenuRequested(QPoint pos)
 {
-    QMenu *menu = new QMenu(this);
+    menu = new QMenu(this);
 
     QAction *openFile = new QAction(trUtf8("Open File"), this);
     QAction *openUrl = new QAction(trUtf8("Open URL"), this);
@@ -242,7 +242,13 @@ void MainWindow::slotCustomMenuRequested(QPoint pos)
     menu->addAction(openUrl);
     menu->addAction(exports);
 
-    menu->popup(ui.tableWidget->viewport()->mapToGlobal(pos));
+    menu->exec(ui.tableWidget->viewport()->mapToGlobal(pos));
+}
+
+void MainWindow::slotCloseContextMenu()
+{
+    if (menu->isActiveWindow())
+        menu->close();
 }
 
 const char *MainWindow::getColumnTableName(IRecordsStream *ptr, const char *string, const size_t &row)
@@ -258,6 +264,7 @@ const char *MainWindow::getColumnTableName(IRecordsStream *ptr, const char *stri
 }
 void MainWindow::slotOpenFile()
 {
+    slotCloseContextMenu();
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
 
     IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
@@ -280,6 +287,7 @@ void MainWindow::slotOpenFile()
 
 void MainWindow::slotOpenUrl()
 {
+    slotCloseContextMenu();
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
 
     IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());

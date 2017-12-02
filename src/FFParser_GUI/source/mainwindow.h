@@ -79,11 +79,13 @@ private slots:
     void slotOpenUrl();
     void slotExport();
     void slotCustomMenuRequested(QPoint pos);
+    void slotCloseContextMenu();
     void slotMenuExport();
 
 private:
     Ui::MainWindow ui;
     Export *exportFileWindow;
+    QMenu *menu;
 
     void createUI(const QStringList &headers, size_t);
 
