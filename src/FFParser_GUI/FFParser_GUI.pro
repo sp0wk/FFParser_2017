@@ -30,15 +30,18 @@ INCLUDEPATH += "source/"
 
 SOURCES += \
     source/main.cpp \
-    source/mainwindow.cpp
+    source/mainwindow.cpp \
+    source/export.cpp
 
 TRANSLATIONS = languages/TranslationExample_en.ts  languages/TranslationExample_ru.ts
 
 HEADERS += \
-    source/mainwindow.h
+    source/mainwindow.h \
+    source/export.h
 
 FORMS += \
-    source/mainwindow.ui
+    source/mainwindow.ui \
+    source/export.ui
 
 
 
