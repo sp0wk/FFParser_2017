@@ -16066,34 +16066,6 @@
 										},
 										{
 											"_type": "UMLOperationView",
-											"_id": "AAAAAAFgBapgFj2duvM=",
-											"_parent": {
-												"$ref": "AAAAAAFgBajvxjUvUF8="
-											},
-											"model": {
-												"$ref": "AAAAAAFgBapf1z1ze/E="
-											},
-											"visible": true,
-											"enabled": true,
-											"lineColor": "#000000",
-											"fillColor": "#ffffff",
-											"fontColor": "#000000",
-											"font": "Arial;13;2",
-											"showShadow": true,
-											"containerChangeable": false,
-											"containerExtending": false,
-											"left": 181,
-											"top": 505,
-											"width": 119,
-											"height": 13,
-											"autoResize": false,
-											"underline": false,
-											"text": "+exportAllRecords()",
-											"horizontalAlignment": 0,
-											"verticalAlignment": 5
-										},
-										{
-											"_type": "UMLOperationView",
 											"_id": "AAAAAAFgBaqI4D9QS60=",
 											"_parent": {
 												"$ref": "AAAAAAFgBajvxjUvUF8="
@@ -16111,12 +16083,40 @@
 											"containerChangeable": false,
 											"containerExtending": false,
 											"left": 181,
+											"top": 505,
+											"width": 119,
+											"height": 13,
+											"autoResize": false,
+											"underline": false,
+											"text": "+exportCache()",
+											"horizontalAlignment": 0,
+											"verticalAlignment": 5
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAFgBapgFj2duvM=",
+											"_parent": {
+												"$ref": "AAAAAAFgBajvxjUvUF8="
+											},
+											"model": {
+												"$ref": "AAAAAAFgBapf1z1ze/E="
+											},
+											"visible": true,
+											"enabled": true,
+											"lineColor": "#000000",
+											"fillColor": "#ffffff",
+											"fontColor": "#000000",
+											"font": "Arial;13;2",
+											"showShadow": true,
+											"containerChangeable": false,
+											"containerExtending": false,
+											"left": 181,
 											"top": 520,
 											"width": 119,
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "+exportAllCache()",
+											"text": "+exportProfile()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										},
@@ -16144,7 +16144,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "+exportEverything()",
+											"text": "+exportAll()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										}
@@ -16434,7 +16434,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-storage_ref: IStorageFactory",
+											"text": "#storage_ref: IStorageFactory",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										}
@@ -16488,7 +16488,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-createExportPtree()",
+											"text": "#createExportPtree()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										},
@@ -16516,7 +16516,7 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-createMD5fromFile()",
+											"text": "#createMD5fromFile()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										},
@@ -16544,7 +16544,35 @@
 											"height": 13,
 											"autoResize": false,
 											"underline": false,
-											"text": "-calculateMD5()",
+											"text": "#calculateMD5()",
+											"horizontalAlignment": 0,
+											"verticalAlignment": 5
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAFgF3ZhVhUbIpY=",
+											"_parent": {
+												"$ref": "AAAAAAFgBaxFeEywlIc="
+											},
+											"model": {
+												"$ref": "AAAAAAFgF3ZhFRT09lE="
+											},
+											"visible": true,
+											"enabled": true,
+											"lineColor": "#000000",
+											"fillColor": "#ffffff",
+											"fontColor": "#000000",
+											"font": "Arial;13;0",
+											"showShadow": true,
+											"containerChangeable": false,
+											"containerExtending": false,
+											"left": 149,
+											"top": 834,
+											"width": 181.7333984375,
+											"height": 13,
+											"autoResize": false,
+											"underline": false,
+											"text": "#decompressGzip()",
 											"horizontalAlignment": 0,
 											"verticalAlignment": 5
 										}
@@ -16561,7 +16589,7 @@
 									"left": 144,
 									"top": 784,
 									"width": 191.7333984375,
-									"height": 53,
+									"height": 68,
 									"autoResize": false
 								},
 								{
@@ -16625,7 +16653,7 @@
 							"left": 144,
 							"top": 736,
 							"width": 191.7333984375,
-							"height": 101,
+							"height": 116,
 							"autoResize": false,
 							"stereotypeDisplay": "label",
 							"showVisibility": true,
@@ -21424,11 +21452,11 @@
 						},
 						{
 							"_type": "UMLOperation",
-							"_id": "AAAAAAFgBapf1z1ze/E=",
+							"_id": "AAAAAAFgBaqInT8m2UY=",
 							"_parent": {
 								"$ref": "AAAAAAFgBajvxjUmuzw="
 							},
-							"name": "exportAllRecords",
+							"name": "exportCache",
 							"visibility": "public",
 							"isStatic": false,
 							"isLeaf": false,
@@ -21438,11 +21466,11 @@
 						},
 						{
 							"_type": "UMLOperation",
-							"_id": "AAAAAAFgBaqInT8m2UY=",
+							"_id": "AAAAAAFgBapf1z1ze/E=",
 							"_parent": {
 								"$ref": "AAAAAAFgBajvxjUmuzw="
 							},
-							"name": "exportAllCache",
+							"name": "exportProfile",
 							"visibility": "public",
 							"isStatic": false,
 							"isLeaf": false,
@@ -21456,7 +21484,7 @@
 							"_parent": {
 								"$ref": "AAAAAAFgBajvxjUmuzw="
 							},
-							"name": "exportEverything",
+							"name": "exportAll",
 							"visibility": "public",
 							"isStatic": false,
 							"isLeaf": false,
@@ -21546,7 +21574,7 @@
 								"$ref": "AAAAAAFgBaxFeEynZtc="
 							},
 							"name": "storage_ref",
-							"visibility": "private",
+							"visibility": "protected",
 							"isStatic": false,
 							"isLeaf": false,
 							"type": {
@@ -21568,7 +21596,7 @@
 								"$ref": "AAAAAAFgBaxFeEynZtc="
 							},
 							"name": "createExportPtree",
-							"visibility": "private",
+							"visibility": "protected",
 							"isStatic": false,
 							"isLeaf": false,
 							"concurrency": "sequential",
@@ -21582,7 +21610,7 @@
 								"$ref": "AAAAAAFgBaxFeEynZtc="
 							},
 							"name": "createMD5fromFile",
-							"visibility": "private",
+							"visibility": "protected",
 							"isStatic": false,
 							"isLeaf": false,
 							"concurrency": "sequential",
@@ -21596,7 +21624,21 @@
 								"$ref": "AAAAAAFgBaxFeEynZtc="
 							},
 							"name": "calculateMD5",
-							"visibility": "private",
+							"visibility": "protected",
+							"isStatic": false,
+							"isLeaf": false,
+							"concurrency": "sequential",
+							"isQuery": false,
+							"isAbstract": false
+						},
+						{
+							"_type": "UMLOperation",
+							"_id": "AAAAAAFgF3ZhFRT09lE=",
+							"_parent": {
+								"$ref": "AAAAAAFgBaxFeEynZtc="
+							},
+							"name": "decompressGzip",
+							"visibility": "protected",
 							"isStatic": false,
 							"isLeaf": false,
 							"concurrency": "sequential",

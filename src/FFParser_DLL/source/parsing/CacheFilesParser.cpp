@@ -15,6 +15,7 @@ namespace FFParser {
 	std::regex CacheFilesParser::s_filenameRegex("/([-[:w:]]+(?:\\.[-[:w:]]+)*)(?:\\?)?");
 	std::regex CacheFilesParser::s_fnWithExtRegex("([-[:w:]]+\\.)+[[:w:]]+");
 	std::regex CacheFilesParser::s_contentTypeRegex("Content-Type:\\s*(.*?)(?:\\r\\n|;)", icase);
+	std::regex CacheFilesParser::s_contentLengthRegex("\\r\\nContent-Length:\\s*([[:digit:]]+)\\r\\n", icase);
 	std::regex CacheFilesParser::s_contentEncodingRegex("Content-Encoding:\\s*(.*?)\\r\\n", icase);
 	std::regex CacheFilesParser::s_dateRegex("Date:\\s*(.*?)\\r\\n", icase);
 	std::regex CacheFilesParser::s_lastModifiedRegex("Last-Modified:\\s*(.*?)\\r\\n", icase);
@@ -44,7 +45,7 @@ namespace FFParser {
 		_field_names.emplace_back("filename");
 		_field_names.emplace_back("content_type");
 		_field_names.emplace_back("url");
-		_field_names.emplace_back("file_size");
+		_field_names.emplace_back("content_length");
 		_field_names.emplace_back("content_encoding");
 		_field_names.emplace_back("creation_date");
 		_field_names.emplace_back("last_modified");
@@ -63,6 +64,7 @@ namespace FFParser {
 		std::smatch urlMatch;
 		std::smatch filenameMatch;
 		std::smatch contentTypeMatch;
+		std::smatch contentLengthMatch;
 		std::smatch contentEncodingMatch;
 		std::smatch dateMatch;
 		std::smatch lastModifiedMatch;
@@ -80,12 +82,17 @@ namespace FFParser {
 		std::string parseRegionStr = parseRegionMatch.suffix().str();
 		//cached file contents
 		std::string main_content = parseRegionMatch.prefix().str();
-		if (main_content.size() > LEFTOVER) {
-			main_content.erase(main_content.size() - LEFTOVER);		//remove left over bytes from cache info
-		}
 
-		//"file size"
-		std::string fileSizeStr = std::to_string(main_content.size());
+		//"content length"
+		std::regex_search(parseRegionStr, contentLengthMatch, s_contentLengthRegex);
+		std::string fileSizeStr = contentLengthMatch[1].str();
+
+		if (fileSizeStr.empty()) {
+			if (main_content.size() > LEFTOVER) {
+				main_content.erase(main_content.size() - LEFTOVER);		//remove bytes left over from cache info
+			}
+			fileSizeStr = std::to_string(main_content.size());
+		}
 
 		//"url"
 		std::regex_search(parseRegionStr, urlMatch, s_urlRegex);

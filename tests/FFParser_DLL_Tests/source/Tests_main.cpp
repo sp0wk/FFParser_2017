@@ -48,18 +48,18 @@ int main()
 	std::cout << FactoryStorage->getPathToProfile(0) << "\n\n";
 
 	//get records
-	IRecordsStream* recstr = FactoryStorage->createRecordsStream(ERecordTypes::HISTORY, 0);
+	std::unique_ptr<IRecordsStream> recstr( FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 1) );
 
 	size_t from = 0;
-	size_t number = 25;
+	size_t number = 100;
 	size_t cnt = recstr->loadRecords(from, number);
 	size_t cnt2 = recstr->loadNextRecords(number);
 	size_t sz = recstr->getNumberOfRecords();
 	size_t total = recstr->getTotalRecords();
-	
+
 	//TEST export
 	IDataExporter* exp = FactoryStorage->getDataExporter();
-	exp->exportRecords(recstr, "D:\\exported.json", true);
+	exp->exportAll("D:/subf/fldr", true);
 
 	//TEST search
 	size_t cur = recstr->currentRecord();
@@ -73,6 +73,9 @@ int main()
 	// TEST getRecordByIndex
 	IRecord* onerec = recstr->getRecordByIndex(0);
 	if (onerec != nullptr) {
+		//TEST getFieldByName
+		const char* fld = onerec->getFieldByName("path");
+
 		std::cout 
 			<< onerec->getFieldValue(0) << " "
 			<< onerec->getFieldValue(1) << " "

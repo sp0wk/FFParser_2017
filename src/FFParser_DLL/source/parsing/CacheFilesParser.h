@@ -42,6 +42,7 @@ namespace FFParser {
 		static std::regex s_filenameRegex;
 		static std::regex s_fnWithExtRegex;
 		static std::regex s_contentTypeRegex;
+		static std::regex s_contentLengthRegex;
 		static std::regex s_contentEncodingRegex;
 		static std::regex s_dateRegex;
 		static std::regex s_lastModifiedRegex;

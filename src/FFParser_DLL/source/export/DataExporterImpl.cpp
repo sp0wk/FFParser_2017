@@ -6,11 +6,14 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 #include <chrono>
 #include <iomanip>
 
 #include <boost/property_tree/json_parser.hpp>
+
+#include <boost/filesystem.hpp>
 
 //for gzip decompressing
 #include <streambuf>
@@ -33,13 +36,13 @@ namespace FFParser {
 
 	//Interface methods
 
-	bool CALL DataExporterImpl::exportRecords(IRecordsStream* rstream, const char* output_path, bool bCreateMD5) const
+	bool CALL DataExporterImpl::exportRecords(IRecordsStream* rstream, const char* output_path, bool createMD5) const
 	{
 		using boost::property_tree::ptree;
 		using boost::property_tree::write_json;
 		
 		ptree pt;
-		std::string filename;
+		std::string full_path_str;
 
 		if (rstream == nullptr) {
 			ErrorHandler::getInstance().onError("Passed parameter is NULL", "ParserDLL error: \"Export records error\"");
@@ -47,16 +50,28 @@ namespace FFParser {
 		}
 
 		//create json ptree and generate file name
-		filename = output_path != nullptr ? output_path : "";
-		filename.append("/");
-		filename.append(createExportPtree(rstream, pt));
+		full_path_str = output_path != nullptr ? output_path : "";
+		full_path_str.append("/");
+
+		//create directories in path
+		try {
+			boost::filesystem::create_directories(full_path_str);
+		}
+		catch (const boost::filesystem::filesystem_error& ex) {
+			//handle error
+			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Export records error\"");
+			return false;
+		}
+
+		//add generated file name
+		full_path_str.append(createExportPtree(rstream, pt));
 
 		//try to create export file
-		std::ofstream file(filename, std::ios::out);
+		std::ofstream file(full_path_str, std::ios::out);
 		if (!file.is_open()) {
 			//handle error
 			std::string error = "Couldn't create export file:\n";
-			error.append(filename);
+			error.append(full_path_str);
 			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Export records error\"");
 			return false;
 		}
@@ -74,15 +89,15 @@ namespace FFParser {
 		file.close();
 
 		//create md5 if needed
-		if (bCreateMD5) {
-			createMD5fromFile(filename.c_str());
+		if (createMD5) {
+			createMD5fromFile(full_path_str.c_str());
 		}
 
 		return true;
 	}
 
 
-	bool CALL DataExporterImpl::exportCacheFile(IRecord* file_record, const char* output_path) const
+	bool CALL DataExporterImpl::exportCacheFile(IRecord* file_record, const char* output_path, bool createMD5) const
 	{
 		if (file_record == nullptr) {
 			ErrorHandler::getInstance().onError("Passed parameter is NULL", "ParserDLL error: \"Export cache file error\"");
@@ -92,7 +107,7 @@ namespace FFParser {
 		//get required fields
 		const char* path_to_file = file_record->getFieldByName("path");
 		const char* filename = file_record->getFieldByName("filename");
-		const char* size_str = file_record->getFieldByName("file_size");
+		const char* size_str = file_record->getFieldByName("content_length");
 		const char* encoding = file_record->getFieldByName("content_encoding");
 
 		if (!path_to_file || !filename) {
@@ -100,23 +115,38 @@ namespace FFParser {
 			return false;
 		}
 
-		//set full path
-		std::string full_path_str;
-		if (output_path != nullptr && output_path[0] != '\0') {
-			full_path_str = output_path;
-			full_path_str.append("/");
-		}
-		full_path_str.append(filename);
-
 		//set content length
 		size_t converted_size = -1;
-		if (size_str) {
+		if (size_str != nullptr && size_str[0] != '\0') {
 			char* end;
 			converted_size = std::strtoul(size_str, &end, 10);
+
+			if (converted_size == 0) {
+				return false;	//no content
+			}
 		}
 
 		//check encoding
 		bool gzip_enc = ( encoding != nullptr && !strcmp(encoding, "gzip") );
+
+		//set full path
+		std::string full_path_str;
+		if (output_path != nullptr && output_path[0] != '\0') {
+			full_path_str = output_path;
+
+			//create directories in path
+			try {
+				boost::filesystem::create_directories(full_path_str);
+			}
+			catch (const boost::filesystem::filesystem_error& ex) {
+				//handle error
+				ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Export cache file error\"");
+				return false;
+			}
+
+			full_path_str.append("/");
+		}
+		full_path_str.append(filename);
 
 		//try to open cache file
 		std::ifstream file(path_to_file, std::ios::ate | std::ifstream::binary);
@@ -146,18 +176,19 @@ namespace FFParser {
 
 		file.close();
 
-		//decompress file
-		std::string decompressed;
-		if (gzip_enc) {
-			decompressed = decompressGzip(buffer);
-		}
+		//check if export file already exists
+		if (std::ifstream(full_path_str, std::ios::in)) {
+			std::string tmp = path_to_file;
 
-		//check if file already exists
-		for (int i = 1; std::ifstream(full_path_str, std::ios::in); ++i) {
-			//change name
+			//get cache id
+			auto id_pos = tmp.find_last_of("\\");
+			assert(id_pos != std::string::npos);
+			tmp.erase(0, id_pos+1);
+
+			//add cache id to name
 			auto pos = full_path_str.find_last_of('.');
 			assert(pos != std::string::npos);
-			std::string ins = std::string(" (") + std::to_string(i) + std::string(")");
+			std::string ins = std::string(" (") + tmp + std::string(")");
 			full_path_str.insert(pos, ins);
 		}
 
@@ -174,10 +205,24 @@ namespace FFParser {
 		//write data to file
 		bool writeSuccess = false;
 
-		if (!decompressed.empty()) {	//data was compressed
+		//decompress data
+		std::string decompressed;
+		bool wasDecomped = false;
+		if (gzip_enc) {
+			if ( !(wasDecomped = decompressGzip(buffer, decompressed)) ) {
+			#ifndef NDEBUG
+				//handle error
+				std::string error = "Error occured while decompressing file:\n";
+				error.append(full_path_str);
+				ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Export cache file error\"");
+			#endif
+			}
+		}
+
+		if (wasDecomped) {	//write decompressed data
 			writeSuccess = !!export_file.write(decompressed.c_str(), decompressed.size());
 		}
-		else {
+		else {	//write original data
 			writeSuccess = !!export_file.write(buffer.data(), buffer.size());
 		}
 
@@ -192,8 +237,94 @@ namespace FFParser {
 
 		export_file.close();
 
+		//create md5 if needed
+		if (createMD5) {
+			createMD5fromFile(full_path_str.c_str());
+		}
+
 		return true;
 	}
+
+
+	void CALL DataExporterImpl::exportCache(IRecordsStream* rstream, const char* output_path, size_t profile, bool createMD5) const
+	{
+		IRecordsStream* rtmp = nullptr;
+
+		//use passed stream or create new
+		if (rstream != nullptr) {
+			rtmp = rstream;
+		}
+		else if (profile < _storage_ref.getNumberOfProfiles()) {
+			rtmp = _storage_ref.createRecordsStream(ERecordTypes::CACHEFILES, profile);
+			rtmp->loadNextRecords();
+		}
+		else {
+			//handle error
+			ErrorHandler::getInstance().onError("No stream passed and requested profile not found", "ParserDLL error: \"Export cache error\"");
+			return;
+		}
+
+		std::string full_path_str = output_path != nullptr ? output_path : "";
+
+		//export cache files
+		size_t nfiles = rtmp->getNumberOfRecords();
+		for (size_t i = 0; i < nfiles; ++i) {
+			this->exportCacheFile(rtmp->getRecordByIndex(i), full_path_str.c_str(), createMD5);
+		}
+
+		//release created stream
+		if (rtmp != rstream) delete rtmp;
+	}
+
+
+	void CALL DataExporterImpl::exportProfile(const char* output_path, size_t profile, bool export_cache, bool cacheMD5, bool recordsMD5) const
+	{
+		if (profile >= _storage_ref.getNumberOfProfiles()) {
+			//handle error
+			ErrorHandler::getInstance().onError("Requested profile not found", "ParserDLL error: \"Export profile error\"");
+			return;
+		}
+
+		std::string full_path_str = output_path != nullptr ? output_path : "";
+
+		//create record streams
+		std::unique_ptr<IRecordsStream> history( _storage_ref.createRecordsStream(ERecordTypes::HISTORY, profile) );
+		std::unique_ptr<IRecordsStream> bookmarks( _storage_ref.createRecordsStream(ERecordTypes::BOOKMARKS, profile) );
+		std::unique_ptr<IRecordsStream> logins( _storage_ref.createRecordsStream(ERecordTypes::LOGINS, profile) );
+		std::unique_ptr<IRecordsStream> cache( _storage_ref.createRecordsStream(ERecordTypes::CACHEFILES, profile) );
+
+		//load records
+		history->loadNextRecords();
+		bookmarks->loadNextRecords();
+		logins->loadNextRecords();
+		cache->loadNextRecords();
+
+		//export records
+		this->exportRecords(history.get(), full_path_str.c_str(), recordsMD5);
+		this->exportRecords(bookmarks.get(), full_path_str.c_str(), recordsMD5);
+		this->exportRecords(logins.get(), full_path_str.c_str(), recordsMD5);
+		this->exportRecords(cache.get(), full_path_str.c_str(), recordsMD5);
+
+		//export cache files if needed
+		if (export_cache) {
+			full_path_str.append("/cache_files");
+			this->exportCache(cache.get(), full_path_str.c_str(), -1, cacheMD5);
+		}
+	}
+
+
+	void CALL DataExporterImpl::exportAll(const char* output_path, bool createMD5) const
+	{
+		std::string full_path_str = output_path != nullptr ? output_path : "";
+		size_t nprofiles = _storage_ref.getNumberOfProfiles();
+
+		for (size_t i = 0; i < nprofiles; ++i) {
+			std::string profile_path = full_path_str + "/";
+			profile_path.append(_storage_ref.getProfileName(i));
+			this->exportProfile(profile_path.c_str(), i, true, createMD5, createMD5);
+		}
+	}
+
 
 	//methods
 
@@ -393,28 +524,24 @@ namespace FFParser {
 	}
 
 
-	std::string DataExporterImpl::decompressGzip(const std::vector<char>& buffer) const
+	bool DataExporterImpl::decompressGzip(const std::vector<char>& buffer, std::string& res) const
 	{
 		using namespace boost::iostreams;
 
-		std::string decompressed;
 		filtering_ostream out;
 
 		try {
 			out.push(gzip_decompressor());
-			out.push(boost::iostreams::back_inserter(decompressed));
+			out.push(boost::iostreams::back_inserter(res));
 			out.write(buffer.data(), buffer.size());
 			close(out);
 		}
 		catch (const std::exception& e) {
-			//handle error
-			std::string error = "File decompress error:\n";
-			error.append(e.what());
-			ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Export cache file error\"");
-			decompressed.clear();
+			res = e.what();
+			return false;
 		}
 
-		return decompressed;
+		return true;
 	}
 
 }
