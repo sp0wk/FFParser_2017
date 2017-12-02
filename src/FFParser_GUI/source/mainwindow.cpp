@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui.setupUi(this);
     createLanguageMenu();
+    createFileMenu();
 
 
     //dll load
@@ -42,6 +43,23 @@ MainWindow::MainWindow(QWidget *parent) :
     cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, _profileNumber);
 
     stepForTabs.resize(ui.tabWidget->count());
+}
+
+void MainWindow::createFileMenu()
+{
+    QAction *exportMenu = new QAction(tr("Export"), ui.menuFile);
+    ui.menuFile->addAction(exportMenu);
+    connect(exportMenu, &QAction::triggered, this, &MainWindow::slotMenuExport);
+}
+
+void MainWindow::slotMenuExport()
+{
+    exportFileWindow = new Export(this);
+
+    for (size_t i = 0; i < _allAmountProfile; ++i)
+        exportFileWindow->setProfile(DLLStorage->getProfileName(i));
+    exportFileWindow->setProfileCombobox();
+    exportFileWindow->show();
 }
 
 IRecordsStream *MainWindow::getPtr(const size_t &index)
@@ -150,13 +168,8 @@ void MainWindow::viewRecord(IRecordsStream *ptr)
 
 void MainWindow::setNameProfile()
 {
-    size_t counter = 0;
-    while (counter < _allAmountProfile)
-    {
+    for (size_t counter = 0; counter < _allAmountProfile; ++counter)
         ui.chooseProfile->addItem(DLLStorage->getProfileName(counter), counter);
-        ++counter;
-    }
-
 }
 
 
@@ -358,7 +371,7 @@ void MainWindow::createLanguageMenu(void)
 // Called every time, when a menu entry of the language menu is called
 void MainWindow::slotLanguageChanged(QAction* action)
 {
-    if(0 != action)
+    if(action != nullptr)
     {
         // load the language dependant on the action content
         loadLanguage(action->data().toString());

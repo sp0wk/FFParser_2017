@@ -16,7 +16,7 @@
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>
-#include <cstring>
+#include "export.h"
 
 //for DLL
 #include <windows.h>
@@ -79,14 +79,18 @@ private slots:
     void slotOpenUrl();
     void slotExport();
     void slotCustomMenuRequested(QPoint pos);
+    void slotMenuExport();
 
 private:
     Ui::MainWindow ui;
+    Export *exportFileWindow;
+
     void createUI(const QStringList &headers, size_t);
 
     void loadLanguage(const QString &rLanguage);
 
     void createLanguageMenu(void);
+    void createFileMenu();
 
     bool initialLoadRecord(IRecordsStream *);
     void checkNewRecords(const size_t &, const size_t &, const size_t &);

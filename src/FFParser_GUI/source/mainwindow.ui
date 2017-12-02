@@ -290,7 +290,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
