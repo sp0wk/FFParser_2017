@@ -142,6 +142,9 @@ namespace FFParser {
 				filenameStr.append(fileExtStr);
 			}
 		}
+		else {
+			filenameStr.append(".notype");
+		}
 
 		//"content encoding"
 		std::regex_search(parseRegionStr, contentEncodingMatch, s_contentEncodingRegex);
