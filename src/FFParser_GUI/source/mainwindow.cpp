@@ -1,14 +1,15 @@
 #include "mainwindow.h"
 #include <QDebug>
 #include <QVariant>
+#include "contextmenu.h"
+#include "export.h"
 
+using recordPtr = MainWindow::recordPtr;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    historyRecord(nullptr),
-    bookmarksRecord(nullptr),
-    loginRecord(0),
-    cacheRecord(0),
+    _exportFileWindow(new Export(this)),
+    _menu(new ContextMenu(this)),
     _firstRecord(0),
     oldStep(25),
     _profileNumber(0),
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.setupUi(this);
     createLanguageMenu();
     createFileMenu();
+
 
     //dll load
     dllname = L"FFParser_DLL.dll";
@@ -35,12 +37,15 @@ MainWindow::MainWindow(QWidget *parent) :
     _allAmountProfile = DLLStorage->getNumberOfProfiles();
     setNameProfile();
 
-    //get history example
-    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, _profileNumber);
-    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, _profileNumber);
-    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, _profileNumber);
-    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, _profileNumber);
-
+    _allProfiles.resize(_allAmountProfile);
+    // Create records
+    for (size_t i = 0; i < _allProfiles.size(); ++i)
+    {
+        _allProfiles[i].historyRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::HISTORY, i));
+        _allProfiles[i].bookmarksRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, i));
+        _allProfiles[i].loginsRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::LOGINS, i));
+        _allProfiles[i].cacheRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, i));
+    }
     stepForTabs.resize(ui.tabWidget->count());
 }
 
@@ -53,43 +58,53 @@ void MainWindow::createFileMenu()
 
 void MainWindow::slotMenuExport()
 {
-    exportFileWindow = new Export(this);
+    for (size_t i = 0; i < ui.chooseProfile->count(); ++i)
+        _exportFileWindow->setProfile(ui.chooseProfile->itemText(i));
 
-    for (size_t i = 0; i < _allAmountProfile; ++i)
-        exportFileWindow->setProfile(DLLStorage->getProfileName(i));
-    exportFileWindow->setProfileCombobox();
-    exportFileWindow->show();
+    _exportFileWindow->addProfileCombobox();
+    _exportFileWindow->show();
 }
 
-IRecordsStream *MainWindow::getPtr(const size_t &index)
+const recordPtr & MainWindow::getPtr(ERecordTypes type, size_t numberProfile)
 {
+    const ProfileRecordData  &profileData = _allProfiles[numberProfile];
+
+    switch (type)
+    {
+    case ERecordTypes::HISTORY:
+        return profileData.historyRecord;
+    case ERecordTypes::BOOKMARKS:
+        return profileData.bookmarksRecord;
+    case ERecordTypes::LOGINS:
+        return profileData.loginsRecord;
+    case ERecordTypes::CACHEFILES:
+        return profileData.cacheRecord;
+    default:
+        break;
+    }     
+}
+
+
+const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
+{
+    ERecordTypes type;
+
     switch (index)
     {
     case 0:
-        return historyRecord;
+        return getPtr(ERecordTypes::HISTORY, _profileNumber);
     case 1:
-        return bookmarksRecord;
+        return getPtr(ERecordTypes::BOOKMARKS, _profileNumber);
     case 2:
-        return loginRecord;
+        return getPtr(ERecordTypes::LOGINS, _profileNumber);
     case 3:
-        return cacheRecord;
+        return getPtr(ERecordTypes::CACHEFILES, _profileNumber);
     default:
-        return nullptr;
+        break;
     }
 }
 
-
-bool MainWindow::ptrIsNotNull(const size_t &index)
-{
-    IRecordsStream *tempPtr = getPtr(index);
-
-    if (tempPtr != nullptr)
-        return true;
-
-    return false;
-}
-
-void MainWindow::setNameColumnTable(IRecordsStream *ptr)
+void MainWindow::setNameColumnTable(const recordPtr &ptr)
 {
     if (ptr != nullptr)
     {
@@ -126,7 +141,7 @@ void MainWindow::removeRowTable(size_t counter)
         --counter;
     }
 }
-void MainWindow::viewRecord(IRecordsStream *ptr)
+void MainWindow::viewRecord(const recordPtr &ptr)
 {
     removeRowTable(oldStep);
 
@@ -172,7 +187,7 @@ void MainWindow::setNameProfile()
 }
 
 
-bool MainWindow::initialLoadRecord(IRecordsStream *ptr)
+bool MainWindow::initialLoadRecord(const recordPtr &ptr)
 {
     if (ptr != nullptr)
     {
@@ -201,6 +216,8 @@ bool MainWindow::initialLoadRecord(IRecordsStream *ptr)
 MainWindow::~MainWindow()
 {
     FreeLibrary(dll_load);
+    delete _exportFileWindow;
+    delete _menu;
 }
 
 
@@ -228,93 +245,28 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
 
 void MainWindow::slotCustomMenuRequested(QPoint pos)
 {
-    menu = new QMenu(this);
-
-    QAction *openFile = new QAction(trUtf8("Open File"), this);
-    QAction *openUrl = new QAction(trUtf8("Open URL"), this);
-    QAction *exports = new QAction(trUtf8("Export"), this);
-
-    connect(openFile, SIGNAL(triggered(bool)), this, SLOT(slotOpenFile()));
-    connect(openUrl, SIGNAL(triggered(bool)), this, SLOT(slotOpenUrl()));
-    connect(exports, SIGNAL(triggered(bool)), this, SLOT(slotExport()));
-
-    menu->addAction(openFile);
-    menu->addAction(openUrl);
-    menu->addAction(exports);
-
-    menu->exec(ui.tableWidget->viewport()->mapToGlobal(pos));
+    _menu->popup(ui.tableWidget->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::slotCloseContextMenu()
 {
-    if (menu->isActiveWindow())
-        menu->close();
+    _menu->hide();
 }
 
-const char *MainWindow::getColumnTableName(IRecordsStream *ptr, const char *string, const size_t &row)
+QString MainWindow::getTableField(const char *fieldName)
 {
-    if (ptr != nullptr)
-    {
-        IRecord *recordPtr = ptr->getRecordByIndex(row);
-        const char *foundString = recordPtr->getFieldByName(string);
-        return foundString;
-    }
-
-    return nullptr;
-}
-void MainWindow::slotOpenFile()
-{
-    slotCloseContextMenu();
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
 
-    IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
+    const recordPtr &currPtr = getPtrByTabIndex(ui.tabWidget->currentIndex());
 
     if (currPtr != nullptr)
     {
-        const char *found = getColumnTableName(currPtr, "path", row);
-
-
-        QUrl temp = QUrl::fromLocalFile(found);
-
-        if (!QDesktopServices::openUrl(temp))
-        {
-            QMessageBox::warning(this, "Warning",
-                                 tr("This is not path file!\n"),
-                                 QMessageBox::Ok);
-        }
+        IRecord *recordPtr = currPtr->getRecordByIndex(row);
+        const char *foundString = recordPtr->getFieldByName(fieldName);
+        return QString(foundString);
     }
-}
 
-void MainWindow::slotOpenUrl()
-{
-    slotCloseContextMenu();
-    size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
-
-    IRecordsStream *currPtr = getPtr(ui.tabWidget->currentIndex());
-
-    if (currPtr != nullptr)
-    {
-
-        const char *found = getColumnTableName(currPtr, "url", row);
-        if (found == nullptr)
-            found = getColumnTableName(currPtr, "hostname", row);
-
-
-        QUrl temp = QString(found);
-
-        if (!QDesktopServices::openUrl(temp))
-        {
-            QMessageBox::warning(this, "Warning",
-                                 tr("This is not URL address!\n"),
-                                 QMessageBox::Ok);
-        }
-    }
-}
-
-void MainWindow::slotExport()
-{
-    qDebug() << "row: " << ui.tableWidget->selectionModel()->currentIndex().row();
-    qDebug() << "column: " << ui.tableWidget->selectionModel()->currentIndex().column();
+    return "";
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -332,6 +284,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->accept();
     }
 }
+
 
 void MainWindow::createLanguageMenu(void)
 {
@@ -438,14 +391,14 @@ void MainWindow::changeEvent(QEvent* event)
 
 void MainWindow::switchViewRecords(size_t index)
 {
-    IRecordsStream *currPtr = getPtr(index);
+    const recordPtr &currPtr = getPtrByTabIndex(index);
     setNameColumnTable(currPtr);
     viewRecord(currPtr);
 }
 
-void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, const size_t &step)
+void MainWindow::checkNewRecords(size_t indexTab, size_t first, size_t step)
 {
-    IRecordsStream *currPtr = getPtr(indexTab);
+    const recordPtr &currPtr = getPtrByTabIndex(indexTab);
     size_t totalLoadRecords = currPtr->getNumberOfRecords();
     if (first + step >= totalLoadRecords)
     {
@@ -460,7 +413,7 @@ void MainWindow::checkNewRecords(const size_t &indexTab, const size_t &first, co
 
 void MainWindow::on_setRecordButton_clicked()
 {
-    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    if (getPtrByTabIndex(ui.tabWidget->currentIndex()) != nullptr)
     {
         size_t tempStep = ui.spinBox->value();
         size_t tempIndex = ui.tabWidget->currentIndex();
@@ -477,14 +430,14 @@ void MainWindow::on_setRecordButton_clicked()
     }
 }
 
-bool MainWindow::isOutOfRange(const size_t &indexTab, const size_t &first, const size_t &step)
+bool MainWindow::isOutOfRange(size_t indexTab, size_t first, size_t step)
 {
-    return (first + step >= getPtr(indexTab)->getTotalRecords());
+    return (first + step >= getPtrByTabIndex(indexTab)->getTotalRecords());
 }
 
 void MainWindow::on_nextPageButton_clicked()
 {
-    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    if (getPtrByTabIndex(ui.tabWidget->currentIndex()) != nullptr)
     {
         checkNewRecords(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]);
         if (isOutOfRange(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]) == false)
@@ -499,7 +452,7 @@ void MainWindow::on_nextPageButton_clicked()
 
 void MainWindow::on_prevPageButton_clicked()
 {
-    if (ptrIsNotNull(ui.tabWidget->currentIndex()))
+    if (getPtrByTabIndex(ui.tabWidget->currentIndex()) != nullptr)
     {
         if (static_cast<int>(_firstRecord - stepForTabs[ui.tabWidget->currentIndex()]) <= 0)
         {
@@ -515,18 +468,17 @@ void MainWindow::on_prevPageButton_clicked()
     }
 }
 
-bool MainWindow::checkRecords(const size_t &indexTab)
+/*
+bool MainWindow::checkRecords(size_t indexTab)
 {
-    bool flag = false;
-    IRecordsStream *currPtr = getPtr(indexTab);
+
+    IRecordsStream *currPtr = getPtr(indexTab, _profileNumber);
     if (currPtr->getNumberOfRecords() != 0)
-    {
-        flag = true;
-    }
+        return true;
 
-    return flag;
+    return false;
 }
-
+*/
 void MainWindow::search()
 {
     ui.clearSearchRecord->setEnabled(true);
@@ -535,10 +487,11 @@ void MainWindow::search()
     QString dataToFind = ui.lineEdit->text().toLower();
     if (dataToFind.size() >= 2)
     {
-        if (checkRecords(ui.tabWidget->currentIndex()))
+        size_t columnCount = ui.tableWidget->columnCount();
+        size_t rowCount = ui.tableWidget->rowCount();
+
+        if (columnCount != 0 && rowCount != 0)
         {
-            size_t columnCount = ui.tableWidget->columnCount();
-            size_t rowCount = ui.tableWidget->rowCount();
             size_t counterSearchRecords = 0;
 
             for (size_t i = 0; i < rowCount; ++i)
@@ -565,19 +518,19 @@ void MainWindow::search()
                 if (tempSearchFlag)
                     ++counterSearchRecords;
             }
-            ui.label_4->setText("Found: " + QString::number(counterSearchRecords));
+            ui.label_4->setText(tr("Found: ") + QString::number(counterSearchRecords));
             ui.label_4->show();
         }
         else
         {
-            QMessageBox::warning(this, "Warning",
+            QMessageBox::warning(this, tr("Warning"),
                                  tr("The records are not load!\n"),
                                  QMessageBox::Ok);
         }
     }
     else
     {
-        QMessageBox::warning(this, "Warning",
+        QMessageBox::warning(this, tr("Warning"),
                              tr("Input value very small!\n"),
                              QMessageBox::Ok);
     }
@@ -592,17 +545,11 @@ void MainWindow::on_searchButton_clicked()
 void MainWindow::on_chooseProfile_activated(int index)
 {
     _profileNumber = static_cast<size_t>(index);
-
-    historyRecord = DLLStorage->createRecordsStream(ERecordTypes::HISTORY, _profileNumber);
-    bookmarksRecord = DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, _profileNumber);
-    loginRecord = DLLStorage->createRecordsStream(ERecordTypes::LOGINS, _profileNumber);
-    cacheRecord = DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, _profileNumber);
-
     _firstRecord = 0;
     switchViewRecords(ui.tabWidget->currentIndex());
 }
 
-void MainWindow::viewStep(const size_t &indexTab)
+void MainWindow::viewStep(size_t indexTab)
 {
     ui.spinBox->setValue(stepForTabs[indexTab]);
 }
@@ -616,7 +563,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     viewStep(static_cast<size_t>(index));
 }
 
-void MainWindow::viewCounterRecords(const size_t &first, const size_t &last, IRecordsStream *ptr)
+void MainWindow::viewCounterRecords(size_t first, size_t last, const recordPtr &ptr)
 {
     QString temp = QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
     ui.label_3->setText(temp);

@@ -2,9 +2,10 @@
 #define EXPORT_H
 
 #include <QDialog>
-#include <vector>
-#include <string>
 #include <QDebug>
+#include <QString>
+#include <QVector>
+#include "mainwindow.h"
 
 namespace Ui {
 class Export;
@@ -15,15 +16,21 @@ class Export : public QDialog
     Q_OBJECT
 
 public:
-    explicit Export(QWidget *parent = 0);
+    explicit Export(MainWindow *parent);
     ~Export();
 
-    void setProfile(const char *);
-    void setProfileCombobox();
+    void setProfile(const QString &);
+    void addProfileCombobox();
+
+    void exportData();
+
+private slots:
+
 
 private:
     Ui::Export *ui;
-    std::vector<const char *> profiles;
+    MainWindow *_mainwindow;
+    QVector<QString> _profiles;
 
 };
 

@@ -16,7 +16,13 @@
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>
-#include "export.h"
+#include <QVector>
+#include <QSharedPointer>
+
+
+class Export;
+class ContextMenu;
+
 
 //for DLL
 #include <windows.h>
@@ -25,9 +31,6 @@
 using namespace FFParser;
 
 typedef IStorageFactory* (CALL *GetStorageFunc)();
-
-
-
 
 
 #include "ui_mainwindow.h"
@@ -41,24 +44,26 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+    QString getTableField(const char *);
+
+    using recordPtr = QSharedPointer<IRecordsStream>;
+
 protected:
     void changeEvent(QEvent *);
     void closeEvent(QCloseEvent *);
 
-
-    void setNameColumnTable(IRecordsStream *);
-    void viewRecord(IRecordsStream *);
+    void setNameColumnTable(const recordPtr &);
+    void viewRecord(const recordPtr &);
     void removeRowTable(size_t);
     void switchViewRecords(size_t);
     void setNameProfile();
 
-
 protected slots:
     void slotLanguageChanged(QAction *);
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
 
 private slots:
     void on_setRecordButton_clicked();
@@ -75,17 +80,14 @@ private slots:
 
     void on_clearSearchRecord_clicked();
 
-    void slotOpenFile();
-    void slotOpenUrl();
-    void slotExport();
     void slotCustomMenuRequested(QPoint pos);
     void slotCloseContextMenu();
     void slotMenuExport();
 
 private:
     Ui::MainWindow ui;
-    Export *exportFileWindow;
-    QMenu *menu;
+    Export *_exportFileWindow;
+    ContextMenu *_menu;
 
     void createUI(const QStringList &headers, size_t);
 
@@ -94,16 +96,27 @@ private:
     void createLanguageMenu(void);
     void createFileMenu();
 
-    bool initialLoadRecord(IRecordsStream *);
-    void checkNewRecords(const size_t &, const size_t &, const size_t &);
-    bool isOutOfRange(const size_t &, const size_t &, const size_t &);
-    bool checkRecords(const size_t &);
-    void viewStep(const size_t &);
-    void viewCounterRecords(const size_t &, const size_t &, IRecordsStream *);
+    bool initialLoadRecord(const recordPtr &);
+    void checkNewRecords(size_t, size_t, size_t);
+    bool isOutOfRange(size_t, size_t, size_t);
+    //bool checkRecords(size_t);
+    void viewStep(size_t);
+    void viewCounterRecords(size_t, size_t, const recordPtr &);
     void search();
-    bool ptrIsNotNull(const size_t &);
-    IRecordsStream *getPtr(const size_t &);
-    const char *getColumnTableName(IRecordsStream *, const char*, const size_t &);
+    const recordPtr & getPtrByTabIndex(size_t);
+    const recordPtr & getPtr(ERecordTypes, size_t);
+
+
+    struct ProfileRecordData
+    {
+        recordPtr historyRecord;
+        recordPtr bookmarksRecord;
+        recordPtr loginsRecord;
+        recordPtr cacheRecord;
+    };
+
+    QVector<ProfileRecordData> _allProfiles;
+
 
     QTranslator m_translator;
     QTranslator m_translatorQt;
@@ -112,10 +125,7 @@ private:
 
 
 
-    IRecordsStream *historyRecord;
-    IRecordsStream *bookmarksRecord;
-    IRecordsStream *loginRecord;
-    IRecordsStream *cacheRecord;
+
 
     size_t _firstRecord;
     size_t oldStep;
