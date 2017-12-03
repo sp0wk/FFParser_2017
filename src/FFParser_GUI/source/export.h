@@ -7,6 +7,7 @@
 #include <QVector>
 #include "mainwindow.h"
 
+
 namespace Ui {
 class Export;
 }
@@ -19,18 +20,21 @@ public:
     explicit Export(MainWindow *parent);
     ~Export();
 
-    void setProfile(const QString &);
-    void addProfileCombobox();
+    void addProfileToCombobox(const QString &);
 
     void exportData();
+    virtual void show();
 
 private slots:
 
+    void on_exportButton_clicked();
+
+    void on_browseButton_clicked();
 
 private:
     Ui::Export *ui;
     MainWindow *_mainwindow;
-    QVector<QString> _profiles;
+
 
 };
 

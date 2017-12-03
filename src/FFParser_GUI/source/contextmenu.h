@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QDebug>
 #include "mainwindow.h"
+#include "../include/IDataExporter.h"
 
 class ContextMenu : public QMenu
 {
@@ -28,6 +29,8 @@ private:
 
     MainWindow *_mainwindow;
     QMenu _menu;
+
+    IDataExporter *_exportPtr;
 };
 
 

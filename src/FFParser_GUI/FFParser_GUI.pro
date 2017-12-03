@@ -32,18 +32,23 @@ SOURCES += \
     source/main.cpp \
     source/export.cpp \
     source/mainwindow.cpp \
-    source/contextmenu.cpp
+    source/contextmenu.cpp \
+    source/changelanguage.cpp \
+    source/exportcachefiledialog.cpp
 
 TRANSLATIONS = languages/TranslationExample_en.ts  languages/TranslationExample_ru.ts
 
 HEADERS += \
     source/mainwindow.h \
     source/export.h \
-    source/contextmenu.h
+    source/contextmenu.h \
+    source/changelanguage.h \
+    source/exportcachefiledialog.h
 
 FORMS += \
     source/mainwindow.ui \
-    source/export.ui
+    source/export.ui \
+    source/exportcachefiledialog.ui
 
 
 

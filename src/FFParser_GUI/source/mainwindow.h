@@ -50,10 +50,16 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    QString getTableField(const char *);
+
 
     using LibGuard = std::unique_ptr<std::remove_pointer<HMODULE>::type, std::function<void(HMODULE)>>;
     using recordPtr = QSharedPointer<IRecordsStream>;
+
+    const recordPtr & getPtrByTabIndex(size_t);
+    const recordPtr & getPtr(ERecordTypes, size_t);
+    QString getTableField(const char *);
+    IDataExporter * getExporter();
+    void exportSelectedFile(const char *, bool);
 
 protected:
     void changeEvent(QEvent *);
@@ -94,6 +100,7 @@ private:
     LibGuard dll_load;
     //lib storage
     IStorageFactory* DLLStorage;
+    const QString tempDir;
 
     Ui::MainWindow ui;
     Export *_exportFileWindow;
@@ -109,12 +116,10 @@ private:
     bool initialLoadRecord(const recordPtr &);
     void checkNewRecords(size_t, size_t, size_t);
     bool isOutOfRange(size_t, size_t, size_t);
-    //bool checkRecords(size_t);
     void viewStep(size_t);
     void viewCounterRecords(size_t, size_t, const recordPtr &);
     void search();
-    const recordPtr & getPtrByTabIndex(size_t);
-    const recordPtr & getPtr(ERecordTypes, size_t);
+
 
     struct ProfileRecordData
     {

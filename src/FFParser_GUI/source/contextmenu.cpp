@@ -1,5 +1,7 @@
 #include "contextmenu.h"
+#include "exportcachefiledialog.h"
 #include <QString>
+
 
 ContextMenu::ContextMenu(MainWindow *parent)
     : _menu(parent),
@@ -54,10 +56,8 @@ void ContextMenu::slotOpenUrl()
 
 void ContextMenu::slotExport()
 {
-    /*
-    qDebug() << "row: " << ui.tableWidget->selectionModel()->currentIndex().row();
-    qDebug() << "column: " << ui.tableWidget->selectionModel()->currentIndex().column();
-    */
+    ExportCacheFileDialog exportCache(_mainwindow);
+    exportCache.exec();
 }
 
 

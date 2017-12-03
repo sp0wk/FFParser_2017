@@ -9,6 +9,7 @@ using recordPtr = MainWindow::recordPtr;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     dllname(L"FFParser_DLL.dll"),
+    tempDir(QCoreApplication::applicationFilePath() + "/temp"),
     dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); }),
     _exportFileWindow(new Export(this)),
     _menu(new ContextMenu(this)),
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
 
     DLLStorage = dll_getstorage();
+
 
     _allAmountProfile = DLLStorage->getNumberOfProfiles();
     setNameProfile();
@@ -58,9 +60,8 @@ void MainWindow::createFileMenu()
 void MainWindow::slotMenuExport()
 {
     for (int i = 0; i < ui.chooseProfile->count(); ++i)
-        _exportFileWindow->setProfile(ui.chooseProfile->itemText(i));
+        _exportFileWindow->addProfileToCombobox(ui.chooseProfile->itemText(i));
 
-    _exportFileWindow->addProfileCombobox();
     _exportFileWindow->show();
 }
 
@@ -83,6 +84,19 @@ const recordPtr & MainWindow::getPtr(ERecordTypes type, size_t numberProfile)
     }     
 }
 
+void MainWindow::exportSelectedFile(const char *path, bool md5)
+{
+    size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
+
+    const recordPtr &currPtr = getPtrByTabIndex(ui.tabWidget->currentIndex());
+
+    if (currPtr != nullptr)
+    {
+        IRecord *recordPtr = currPtr->getRecordByIndex(_firstRecord + row);
+        IDataExporter *exporter = DLLStorage->getDataExporter();
+        exporter->exportCacheFile(recordPtr, path, md5);
+    }
+}
 
 const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
 {
@@ -99,6 +113,11 @@ const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
     default:
         break;
     }
+}
+
+IDataExporter *MainWindow::getExporter()
+{
+    return DLLStorage->getDataExporter();
 }
 
 void MainWindow::setNameColumnTable(const recordPtr &ptr)
@@ -415,7 +434,7 @@ void MainWindow::on_setRecordButton_clicked()
         size_t tempStep = ui.spinBox->value();
         size_t tempIndex = ui.tabWidget->currentIndex();
 
-        checkNewRecords(tempIndex, 0, tempStep);
+        checkNewRecords(tempIndex, _firstRecord, tempStep);
         stepForTabs[tempIndex] = tempStep;
         switchViewRecords(tempIndex);
     }
@@ -465,17 +484,6 @@ void MainWindow::on_prevPageButton_clicked()
     }
 }
 
-/*
-bool MainWindow::checkRecords(size_t indexTab)
-{
-
-    IRecordsStream *currPtr = getPtr(indexTab, _profileNumber);
-    if (currPtr->getNumberOfRecords() != 0)
-        return true;
-
-    return false;
-}
-*/
 void MainWindow::search()
 {
     ui.clearSearchRecord->setEnabled(true);
@@ -515,8 +523,8 @@ void MainWindow::search()
                 if (tempSearchFlag)
                     ++counterSearchRecords;
             }
-            ui.label_4->setText(tr("Found: ") + QString::number(counterSearchRecords));
-            ui.label_4->show();
+            ui.foundTextLabel->setText(tr("Found: ") + QString::number(counterSearchRecords));
+            ui.foundTextLabel->show();
         }
         else
         {
@@ -549,6 +557,10 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     _firstRecord = 0;
     if (_searchFlag)
         _searchFlag = false;
+
+    if (ui.foundTextLabel->isVisible())
+        ui.foundTextLabel->hide();
+
     switchViewRecords(static_cast<size_t>(index));
     viewStep(static_cast<size_t>(index));
 }
@@ -556,13 +568,13 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 void MainWindow::viewCounterRecords(size_t first, size_t last, const recordPtr &ptr)
 {
     QString temp = QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
-    ui.label_3->setText(temp);
+    ui.recordRangeTextLabel->setText(temp);
 }
 
 void MainWindow::on_clearSearchRecord_clicked()
 {
     _searchFlag = false;
-    ui.label_4->hide();
+    ui.foundTextLabel->hide();
 
     size_t columnCount = ui.tableWidget->columnCount();
     size_t rowCount = ui.tableWidget->rowCount();
