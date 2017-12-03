@@ -18,6 +18,9 @@
 #include <QUrl>
 #include <QVector>
 #include <QSharedPointer>
+#include <memory>
+#include <functional>
+#include <type_traits>
 
 
 class Export;
@@ -49,6 +52,7 @@ public:
     ~MainWindow();
     QString getTableField(const char *);
 
+    using LibGuard = std::unique_ptr<std::remove_pointer<HMODULE>::type, std::function<void(HMODULE)>>;
     using recordPtr = QSharedPointer<IRecordsStream>;
 
 protected:
@@ -74,7 +78,7 @@ private slots:
 
     void on_searchButton_clicked();
 
-    void on_chooseProfile_activated(int index);
+    void on_chooseProfile_currentIndexChanged(int index);
 
     void on_tabWidget_currentChanged(int index);
 
@@ -85,6 +89,12 @@ private slots:
     void slotMenuExport();
 
 private:
+    //dll load
+    const wchar_t* dllname;
+    LibGuard dll_load;
+    //lib storage
+    IStorageFactory* DLLStorage;
+
     Ui::MainWindow ui;
     Export *_exportFileWindow;
     ContextMenu *_menu;
@@ -106,7 +116,6 @@ private:
     const recordPtr & getPtrByTabIndex(size_t);
     const recordPtr & getPtr(ERecordTypes, size_t);
 
-
     struct ProfileRecordData
     {
         recordPtr historyRecord;
@@ -117,15 +126,10 @@ private:
 
     QVector<ProfileRecordData> _allProfiles;
 
-
     QTranslator m_translator;
     QTranslator m_translatorQt;
     QString m_currLang;
     QString m_langPath;
-
-
-
-
 
     size_t _firstRecord;
     size_t oldStep;
@@ -133,17 +137,7 @@ private:
     size_t _allAmountProfile;
     bool _searchFlag;
 
-
     std::vector<size_t> stepForTabs;
-
-    //dll load
-    const wchar_t* dllname;
-    HINSTANCE dll_load;
-    //global access to storage
-    IStorageFactory* DLLStorage;
-
-
-
 };
 
 #endif // MAINWINDOW_H

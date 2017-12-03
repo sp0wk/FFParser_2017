@@ -8,6 +8,8 @@ using recordPtr = MainWindow::recordPtr;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    dllname(L"FFParser_DLL.dll"),
+    dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); }),
     _exportFileWindow(new Export(this)),
     _menu(new ContextMenu(this)),
     _firstRecord(0),
@@ -20,17 +22,14 @@ MainWindow::MainWindow(QWidget *parent) :
     createLanguageMenu();
     createFileMenu();
 
-
-    //dll load
-    dllname = L"FFParser_DLL.dll";
-
-    dll_load = LoadLibrary(dllname);
-
-    if (!dll_load) {
+    if (dll_load.get() == nullptr) {
+        QMessageBox::warning(this, "Warning",
+                             tr("Couldn't load FFParser_DLL!\n"),
+                             QMessageBox::Ok);
         exit(1);
     }
 
-    GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load, "GetStorage");
+    GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
 
     DLLStorage = dll_getstorage();
 
@@ -39,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _allProfiles.resize(_allAmountProfile);
     // Create records
-    for (size_t i = 0; i < _allProfiles.size(); ++i)
+    for (int i = 0; i < _allProfiles.size(); ++i)
     {
         _allProfiles[i].historyRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::HISTORY, i));
         _allProfiles[i].bookmarksRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, i));
@@ -58,7 +57,7 @@ void MainWindow::createFileMenu()
 
 void MainWindow::slotMenuExport()
 {
-    for (size_t i = 0; i < ui.chooseProfile->count(); ++i)
+    for (int i = 0; i < ui.chooseProfile->count(); ++i)
         _exportFileWindow->setProfile(ui.chooseProfile->itemText(i));
 
     _exportFileWindow->addProfileCombobox();
@@ -87,8 +86,6 @@ const recordPtr & MainWindow::getPtr(ERecordTypes type, size_t numberProfile)
 
 const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
 {
-    ERecordTypes type;
-
     switch (index)
     {
     case 0:
@@ -215,7 +212,6 @@ bool MainWindow::initialLoadRecord(const recordPtr &ptr)
 
 MainWindow::~MainWindow()
 {
-    FreeLibrary(dll_load);
     delete _exportFileWindow;
     delete _menu;
 }
@@ -241,6 +237,7 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
 
     connect(ui.tableWidget, SIGNAL(clicked(QModelIndex)), this, SLOT(slotCloseContextMenu()));
     connect(ui.tableWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
+    connect(ui.chooseProfile, SIGNAL(currentIndexChanged(int)), this, SLOT(on_chooseProfile_currentIndexChanged(int)));
 }
 
 void MainWindow::slotCustomMenuRequested(QPoint pos)
@@ -542,13 +539,6 @@ void MainWindow::on_searchButton_clicked()
     search();
 }
 
-void MainWindow::on_chooseProfile_activated(int index)
-{
-    _profileNumber = static_cast<size_t>(index);
-    _firstRecord = 0;
-    switchViewRecords(ui.tabWidget->currentIndex());
-}
-
 void MainWindow::viewStep(size_t indexTab)
 {
     ui.spinBox->setValue(stepForTabs[indexTab]);
@@ -577,9 +567,9 @@ void MainWindow::on_clearSearchRecord_clicked()
     size_t columnCount = ui.tableWidget->columnCount();
     size_t rowCount = ui.tableWidget->rowCount();
 
-    for (int i = 0; i < rowCount; ++i)
+    for (size_t i = 0; i < rowCount; ++i)
     {
-        for (int  j = 0; j < columnCount; ++j)
+        for (size_t  j = 0; j < columnCount; ++j)
         {
             ui.tableWidget->item(i, j)->setData(Qt::BackgroundRole, QColor (255, 255, 255));
         }
@@ -587,4 +577,11 @@ void MainWindow::on_clearSearchRecord_clicked()
 
     ui.lineEdit->setText("");
     ui.clearSearchRecord->setEnabled(false);
+}
+
+void MainWindow::on_chooseProfile_currentIndexChanged(int index)
+{
+    _profileNumber = static_cast<size_t>(index);
+    _firstRecord = 0;
+    switchViewRecords(ui.tabWidget->currentIndex());
 }
