@@ -169,30 +169,45 @@ void MainWindow::viewRecord(const recordPtr &ptr)
 
         ptr->setCurrentRecord(_firstRecord);
 
-        size_t iterator = 0;
-
         size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
         size_t total = ptr->getTotalRecords();
-        if (tempStep > total)
-            stepForTabs[ui.tabWidget->currentIndex()] = total;
 
-        for (size_t i = _firstRecord; i < _firstRecord + stepForTabs[ui.tabWidget->currentIndex()]; ++i)
+        if (tempStep > total) {
+            stepForTabs[ui.tabWidget->currentIndex()] = total;
+        }
+
+        QStringList actualRowNumbers;
+
+        size_t iterator = 0;
+        size_t max_count = _firstRecord + stepForTabs[ui.tabWidget->currentIndex()];
+
+        //read records to table
+        for (size_t i = _firstRecord; i < max_count; ++i)
         {
             ui.tableWidget->insertRow(iterator);
+
+            //add actual row number
+            actualRowNumbers.push_back(QString::number(i + 1));
+
             size_t counter = 0;
             while (onerec->getFieldValue(counter) != nullptr)
             {
                 ui.tableWidget->setItem(iterator, counter, new QTableWidgetItem(onerec->getFieldValue(counter)));
                 ++counter;
             }
+
             ++iterator;
             onerec = ptr->getNextRecord();
 
             if (onerec == nullptr)
                 break;
         }
+
         viewCounterRecords(_firstRecord, _firstRecord + iterator, ptr);
         oldStep = stepForTabs[ui.tabWidget->currentIndex()];
+
+        //set actual row numbers
+        ui.tableWidget->setVerticalHeaderLabels(actualRowNumbers);
     }
 }
 
