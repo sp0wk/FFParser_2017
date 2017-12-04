@@ -57,7 +57,7 @@ namespace FFParser {
 		if (auto file_sh = _file_accessor_ref.lock()) {
 			getRecordsFromDB(file_sh->getPathToResource(EResourcePaths::DATABASE, profile), _history_count_query);
 
-			return std::stoi(_db_records[0][0]);
+			return _db_records.size() > 0 ? std::stoi(_db_records[0][0]) : 0;
 		}
 
 		return 0;
