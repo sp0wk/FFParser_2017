@@ -32,7 +32,7 @@ void ContextMenu::slotOpenFile()
     QUrl temp = QUrl::fromLocalFile(_mainwindow->getTableField("path"));
     if (!QDesktopServices::openUrl(temp))
     {
-        QMessageBox::warning(this, "Warning",
+        QMessageBox::warning(_mainwindow, "Warning",
                              tr("This is not path file!\n"),
                              QMessageBox::Ok);
     }
@@ -48,7 +48,7 @@ void ContextMenu::slotOpenUrl()
 
     if (!QDesktopServices::openUrl(temp))
     {
-        QMessageBox::warning(this, "Warning",
+        QMessageBox::warning(_mainwindow, "Warning",
                              tr("This is not URL address!\n"),
                              QMessageBox::Ok);
     }

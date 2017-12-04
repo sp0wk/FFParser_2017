@@ -92,7 +92,10 @@ private slots:
 
     void slotCustomMenuRequested(QPoint pos);
     void slotCloseContextMenu();
+    void slotOpenSelectedFileMenu();
+    void slotExportSelectedFile();
     void slotMenuExport();
+    void slotExitProgram();
 
 private:
     //dll load

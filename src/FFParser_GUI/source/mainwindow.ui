@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Firefox Cache/History Parser</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>

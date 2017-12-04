@@ -3,6 +3,7 @@
 #include <QVariant>
 #include "contextmenu.h"
 #include "export.h"
+#include "exportcachefiledialog.h"
 
 using recordPtr = MainWindow::recordPtr;
 
@@ -23,6 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
     createLanguageMenu();
     createFileMenu();
 
+    QString appPath = QApplication::applicationDirPath();
+    QIcon icon(appPath.append("/FFParser_GUI.ico"));
+    this->setWindowIcon(icon);
+
     if (dll_load.get() == nullptr) {
         QMessageBox::warning(this, "Warning",
                              tr("Couldn't load FFParser_DLL!\n"),
@@ -33,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent) :
     GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
 
     DLLStorage = dll_getstorage();
-
 
     _allAmountProfile = DLLStorage->getNumberOfProfiles();
     setNameProfile();
@@ -52,9 +56,43 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::createFileMenu()
 {
+    QAction *openFileMenu = new QAction(tr("Open selected file"), ui.menuFile);
+    ui.menuFile->addAction(openFileMenu);
+    connect(openFileMenu, &QAction::triggered, this, &MainWindow::slotOpenSelectedFileMenu);
+
+    QAction *exportFile = new QAction(tr("Export selected file"), ui.menuFile);
+    ui.menuFile->addAction(exportFile);
+    connect(exportFile, &QAction::triggered, this, &MainWindow::slotExportSelectedFile);
+
+    ui.menuFile->addSeparator();
+
     QAction *exportMenu = new QAction(tr("Export"), ui.menuFile);
     ui.menuFile->addAction(exportMenu);
     connect(exportMenu, &QAction::triggered, this, &MainWindow::slotMenuExport);
+
+    ui.menuFile->addSeparator();
+
+    QAction *exitMenu = new QAction(tr("Exit"), ui.menuFile);
+    ui.menuFile->addAction(exitMenu);
+    connect(exitMenu, &QAction::triggered, this, &MainWindow::slotExitProgram);
+}
+
+void MainWindow::slotOpenSelectedFileMenu()
+{
+    QUrl temp = QUrl::fromLocalFile(getTableField("path"));
+    if (!QDesktopServices::openUrl(temp))
+    {
+        QMessageBox::warning(this, "Warning",
+                             tr("This is not path file!\n"),
+                             QMessageBox::Ok);
+    }
+}
+
+
+void MainWindow::slotExportSelectedFile()
+{
+    ExportCacheFileDialog exportCache(this);
+    exportCache.exec();
 }
 
 void MainWindow::slotMenuExport()
@@ -63,6 +101,18 @@ void MainWindow::slotMenuExport()
         _exportFileWindow->addProfileToCombobox(ui.chooseProfile->itemText(i));
 
     _exportFileWindow->show();
+}
+
+void MainWindow::slotExitProgram()
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question(this, "Close",
+                                                               tr("Do you want to close FFParser?\n"),
+                                                               QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                               QMessageBox::Yes);
+    if (resBtn == QMessageBox::Yes)
+    {
+        QApplication::quit();
+    }
 }
 
 const recordPtr & MainWindow::getPtr(ERecordTypes type, size_t numberProfile)
@@ -342,9 +392,8 @@ void MainWindow::createLanguageMenu(void)
         locale.remove(0, locale.indexOf('_') + 1);      // "ru"
 
         QString lang = QLocale::languageToString(QLocale(locale).language());
-        QIcon ico(QString("%1/%2.png").arg(m_langPath).arg(locale));
 
-        QAction *action = new QAction(ico, lang, this);
+        QAction *action = new QAction(lang, this);
         action->setCheckable(true);
         action->setData(locale);
 
@@ -356,7 +405,6 @@ void MainWindow::createLanguageMenu(void)
         {
             action->setChecked(true);
         }
-        setWindowIcon(action->icon());
     }
 }
 
@@ -367,7 +415,6 @@ void MainWindow::slotLanguageChanged(QAction* action)
     {
         // load the language dependant on the action content
         loadLanguage(action->data().toString());
-        setWindowIcon(action->icon());
     }
 }
 
