@@ -109,7 +109,7 @@
     <string>Cache files</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="chooseProfile">
+  <widget class="QComboBox" name="profilesToExport">
    <property name="geometry">
     <rect>
      <x>92</x>

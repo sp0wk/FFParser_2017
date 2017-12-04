@@ -14,10 +14,7 @@ public:
     explicit ContextMenu(MainWindow *parent);
     ~ContextMenu() = default;
 
-    virtual void popup(const QPoint &pos, QAction *at = nullptr)
-    {
-        _menu.popup(pos, at);
-    }
+    virtual void popup(const QPoint &pos, QAction *at = nullptr);
 
 public slots:
     void slotOpenFile();

@@ -20,8 +20,6 @@ public:
     explicit Export(MainWindow *parent);
     ~Export();
 
-    void addProfileToCombobox(const QString &);
-
     void exportData();
     virtual void show();
 
@@ -34,8 +32,6 @@ private slots:
 private:
     Ui::Export *ui;
     MainWindow *_mainwindow;
-
-
 };
 
 #endif // EXPORT_H

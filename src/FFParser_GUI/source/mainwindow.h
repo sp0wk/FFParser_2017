@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "ui_mainwindow.h"
+
 #include <QMainWindow>
 #include <QString>
 #include <QTranslator>
@@ -36,9 +38,6 @@ using namespace FFParser;
 typedef IStorageFactory* (CALL *GetStorageFunc)();
 
 
-#include "ui_mainwindow.h"
-
-
 namespace Ui {
 class MainWindow;
 }
@@ -55,8 +54,10 @@ public:
     using LibGuard = std::unique_ptr<std::remove_pointer<HMODULE>::type, std::function<void(HMODULE)>>;
     using recordPtr = QSharedPointer<IRecordsStream>;
 
+    QStringList getProfiles();
     const recordPtr & getPtrByTabIndex(size_t);
     const recordPtr & getPtr(ERecordTypes, size_t);
+    ERecordTypes getCurrentTabType();
     QString getTableField(const char *);
     IDataExporter * getExporter();
     void exportSelectedFile(const char *, bool);
@@ -84,7 +85,7 @@ private slots:
 
     void on_searchButton_clicked();
 
-    void on_chooseProfile_currentIndexChanged(int index);
+    void on_chooseProfile_activated(int index);
 
     void on_tabWidget_currentChanged(int index);
 
@@ -96,6 +97,8 @@ private slots:
     void slotExportSelectedFile();
     void slotMenuExport();
     void slotExitProgram();
+
+    void on_tableWidget_itemSelectionChanged();
 
 private:
     //dll load
@@ -140,7 +143,7 @@ private:
     QString m_langPath;
 
     size_t _firstRecord;
-    size_t oldStep;
+    size_t _oldStep;
     size_t _profileNumber;
     size_t _allAmountProfile;
     bool _searchFlag;

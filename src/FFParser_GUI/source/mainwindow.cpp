@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include <QDebug>
 #include <QVariant>
 #include "contextmenu.h"
 #include "export.h"
@@ -15,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _exportFileWindow(new Export(this)),
     _menu(new ContextMenu(this)),
     _firstRecord(0),
-    oldStep(25),
+    _oldStep(25),
     _profileNumber(0),
     _allAmountProfile(0),
     _searchFlag(false)
@@ -29,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowIcon(icon);
 
     if (dll_load.get() == nullptr) {
-        QMessageBox::warning(this, "Warning",
+        QMessageBox::warning(this, tr("Warning"),
                              tr("Couldn't load FFParser_DLL!\n"),
                              QMessageBox::Ok);
         exit(1);
@@ -54,13 +53,22 @@ MainWindow::MainWindow(QWidget *parent) :
     stepForTabs.resize(ui.tabWidget->count());
 }
 
+MainWindow::~MainWindow()
+{
+    delete _exportFileWindow;
+    delete _menu;
+}
+
+
 void MainWindow::createFileMenu()
 {
     QAction *openFileMenu = new QAction(tr("Open selected file"), ui.menuFile);
+    openFileMenu->setDisabled(true);
     ui.menuFile->addAction(openFileMenu);
     connect(openFileMenu, &QAction::triggered, this, &MainWindow::slotOpenSelectedFileMenu);
 
     QAction *exportFile = new QAction(tr("Export selected file"), ui.menuFile);
+    exportFile->setDisabled(true);
     ui.menuFile->addAction(exportFile);
     connect(exportFile, &QAction::triggered, this, &MainWindow::slotExportSelectedFile);
 
@@ -83,7 +91,7 @@ void MainWindow::slotOpenSelectedFileMenu()
     if (!QDesktopServices::openUrl(temp))
     {
         QMessageBox::warning(this, "Warning",
-                             tr("This is not path file!\n"),
+                             tr("Cannot open file\n"),
                              QMessageBox::Ok);
     }
 }
@@ -97,22 +105,42 @@ void MainWindow::slotExportSelectedFile()
 
 void MainWindow::slotMenuExport()
 {
-    for (int i = 0; i < ui.chooseProfile->count(); ++i)
-        _exportFileWindow->addProfileToCombobox(ui.chooseProfile->itemText(i));
-
     _exportFileWindow->show();
 }
 
 void MainWindow::slotExitProgram()
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question(this, "Close",
-                                                               tr("Do you want to close FFParser?\n"),
+    QMessageBox::StandardButton resBtn = QMessageBox::question(this, tr("Close"),
+                                                               tr("Close FFParser?\n"),
                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
                                                                QMessageBox::Yes);
     if (resBtn == QMessageBox::Yes)
     {
         QApplication::quit();
     }
+}
+
+
+ERecordTypes MainWindow::getCurrentTabType()
+{
+    switch (ui.tabWidget->currentIndex())
+    {
+        case 0: return ERecordTypes::HISTORY;
+        case 1: return ERecordTypes::BOOKMARKS;
+        case 2: return ERecordTypes::LOGINS;
+        case 3: return ERecordTypes::CACHEFILES;
+    }
+}
+
+
+QStringList MainWindow::getProfiles()
+{
+    QStringList profiles;
+    for (int i = 0; i < ui.chooseProfile->count(); ++i) {
+        profiles.push_back(ui.chooseProfile->itemText(i));
+    }
+
+    return profiles;
 }
 
 const recordPtr & MainWindow::getPtr(ERecordTypes type, size_t numberProfile)
@@ -187,7 +215,7 @@ void MainWindow::setNameColumnTable(const recordPtr &ptr)
     }
     else
     {
-        QMessageBox::warning(this, "Warning",
+        QMessageBox::warning(this, tr("Warning"),
                              tr("Required entries were not found on your computer!\n"),
                              QMessageBox::Ok);
     }
@@ -209,7 +237,7 @@ void MainWindow::removeRowTable(size_t counter)
 }
 void MainWindow::viewRecord(const recordPtr &ptr)
 {
-    removeRowTable(oldStep);
+    removeRowTable(_oldStep);
 
     if (initialLoadRecord(ptr))
     {
@@ -254,7 +282,7 @@ void MainWindow::viewRecord(const recordPtr &ptr)
         }
 
         viewCounterRecords(_firstRecord, _firstRecord + iterator, ptr);
-        oldStep = stepForTabs[ui.tabWidget->currentIndex()];
+        _oldStep = stepForTabs[ui.tabWidget->currentIndex()];
 
         //set actual row numbers
         ui.tableWidget->setVerticalHeaderLabels(actualRowNumbers);
@@ -263,8 +291,9 @@ void MainWindow::viewRecord(const recordPtr &ptr)
 
 void MainWindow::setNameProfile()
 {
+    ui.chooseProfile->clear();
     for (size_t counter = 0; counter < _allAmountProfile; ++counter)
-        ui.chooseProfile->addItem(DLLStorage->getProfileName(counter), counter);
+        ui.chooseProfile->addItem(DLLStorage->getProfileName(counter));
 }
 
 
@@ -286,20 +315,13 @@ bool MainWindow::initialLoadRecord(const recordPtr &ptr)
     }
     else
     {
-        QMessageBox::warning(this, "Warning",
+        QMessageBox::warning(this, tr("Warning"),
                              tr("Required entries were not found on your computer!\n"),
                              QMessageBox::Ok);
 
         return false;
     }
 }
-
-MainWindow::~MainWindow()
-{
-    delete _exportFileWindow;
-    delete _menu;
-}
-
 
 
 void MainWindow::createUI(const QStringList &headers, size_t number)
@@ -321,7 +343,6 @@ void MainWindow::createUI(const QStringList &headers, size_t number)
 
     connect(ui.tableWidget, SIGNAL(clicked(QModelIndex)), this, SLOT(slotCloseContextMenu()));
     connect(ui.tableWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(slotCustomMenuRequested(QPoint)));
-    connect(ui.chooseProfile, SIGNAL(currentIndexChanged(int)), this, SLOT(on_chooseProfile_currentIndexChanged(int)));
 }
 
 void MainWindow::slotCustomMenuRequested(QPoint pos)
@@ -352,8 +373,8 @@ QString MainWindow::getTableField(const char *fieldName)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question(this, "Close",
-                                                               tr("Do you want to close FFParser?\n"),
+    QMessageBox::StandardButton resBtn = QMessageBox::question(this, tr("Close"),
+                                                               tr("Close FFParser?\n"),
                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
                                                                QMessageBox::Yes);
     if (resBtn != QMessageBox::Yes)
@@ -591,14 +612,14 @@ void MainWindow::search()
         else
         {
             QMessageBox::warning(this, tr("Warning"),
-                                 tr("The records are not load!\n"),
+                                 tr("The records are not loaded\n"),
                                  QMessageBox::Ok);
         }
     }
     else
     {
         QMessageBox::warning(this, tr("Warning"),
-                             tr("Input value very small!\n"),
+                             tr("Search text's too short\n"),
                              QMessageBox::Ok);
     }
 }
@@ -617,6 +638,7 @@ void MainWindow::viewStep(size_t indexTab)
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     _firstRecord = 0;
+
     if (_searchFlag)
         _searchFlag = false;
 
@@ -653,9 +675,24 @@ void MainWindow::on_clearSearchRecord_clicked()
     ui.clearSearchRecord->setEnabled(false);
 }
 
-void MainWindow::on_chooseProfile_currentIndexChanged(int index)
+void MainWindow::on_chooseProfile_activated(int index)
 {
     _profileNumber = static_cast<size_t>(index);
     _firstRecord = 0;
     switchViewRecords(ui.tabWidget->currentIndex());
 }
+
+void MainWindow::on_tableWidget_itemSelectionChanged()
+{
+    //update main menu
+    if (getCurrentTabType() != ERecordTypes::CACHEFILES) {
+        ui.menuFile->actions().at(0)->setDisabled(true);
+        ui.menuFile->actions().at(1)->setDisabled(true);
+    }
+    else {
+        ui.menuFile->actions().at(0)->setEnabled(true);
+        ui.menuFile->actions().at(1)->setEnabled(true);
+    }
+}
+
+

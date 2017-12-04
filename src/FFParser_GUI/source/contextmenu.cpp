@@ -16,8 +16,8 @@ ContextMenu::ContextMenu(MainWindow *parent)
     connect(openUrl, SIGNAL(triggered(bool)), this, SLOT(slotOpenUrl()));
     connect(exports, SIGNAL(triggered(bool)), this, SLOT(slotExport()));
 
-    _menu.addAction(openFile);
     _menu.addAction(openUrl);
+    _menu.addAction(openFile);
     _menu.addAction(exports);
 }
 
@@ -27,13 +27,27 @@ void ContextMenu::leaveEvent(QEvent *event)
 }
 
 
+void ContextMenu::popup(const QPoint &pos, QAction *at)
+{
+    if (_mainwindow->getCurrentTabType() != ERecordTypes::CACHEFILES) {
+        _menu.actions().at(1)->setDisabled(true);
+        _menu.actions().at(2)->setDisabled(true);
+    }
+    else {
+        _menu.actions().at(1)->setEnabled(true);
+        _menu.actions().at(2)->setEnabled(true);
+    }
+
+    _menu.popup(pos, at);
+}
+
 void ContextMenu::slotOpenFile()
 {
     QUrl temp = QUrl::fromLocalFile(_mainwindow->getTableField("path"));
     if (!QDesktopServices::openUrl(temp))
     {
         QMessageBox::warning(_mainwindow, "Warning",
-                             tr("This is not path file!\n"),
+                             tr("Cannot open file\n"),
                              QMessageBox::Ok);
     }
 }
@@ -49,7 +63,7 @@ void ContextMenu::slotOpenUrl()
     if (!QDesktopServices::openUrl(temp))
     {
         QMessageBox::warning(_mainwindow, "Warning",
-                             tr("This is not URL address!\n"),
+                             tr("Cannot open URL\n"),
                              QMessageBox::Ok);
     }
 }

@@ -19,17 +19,12 @@ Export::~Export()
     delete ui;
 }
 
-void Export::addProfileToCombobox(const QString &item)
-{
-    ui->chooseProfile->addItem(item);
-}
-
 void Export::exportData()
 {
     IDataExporter *exportPtr = _mainwindow->getExporter();
 
 
-    size_t profileNumber = ui->chooseProfile->currentIndex();
+    size_t profileNumber = ui->profilesToExport->currentIndex();
     QString path = ui->pathInputText->text();
 
     bool md5file = ui->calculateMD5CheckBox->isChecked();
@@ -109,12 +104,17 @@ void Export::exportData()
 
 void Export::show()
 {
+    //set profiles
+    ui->profilesToExport->clear();
+    ui->profilesToExport->addItems(_mainwindow->getProfiles());
+
     ui->progressBar->setValue(0);
     ui->historyCheckBox->setChecked(false);
     ui->bookmarksCheckBox->setChecked(false);
     ui->loginsCheckBox->setChecked(false);
     ui->cacheCheckBox->setChecked(false);
     ui->cacheFilesCheckBox->setChecked(false);
+
     QDialog::show();
 }
 
