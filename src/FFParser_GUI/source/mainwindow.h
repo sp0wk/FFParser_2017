@@ -63,6 +63,7 @@ public:
     void exportSelectedFile(const char *, bool);
     void exportAndOpenSelected();
     void showSelectedFileInExplorer();
+    QTableWidgetItem* getLastClickedItem();
 
 protected:
     void changeEvent(QEvent *);
@@ -102,6 +103,7 @@ private slots:
     void slotExitProgram();
 
     void on_tableWidget_itemSelectionChanged();
+    void on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
 
 private:
     //dll load
@@ -145,6 +147,8 @@ private:
     QTranslator m_translatorQt;
     QString m_currLang;
     QString m_langPath;
+
+    QTableWidgetItem *_lastClickedItem;
 
     size_t _firstRecord;
     size_t _oldStep;

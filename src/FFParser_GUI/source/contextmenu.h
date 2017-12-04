@@ -17,6 +17,7 @@ public:
     virtual void popup(const QPoint &pos, QAction *at = nullptr);
 
 public slots:
+    void slotCopyText();
     void slotOpenFile();
     void slotOpenUrl();
     void slotExport();

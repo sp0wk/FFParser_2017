@@ -242,6 +242,12 @@ void MainWindow::showSelectedFileInExplorer()
     process->start("explorer.exe", args);
 }
 
+
+QTableWidgetItem* MainWindow::getLastClickedItem()
+{
+    return _lastClickedItem;
+}
+
 const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
 {
     switch (index)
@@ -764,3 +770,7 @@ void MainWindow::on_tableWidget_itemSelectionChanged()
 }
 
 
+void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous)
+{
+    _lastClickedItem = current;
+}
