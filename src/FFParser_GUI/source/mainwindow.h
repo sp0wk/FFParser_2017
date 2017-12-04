@@ -101,6 +101,9 @@ private slots:
     void slotShowInExplorer();
     void slotMenuExport();
     void slotExitProgram();
+    void slotAboutMenu();
+    void slotOpenCacheFolder();
+    void slotOpenProfileFolder();
 
     void on_tableWidget_itemSelectionChanged();
     void on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
@@ -124,13 +127,16 @@ private:
 
     void createLanguageMenu(void);
     void createFileMenu();
+    void createHelpMenu();
 
-    bool initialLoadRecord(const recordPtr &);
+    void initialLoadRecord(const recordPtr &);
     void checkNewRecords(size_t, size_t, size_t);
     bool isOutOfRange(size_t, size_t, size_t);
     void viewStep(size_t);
     void viewCounterRecords(size_t, size_t, const recordPtr &);
     void search();
+    void setMainFormEnabled(bool);
+    void initialLoad();
 
 
     struct ProfileRecordData

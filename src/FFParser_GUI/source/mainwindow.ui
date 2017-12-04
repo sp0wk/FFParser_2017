@@ -193,6 +193,9 @@
     <property name="maximum">
      <number>999999999</number>
     </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
     <property name="value">
      <number>25</number>
     </property>
@@ -291,14 +294,14 @@
      <string>File</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuAbout">
+   <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>About</string>
+     <string>Help</string>
     </property>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuLanguage"/>
-   <addaction name="menuAbout"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
