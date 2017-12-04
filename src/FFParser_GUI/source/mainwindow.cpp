@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QVariant>
+#include <QProcess>
 #include "contextmenu.h"
 #include "export.h"
 #include "exportcachefiledialog.h"
@@ -9,7 +10,8 @@ using recordPtr = MainWindow::recordPtr;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     dllname(L"FFParser_DLL.dll"),
-    tempDir(QCoreApplication::applicationFilePath() + "/temp"),
+    tempDirPath(QCoreApplication::applicationDirPath() + "/temp/"),
+    tempDir(tempDirPath),
     dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); }),
     _exportFileWindow(new Export(this)),
     _menu(new ContextMenu(this)),
@@ -22,6 +24,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.setupUi(this);
     createLanguageMenu();
     createFileMenu();
+
+    //create folder for temporary files
+    if (!tempDir.exists()) {
+        tempDir.mkdir(tempDirPath);
+    }
 
     QString appPath = QApplication::applicationDirPath();
     QIcon icon(appPath.append("/FFParser_GUI.ico"));
@@ -57,6 +64,9 @@ MainWindow::~MainWindow()
 {
     delete _exportFileWindow;
     delete _menu;
+
+    //delete temp dir
+    tempDir.removeRecursively();
 }
 
 
@@ -71,6 +81,11 @@ void MainWindow::createFileMenu()
     exportFile->setDisabled(true);
     ui.menuFile->addAction(exportFile);
     connect(exportFile, &QAction::triggered, this, &MainWindow::slotExportSelectedFile);
+
+    QAction *showInExplr = new QAction(tr("Show file in explorer"), ui.menuFile);
+    showInExplr->setDisabled(true);
+    ui.menuFile->addAction(showInExplr);
+    connect(showInExplr, &QAction::triggered, this, &MainWindow::slotShowInExplorer);
 
     ui.menuFile->addSeparator();
 
@@ -87,13 +102,7 @@ void MainWindow::createFileMenu()
 
 void MainWindow::slotOpenSelectedFileMenu()
 {
-    QUrl temp = QUrl::fromLocalFile(getTableField("path"));
-    if (!QDesktopServices::openUrl(temp))
-    {
-        QMessageBox::warning(this, "Warning",
-                             tr("Cannot open file\n"),
-                             QMessageBox::Ok);
-    }
+    this->exportAndOpenSelected();
 }
 
 
@@ -101,6 +110,11 @@ void MainWindow::slotExportSelectedFile()
 {
     ExportCacheFileDialog exportCache(this);
     exportCache.exec();
+}
+
+void MainWindow::slotShowInExplorer()
+{
+    this->showSelectedFileInExplorer();
 }
 
 void MainWindow::slotMenuExport()
@@ -174,6 +188,58 @@ void MainWindow::exportSelectedFile(const char *path, bool md5)
         IDataExporter *exporter = DLLStorage->getDataExporter();
         exporter->exportCacheFile(recordPtr, path, md5);
     }
+}
+
+
+void MainWindow::exportAndOpenSelected()
+{
+    //get file name
+    QString fname = getTableField("filename");
+
+    //get cache id
+    QString cache_id = getTableField("path");
+    int pos = cache_id.lastIndexOf("\\");
+    cache_id.remove(0, pos+1);
+    cache_id.insert(0, " (");
+    cache_id += ")";
+
+    //set path to file with id
+    QString id_file = fname;
+    pos = id_file.lastIndexOf(".");
+    id_file.insert(pos, cache_id);
+
+    //check if file with cache id exists
+    QUrl path = QUrl::fromLocalFile(tempDirPath + id_file);
+    if (!QDesktopServices::openUrl(path))
+    {
+        //try unique file
+        QString temp = tempDirPath + fname;
+        if (!QDesktopServices::openUrl(temp))
+        {
+            //export selected file
+            exportSelectedFile(tempDirPath.toStdString().c_str(), false);
+
+            //open file
+            if (!QDesktopServices::openUrl(temp)) {
+                QMessageBox::warning(this, "Warning",
+                                             tr("Cannot open file\n"),
+                                             QMessageBox::Ok);
+            }
+        }
+    }
+}
+
+
+void MainWindow::showSelectedFileInExplorer()
+{
+    QString path = this->getTableField("path");
+
+    QStringList args;
+
+    args << "/select," << QDir::toNativeSeparators(path);
+
+    QProcess *process = new QProcess(this);
+    process->start("explorer.exe", args);
 }
 
 const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
@@ -688,10 +754,12 @@ void MainWindow::on_tableWidget_itemSelectionChanged()
     if (getCurrentTabType() != ERecordTypes::CACHEFILES) {
         ui.menuFile->actions().at(0)->setDisabled(true);
         ui.menuFile->actions().at(1)->setDisabled(true);
+        ui.menuFile->actions().at(2)->setDisabled(true);
     }
     else {
         ui.menuFile->actions().at(0)->setEnabled(true);
         ui.menuFile->actions().at(1)->setEnabled(true);
+        ui.menuFile->actions().at(2)->setEnabled(true);
     }
 }
 

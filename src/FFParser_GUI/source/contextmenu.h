@@ -20,6 +20,7 @@ public slots:
     void slotOpenFile();
     void slotOpenUrl();
     void slotExport();
+    void slotShowInExplorer();
 
 private:
     void leaveEvent(QEvent *);

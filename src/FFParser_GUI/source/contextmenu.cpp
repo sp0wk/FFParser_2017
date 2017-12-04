@@ -8,17 +8,20 @@ ContextMenu::ContextMenu(MainWindow *parent)
       _mainwindow(parent)
 {
 
-    QAction *openFile = new QAction(trUtf8("Open File"), this);
     QAction *openUrl = new QAction(trUtf8("Open URL"), this);
+    QAction *openFile = new QAction(trUtf8("Open File"), this);
     QAction *exports = new QAction(trUtf8("Export"), this);
+    QAction *showExpl = new QAction(trUtf8("Show in explorer"), this);
 
-    connect(openFile, SIGNAL(triggered(bool)), this, SLOT(slotOpenFile()));
     connect(openUrl, SIGNAL(triggered(bool)), this, SLOT(slotOpenUrl()));
+    connect(openFile, SIGNAL(triggered(bool)), this, SLOT(slotOpenFile()));
     connect(exports, SIGNAL(triggered(bool)), this, SLOT(slotExport()));
+    connect(showExpl, SIGNAL(triggered(bool)), this, SLOT(slotShowInExplorer()));
 
     _menu.addAction(openUrl);
     _menu.addAction(openFile);
     _menu.addAction(exports);
+    _menu.addAction(showExpl);
 }
 
 void ContextMenu::leaveEvent(QEvent *event)
@@ -32,10 +35,12 @@ void ContextMenu::popup(const QPoint &pos, QAction *at)
     if (_mainwindow->getCurrentTabType() != ERecordTypes::CACHEFILES) {
         _menu.actions().at(1)->setDisabled(true);
         _menu.actions().at(2)->setDisabled(true);
+        _menu.actions().at(3)->setDisabled(true);
     }
     else {
         _menu.actions().at(1)->setEnabled(true);
         _menu.actions().at(2)->setEnabled(true);
+        _menu.actions().at(3)->setEnabled(true);
     }
 
     _menu.popup(pos, at);
@@ -43,14 +48,15 @@ void ContextMenu::popup(const QPoint &pos, QAction *at)
 
 void ContextMenu::slotOpenFile()
 {
-    QUrl temp = QUrl::fromLocalFile(_mainwindow->getTableField("path"));
-    if (!QDesktopServices::openUrl(temp))
-    {
-        QMessageBox::warning(_mainwindow, "Warning",
-                             tr("Cannot open file\n"),
-                             QMessageBox::Ok);
-    }
+    _mainwindow->exportAndOpenSelected();
 }
+
+
+void ContextMenu::slotShowInExplorer()
+{
+    _mainwindow->showSelectedFileInExplorer();
+}
+
 
 void ContextMenu::slotOpenUrl()
 {

@@ -61,6 +61,8 @@ public:
     QString getTableField(const char *);
     IDataExporter * getExporter();
     void exportSelectedFile(const char *, bool);
+    void exportAndOpenSelected();
+    void showSelectedFileInExplorer();
 
 protected:
     void changeEvent(QEvent *);
@@ -95,6 +97,7 @@ private slots:
     void slotCloseContextMenu();
     void slotOpenSelectedFileMenu();
     void slotExportSelectedFile();
+    void slotShowInExplorer();
     void slotMenuExport();
     void slotExitProgram();
 
@@ -106,7 +109,8 @@ private:
     LibGuard dll_load;
     //lib storage
     IStorageFactory* DLLStorage;
-    const QString tempDir;
+    const QString tempDirPath;
+    QDir tempDir;
 
     Ui::MainWindow ui;
     Export *_exportFileWindow;
