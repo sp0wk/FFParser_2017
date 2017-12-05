@@ -105,7 +105,7 @@
     <message>
         <location filename="../source/export.cpp" line="14"/>
         <source>Data export</source>
-        <translation></translation>
+        <translation>Экспорт данных</translation>
     </message>
 </context>
 <context>
@@ -140,36 +140,33 @@
         <source>Cache file export</source>
         <translation>Экспорт файла кэша</translation>
     </message>
+    <message>
+        <location filename="../source/exportcachefiledialog.cpp" line="24"/>
+        <source>Select Output Folder</source>
+        <translation>Выберите папку</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <source>MainWindow</source>
-        <translation type="vanished">FFParser</translation>
-    </message>
-    <message>
-        <source>Choose</source>
-        <translation type="vanished">Выберете</translation>
-    </message>
-    <message>
+        <location filename="../source/mainwindow.ui" line="104"/>
         <source>History</source>
-        <translation type="vanished">История</translation>
+        <translation>История</translation>
     </message>
     <message>
+        <location filename="../source/mainwindow.ui" line="109"/>
         <source>Bookmarks</source>
-        <translation type="vanished">Закладки</translation>
+        <translation>Закладки</translation>
     </message>
     <message>
+        <location filename="../source/mainwindow.ui" line="114"/>
+        <source>Logins</source>
+        <translation>Логины/пароли</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="119"/>
         <source>Cache</source>
-        <translation type="vanished">Кеш</translation>
-    </message>
-    <message>
-        <source>Paswords</source>
-        <translation type="vanished">Пароли</translation>
-    </message>
-    <message>
-        <source>Passwords</source>
-        <translation type="vanished">Пароли</translation>
+        <translation>Кэш</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="48"/>
@@ -184,14 +181,6 @@
     <message>
         <source>Choose profile:</source>
         <translation type="vanished">Выберете профиль</translation>
-    </message>
-    <message>
-        <source>Tab 1</source>
-        <translation type="vanished">Таб 1</translation>
-    </message>
-    <message>
-        <source>Tab 2</source>
-        <translation type="vanished">Таб 2</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="317"/>
@@ -214,26 +203,6 @@
         <translation>Профиль:</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.ui" line="104"/>
-        <source>История</source>
-        <translation>История</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="109"/>
-        <source>Закладки</source>
-        <translation>Закладки</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="114"/>
-        <source>Пароли и логины</source>
-        <translation>Пароли и логины</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="119"/>
-        <source>Кэш</source>
-        <translation>Кэш</translation>
-    </message>
-    <message>
         <location filename="../source/mainwindow.ui" line="149"/>
         <source>Set and View</source>
         <translation>Установить</translation>
@@ -241,17 +210,12 @@
     <message>
         <location filename="../source/mainwindow.ui" line="162"/>
         <source>Number of records to be displayed in one table</source>
-        <translation>Количество записей, отображаемых в одной таблице</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="223"/>
-        <source>0-0 / 0</source>
-        <translation>0-0 / 0</translation>
+        <translation>Количество записей в одной таблице</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="239"/>
         <source>Clear search</source>
-        <translation>Очистить поиск</translation>
+        <translation>Очистить</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="274"/>
@@ -269,101 +233,104 @@
         <translation>Помощь</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="88"/>
-        <location filename="../source/mainwindow.cpp" line="725"/>
-        <location filename="../source/mainwindow.cpp" line="732"/>
+        <location filename="../source/mainwindow.cpp" line="105"/>
+        <location filename="../source/mainwindow.cpp" line="701"/>
+        <location filename="../source/mainwindow.cpp" line="708"/>
         <source>Warning</source>
         <translation>Внимание</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="89"/>
+        <location filename="../source/mainwindow.cpp" line="106"/>
         <source>Couldn&apos;t load FFParser_DLL!
 </source>
         <translation>Невозможно загрузить FFParser_DDL!</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="104"/>
+        <location filename="../source/mainwindow.cpp" line="121"/>
         <source>About</source>
         <translation>О программе</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="112"/>
+        <location filename="../source/mainwindow.cpp" line="129"/>
         <source>About FFParser</source>
         <translation>О FFParser</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="113"/>
+        <location filename="../source/mainwindow.cpp" line="130"/>
         <source>Firefox Cache/History Parser
 Version: 1.0
 Developers: Igor Yarovoy, Dmitriy Voloshyn
 ©Apriorit, 2017</source>
-        <translation>Firefox Cache/History Parser Версия: 1.0 Разработчики: Игорь Яровой, Дмитрий Волошин ©Apriorit, 2017</translation>
+        <translation>Firefox Cache/History Parser
+Версия: 1.0
+Разработчики: Игорь Яровой, Дмитрий Волошин
+©Apriorit, 2017</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="121"/>
+        <location filename="../source/mainwindow.cpp" line="138"/>
         <source>Open selected file</source>
         <translation>Открыть выбранный файл</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="127"/>
+        <location filename="../source/mainwindow.cpp" line="144"/>
         <source>Export selected file</source>
         <translation>Экспортировать выбранный файл</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="133"/>
+        <location filename="../source/mainwindow.cpp" line="150"/>
         <source>Show file in explorer</source>
         <translation>Показать файл в проводнике</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="141"/>
+        <location filename="../source/mainwindow.cpp" line="158"/>
         <source>Open profile folder</source>
         <translation>Открыть папку профиля</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="146"/>
+        <location filename="../source/mainwindow.cpp" line="163"/>
         <source>Open cache folder</source>
         <translation>Открыть папку кэша</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="159"/>
+        <location filename="../source/mainwindow.cpp" line="176"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="213"/>
-        <location filename="../source/mainwindow.cpp" line="517"/>
+        <location filename="../source/mainwindow.cpp" line="230"/>
+        <location filename="../source/mainwindow.cpp" line="519"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="214"/>
-        <location filename="../source/mainwindow.cpp" line="518"/>
+        <location filename="../source/mainwindow.cpp" line="231"/>
+        <location filename="../source/mainwindow.cpp" line="520"/>
         <source>Close FFParser?
 </source>
         <translation>Закрыть FFParser?</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="311"/>
+        <location filename="../source/mainwindow.cpp" line="328"/>
         <source>Cannot open file
 </source>
         <translation>Невозможно открыть файл</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="720"/>
+        <location filename="../source/mainwindow.cpp" line="696"/>
         <source>Found: </source>
         <translation>Найдено:</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="726"/>
+        <location filename="../source/mainwindow.cpp" line="702"/>
         <source>The records are not loaded
 </source>
-        <translation>Записи не загружены!</translation>
+        <translation>Записи не загружены</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.cpp" line="733"/>
+        <location filename="../source/mainwindow.cpp" line="709"/>
         <source>Search text&apos;s too short
 </source>
-        <translation>Текст поиска слишком короткий!</translation>
+        <translation>Текст поиска слишком короткий</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="345"/>
@@ -383,38 +350,9 @@ Developers: Igor Yarovoy, Dmitriy Voloshyn
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="365"/>
-        <location filename="../source/mainwindow.cpp" line="152"/>
+        <location filename="../source/mainwindow.cpp" line="169"/>
         <source>Export</source>
         <translation>Экспорт</translation>
-    </message>
-    <message>
-        <source>size</source>
-        <translation type="vanished">размер</translation>
-    </message>
-    <message>
-        <source>creation time</source>
-        <translation type="vanished">время создания</translation>
-    </message>
-    <message>
-        <source>last modification time</source>
-        <translation type="vanished">время последней модификации</translation>
-    </message>
-    <message>
-        <source>last access time</source>
-        <translation type="vanished">время последнего изменения</translation>
-    </message>
-    <message>
-        <source>URL</source>
-        <translation type="vanished">url</translation>
-    </message>
-    <message>
-        <source>Do you want to close FFParser?
-</source>
-        <translation type="vanished">Вы действительно хотите закрыть FFParser?</translation>
-    </message>
-    <message>
-        <source>Current Language changed to %1</source>
-        <translation type="vanished">Current Language changed to %1</translation>
     </message>
 </context>
 </TS>

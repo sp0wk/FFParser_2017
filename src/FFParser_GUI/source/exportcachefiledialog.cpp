@@ -21,7 +21,7 @@ ExportCacheFileDialog::~ExportCacheFileDialog()
 
 void ExportCacheFileDialog::on_browseButton_clicked()
 {
-    QString path = QFileDialog::getExistingDirectory(0, ("Select Output Folder"), ui->pathInputText->text());
+    QString path = QFileDialog::getExistingDirectory(0, (tr("Select Output Folder")), ui->pathInputText->text());
     if (path != "")
         ui->pathInputText->setText(path);
 }

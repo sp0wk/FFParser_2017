@@ -5,16 +5,13 @@
 
 #include <QMainWindow>
 #include <QString>
-#include <QTranslator>
 #include <QDir>
 #include <QEvent>
-#include <QLocale>
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QTableWidgetItem>
 #include <QAbstractItemModel>
 #include <QApplication>
-#include <vector>
 #include <QMenu>
 #include <QDesktopServices>
 #include <QUrl>

@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include <QTranslator>
 #include <QString>
+#include <QLocale>
 
 class ChangeLanguage
 {

@@ -101,22 +101,22 @@
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>История</string>
+      <string>History</string>
      </attribute>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>Закладки</string>
+      <string>Bookmarks</string>
      </attribute>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Пароли и логины</string>
+      <string>Logins</string>
      </attribute>
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
-      <string>Кэш</string>
+      <string>Cache</string>
      </attribute>
     </widget>
    </widget>
@@ -309,7 +309,7 @@
      <x>0</x>
      <y>0</y>
      <width>944</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLanguage">
