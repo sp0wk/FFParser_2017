@@ -2,9 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>ChangeLanguage</name>
-</context>
-<context>
     <name>ContextMenu</name>
     <message>
         <location filename="../source/contextmenu.cpp" line="12"/>
@@ -146,11 +143,31 @@
     <message>
         <location filename="../source/exportcachefiledialog.cpp" line="24"/>
         <source>Select Output Folder</source>
-        <translation>Select output folder</translation>
+        <translation>Select output Folder</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
+    <message>
+        <location filename="../source/mainwindow.ui" line="32"/>
+        <source>Firefox Cache/History Parser</source>
+        <translation>Firefox Cache/History Parser</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="48"/>
+        <source>Next</source>
+        <translation>Next</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="61"/>
+        <source>Prev</source>
+        <translation>Prev</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="74"/>
+        <source>Profile:</source>
+        <translation>Profile:</translation>
+    </message>
     <message>
         <location filename="../source/mainwindow.ui" line="104"/>
         <source>History</source>
@@ -172,36 +189,6 @@
         <translation>Cache</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.ui" line="48"/>
-        <source>Next</source>
-        <translation>Next</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="61"/>
-        <source>Prev</source>
-        <translation>Prev</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="317"/>
-        <source>Language</source>
-        <translation>Language</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="175"/>
-        <source>Search</source>
-        <translation>Search</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="32"/>
-        <source>Firefox Cache/History Parser</source>
-        <translation>Firefox Cache/History Parser</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="74"/>
-        <source>Profile:</source>
-        <translation>Profile:</translation>
-    </message>
-    <message>
         <location filename="../source/mainwindow.ui" line="149"/>
         <source>Set and View</source>
         <translation>Set and View</translation>
@@ -210,6 +197,16 @@
         <location filename="../source/mainwindow.ui" line="162"/>
         <source>Number of records to be displayed in one table</source>
         <translation>Number of records to be displayed in one table</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="175"/>
+        <source>Search</source>
+        <translation>Search</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="223"/>
+        <source>0-0 / 0</source>
+        <translation>0-0 / 0</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="239"/>
@@ -222,6 +219,11 @@
         <translation>Record:</translation>
     </message>
     <message>
+        <location filename="../source/mainwindow.ui" line="317"/>
+        <source>Language</source>
+        <translation>Language</translation>
+    </message>
+    <message>
         <location filename="../source/mainwindow.ui" line="322"/>
         <source>File</source>
         <translation>File</translation>
@@ -230,6 +232,28 @@
         <location filename="../source/mainwindow.ui" line="327"/>
         <source>Help</source>
         <translation>Help</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="345"/>
+        <location filename="../source/mainwindow.ui" line="355"/>
+        <source>English</source>
+        <translation>English</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="350"/>
+        <source>Russin</source>
+        <translation>Russian</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="360"/>
+        <source>Russian</source>
+        <translation>Russian</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="365"/>
+        <location filename="../source/mainwindow.cpp" line="169"/>
+        <source>Export</source>
+        <translation>Export</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="105"/>
@@ -242,7 +266,7 @@
         <location filename="../source/mainwindow.cpp" line="106"/>
         <source>Couldn&apos;t load FFParser_DLL!
 </source>
-        <translation>Couldn&apos;t load FFParser_DDL!</translation>
+        <translation>Couldn&apos;t load FFParser_DLL!</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="121"/>
@@ -260,7 +284,7 @@
 Version: 1.0
 Developers: Igor Yarovoy, Dmitriy Voloshyn
 ©Apriorit, 2017</source>
-        <translation>Firefox Cache/History Parser
+        <translation>Firefox Cache/History Parse
 Version: 1.0
 Developers: Igor Yarovoy, Dmitriy Voloshyn
 ©Apriorit, 2017</translation>
@@ -330,28 +354,6 @@ Developers: Igor Yarovoy, Dmitriy Voloshyn
         <source>Search text&apos;s too short
 </source>
         <translation>Search text&apos;s too short</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="345"/>
-        <location filename="../source/mainwindow.ui" line="355"/>
-        <source>English</source>
-        <translation>English</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="350"/>
-        <source>Russin</source>
-        <translation>Russian</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="360"/>
-        <source>Russian</source>
-        <translation>Rassian</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="365"/>
-        <location filename="../source/mainwindow.cpp" line="169"/>
-        <source>Export</source>
-        <translation>Export</translation>
     </message>
 </context>
 </TS>

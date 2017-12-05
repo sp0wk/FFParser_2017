@@ -37,7 +37,7 @@
         <location filename="../source/contextmenu.cpp" line="82"/>
         <source>Cannot open URL
 </source>
-        <translation>Невозможно открыть URL</translation>
+        <translation>Не удается открыть URL-адрес</translation>
     </message>
 </context>
 <context>
@@ -80,12 +80,12 @@
     <message>
         <location filename="../source/export.ui" line="145"/>
         <source>Data to export:</source>
-        <translation>Экспорт данных:</translation>
+        <translation>Данные для экспорта:</translation>
     </message>
     <message>
         <location filename="../source/export.ui" line="158"/>
         <source>Choose profile:</source>
-        <translation>Выберете профиль:</translation>
+        <translation>Профиль:</translation>
     </message>
     <message>
         <location filename="../source/export.ui" line="171"/>
@@ -143,11 +143,31 @@
     <message>
         <location filename="../source/exportcachefiledialog.cpp" line="24"/>
         <source>Select Output Folder</source>
-        <translation>Выберите папку</translation>
+        <translation>Выбрать выходную папку</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
+    <message>
+        <location filename="../source/mainwindow.ui" line="32"/>
+        <source>Firefox Cache/History Parser</source>
+        <translation>Firefox Cache/History Parser</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="48"/>
+        <source>Next</source>
+        <translation>След</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="61"/>
+        <source>Prev</source>
+        <translation>Пред</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="74"/>
+        <source>Profile:</source>
+        <translation>Профиль:</translation>
+    </message>
     <message>
         <location filename="../source/mainwindow.ui" line="104"/>
         <source>History</source>
@@ -169,40 +189,6 @@
         <translation>Кэш</translation>
     </message>
     <message>
-        <location filename="../source/mainwindow.ui" line="48"/>
-        <source>Next</source>
-        <translation>След</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="61"/>
-        <source>Prev</source>
-        <translation>Пред</translation>
-    </message>
-    <message>
-        <source>Choose profile:</source>
-        <translation type="vanished">Выберете профиль</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="317"/>
-        <source>Language</source>
-        <translation>Язык</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="175"/>
-        <source>Search</source>
-        <translation>Поиск</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="32"/>
-        <source>Firefox Cache/History Parser</source>
-        <translation>Firefox Cache/History Parser</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="74"/>
-        <source>Profile:</source>
-        <translation>Профиль:</translation>
-    </message>
-    <message>
         <location filename="../source/mainwindow.ui" line="149"/>
         <source>Set and View</source>
         <translation>Установить</translation>
@@ -210,17 +196,32 @@
     <message>
         <location filename="../source/mainwindow.ui" line="162"/>
         <source>Number of records to be displayed in one table</source>
-        <translation>Количество записей в одной таблице</translation>
+        <translation>Количество записей, отображаемых в одной таблице</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="175"/>
+        <source>Search</source>
+        <translation>Поиск</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="223"/>
+        <source>0-0 / 0</source>
+        <translation>0-0 / 0</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="239"/>
         <source>Clear search</source>
-        <translation>Очистить</translation>
+        <translation>Очистить поиск</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="274"/>
         <source>Record:</source>
         <translation>Запись:</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="317"/>
+        <source>Language</source>
+        <translation>Язык</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.ui" line="322"/>
@@ -233,6 +234,28 @@
         <translation>Помощь</translation>
     </message>
     <message>
+        <location filename="../source/mainwindow.ui" line="345"/>
+        <location filename="../source/mainwindow.ui" line="355"/>
+        <source>English</source>
+        <translation>Английский</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="350"/>
+        <source>Russin</source>
+        <translation>Русский</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="360"/>
+        <source>Russian</source>
+        <translation>Русский</translation>
+    </message>
+    <message>
+        <location filename="../source/mainwindow.ui" line="365"/>
+        <location filename="../source/mainwindow.cpp" line="169"/>
+        <source>Export</source>
+        <translation>Экспорт</translation>
+    </message>
+    <message>
         <location filename="../source/mainwindow.cpp" line="105"/>
         <location filename="../source/mainwindow.cpp" line="701"/>
         <location filename="../source/mainwindow.cpp" line="708"/>
@@ -243,7 +266,8 @@
         <location filename="../source/mainwindow.cpp" line="106"/>
         <source>Couldn&apos;t load FFParser_DLL!
 </source>
-        <translation>Невозможно загрузить FFParser_DDL!</translation>
+        <translation>Не удалось загрузить FFParser_DLL!
+</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="121"/>
@@ -274,7 +298,7 @@ Developers: Igor Yarovoy, Dmitriy Voloshyn
     <message>
         <location filename="../source/mainwindow.cpp" line="144"/>
         <source>Export selected file</source>
-        <translation>Экспортировать выбранный файл</translation>
+        <translation>Экспортировать выбранных файл</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="150"/>
@@ -307,13 +331,15 @@ Developers: Igor Yarovoy, Dmitriy Voloshyn
         <location filename="../source/mainwindow.cpp" line="520"/>
         <source>Close FFParser?
 </source>
-        <translation>Закрыть FFParser?</translation>
+        <translation>Закрыть  FFParser?
+</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="328"/>
         <source>Cannot open file
 </source>
-        <translation>Невозможно открыть файл</translation>
+        <translation>Невозможно открыть файл
+</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="696"/>
@@ -324,35 +350,15 @@ Developers: Igor Yarovoy, Dmitriy Voloshyn
         <location filename="../source/mainwindow.cpp" line="702"/>
         <source>The records are not loaded
 </source>
-        <translation>Записи не загружены</translation>
+        <translation>Записи не загружены
+</translation>
     </message>
     <message>
         <location filename="../source/mainwindow.cpp" line="709"/>
         <source>Search text&apos;s too short
 </source>
-        <translation>Текст поиска слишком короткий</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="345"/>
-        <location filename="../source/mainwindow.ui" line="355"/>
-        <source>English</source>
-        <translation>Английский</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="350"/>
-        <source>Russin</source>
-        <translation>Русский</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="360"/>
-        <source>Russian</source>
-        <translation>Русский</translation>
-    </message>
-    <message>
-        <location filename="../source/mainwindow.ui" line="365"/>
-        <location filename="../source/mainwindow.cpp" line="169"/>
-        <source>Export</source>
-        <translation>Экспорт</translation>
+        <translation>Слишком короткий текст текста
+</translation>
     </message>
 </context>
 </TS>
