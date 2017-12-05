@@ -10,6 +10,7 @@ class ChangeLanguage
 public:
     ChangeLanguage(MainWindow *parent);
 
+    void fillLanguageMenu(QMenu* langMenu);
     void loadLanguage(const QString &rLanguage);
     void setLangPath(const QString &path);
     QString getLangPath() const;

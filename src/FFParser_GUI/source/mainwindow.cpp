@@ -8,27 +8,37 @@
 #include "exportcachefiledialog.h"
 #include "changelanguage.h"
 
+
 using recordPtr = MainWindow::recordPtr;
+using SetErrorCallbackFunc = void (CALL *)(void (*callback) (const char* error_text, const char* error_title));
+
+//lib error handler
+void MainWindow::s_libErrorHandler(const char* error_text, const char* error_title)
+{
+    QMessageBox::warning(0, error_title, error_text, QMessageBox::Ok);
+}
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     dllname(L"FFParser_DLL.dll"),
+    dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); }),
     tempDirPath(QCoreApplication::applicationDirPath() + "/temp/"),
     tempDir(tempDirPath),
-    dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); }),
     _exportFileWindow(new Export(this)),
     _menu(new ContextMenu(this)),
     _changeLanguage(new ChangeLanguage(this)),
     _firstRecord(0),
-    _oldStep(25),
     _profileNumber(0),
     _allAmountProfile(0),
-    _searchFlag(false)
+    _searchFlag(false),
+    _stepForTabs(4, 25)
 {
     ui.setupUi(this);
     createLanguageMenu();
     createFileMenu();
     createHelpMenu();
+    createTableUI();
 
     //create folder for temporary files
     if (!tempDir.exists()) {
@@ -56,6 +66,10 @@ void MainWindow::initialLoad()
     if (dll_load.get() != nullptr)
     {
         GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
+        SetErrorCallbackFunc dll_setErrorCB = (SetErrorCallbackFunc) GetProcAddress(dll_load.get(), "SetErrorCallback");
+
+        //set error callback
+        dll_setErrorCB(MainWindow::s_libErrorHandler);
 
         DLLStorage = dll_getstorage();
 
@@ -70,6 +84,8 @@ void MainWindow::initialLoad()
             setNameProfile();
 
             _allProfiles.resize(_allAmountProfile);
+            _totalRecordsArray.resize(_allAmountProfile);
+
             // Create records
             for (int i = 0; i < _allProfiles.size(); ++i)
             {
@@ -77,8 +93,9 @@ void MainWindow::initialLoad()
                 _allProfiles[i].bookmarksRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::BOOKMARKS, i));
                 _allProfiles[i].loginsRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::LOGINS, i));
                 _allProfiles[i].cacheRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, i));
+
+                _totalRecordsArray[i].resize(4);
             }
-            stepForTabs.resize(ui.tabWidget->count());
         }
     }
     else
@@ -266,7 +283,7 @@ void MainWindow::exportSelectedFile(const char *path, bool md5)
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
 
-    const recordPtr &currPtr = getPtrByTabIndex(ui.tabWidget->currentIndex());
+    const recordPtr &currPtr = getCurrentPtr();
 
     if (currPtr != nullptr)
     {
@@ -334,9 +351,9 @@ QTableWidgetItem* MainWindow::getLastClickedItem()
     return _lastClickedItem;
 }
 
-const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
+const recordPtr & MainWindow::getCurrentPtr()
 {
-    switch (index)
+    switch (ui.tabWidget->currentIndex())
     {
     case 0:
         return getPtr(ERecordTypes::HISTORY, _profileNumber);
@@ -351,66 +368,68 @@ const recordPtr & MainWindow::getPtrByTabIndex(size_t index)
     }
 }
 
+
+size_t& MainWindow::getCurrentStep()
+{
+    return _stepForTabs[ui.tabWidget->currentIndex()];
+}
+
+size_t& MainWindow::getCurrentTotalRecords()
+{
+    return _totalRecordsArray[_profileNumber][ui.tabWidget->currentIndex()];
+}
+
 IDataExporter *MainWindow::getExporter()
 {
     return DLLStorage->getDataExporter();
 }
 
-void MainWindow::setNameColumnTable(const recordPtr &ptr)
+void MainWindow::setTableHeaders()
 {
+    const recordPtr &ptr = getCurrentPtr();
+
     int counter = 0;
 
-    QStringList temp;
+    QStringList headers;
     while (ptr->getFieldName(counter) != nullptr)
     {
-        temp += ptr->getFieldName(counter);
+        headers += ptr->getFieldName(counter);
         ++counter;
     }
 
-    createUI(temp, counter);
-}
+    //update table UI
+    ui.tableWidget->setColumnCount(counter);
+    ui.tableWidget->setHorizontalHeaderLabels(headers);
 
-void MainWindow::removeRowTable(size_t counter)
-{
-    if (counter == 0)
-        return;
-
-    ui.tableWidget->clearContents();
-
-    while (counter != -1)
-    {
-        ui.tableWidget->removeRow(counter);
-        --counter;
+    for (int i = 0; i < counter; ++i) {
+        ui.tableWidget->setColumnWidth(i, ui.tableWidget->width() / counter);
     }
 }
-void MainWindow::viewRecord(const recordPtr &ptr)
+
+
+void MainWindow::viewRecords()
 {
-    removeRowTable(_oldStep);
+    const recordPtr &ptr = getCurrentPtr();
 
-
-    initialLoadRecord(ptr);
+    //clear previous rows
+    ui.tableWidget->setRowCount(0);
 
     IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
-    if (onerec == nullptr)
+
+    if (onerec == nullptr) {
+        viewCounterRecords(0, 0);
         return;
+    }
 
     ptr->setCurrentRecord(_firstRecord);
 
-    size_t tempStep = stepForTabs[ui.tabWidget->currentIndex()];
-    size_t total = ptr->getTotalRecords();
-
-    if (tempStep > total) {
-        stepForTabs[ui.tabWidget->currentIndex()] = total;
-    }
-
-    ui.progressBar->setRange(0, stepForTabs[ui.tabWidget->currentIndex()]);
+    ui.progressBar->setMaximum(getCurrentStep());
     ui.progressBar->setValue(0);
-    ui.progressBar->setAutoFillBackground(false);
 
     QStringList actualRowNumbers;
 
     size_t iterator = 0;
-    size_t max_count = _firstRecord + stepForTabs[ui.tabWidget->currentIndex()];
+    size_t max_count = _firstRecord + getCurrentStep();
 
     //read records to table
     for (size_t i = _firstRecord; i < max_count; ++i)
@@ -433,16 +452,18 @@ void MainWindow::viewRecord(const recordPtr &ptr)
         size_t currValue = ui.progressBar->value();
         ui.progressBar->setValue(currValue + 1);
 
+
         if (onerec == nullptr)
             break;
     }
 
-    viewCounterRecords(_firstRecord, _firstRecord + iterator, ptr);
-    _oldStep = stepForTabs[ui.tabWidget->currentIndex()];
+    viewCounterRecords(_firstRecord, _firstRecord + iterator);
 
     //set actual row numbers
     ui.tableWidget->setVerticalHeaderLabels(actualRowNumbers);
 
+    //search text in updated set
+    search();
 }
 
 void MainWindow::setNameProfile()
@@ -453,35 +474,15 @@ void MainWindow::setNameProfile()
 }
 
 
-void MainWindow::initialLoadRecord(const recordPtr &ptr)
+void MainWindow::createTableUI()
 {
-    if (ptr->getNumberOfRecords() == 0)
-    {
-        size_t tempStep = ui.spinBox->value();
-        size_t total = ptr->getTotalRecords();
-
-        if (tempStep > total)
-            tempStep = total;
-        ptr->loadRecords(0, tempStep);
-        stepForTabs[ui.tabWidget->currentIndex()] = tempStep;
-    }
-}
-
-
-void MainWindow::createUI(const QStringList &headers, size_t number)
-{
-    ui.tableWidget->setColumnCount(number);
     ui.tableWidget->setShowGrid(true);
 
     ui.tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 
     ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    ui.tableWidget->setHorizontalHeaderLabels(headers);
     ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    for (size_t i = 0; i < number; ++i)
-        ui.tableWidget->setColumnWidth(i, ui.tableWidget->width() / number);
 
     ui.tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -503,11 +504,12 @@ QString MainWindow::getTableField(const char *fieldName)
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
 
-    const recordPtr &currPtr = getPtrByTabIndex(ui.tabWidget->currentIndex());
-
-    IRecord *recordPtr = currPtr->getRecordByIndex(_firstRecord + row);
+    IRecord *recordPtr = getCurrentPtr()->getRecordByIndex(_firstRecord + row);
     const char *foundString = recordPtr->getFieldByName(fieldName);
-    return QString(foundString);
+
+    if (foundString != nullptr) {
+        return QString(foundString);
+    }
 
     return "";
 }
@@ -531,43 +533,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::createLanguageMenu(void)
 {
-    QActionGroup* langGroup = new QActionGroup(ui.menuLanguage);
-    langGroup->setExclusive(true);
-
-    connect(langGroup, SIGNAL (triggered(QAction *)), this, SLOT (slotLanguageChanged(QAction *)));
-
-    // format systems language
-    QString defaultLocale = QLocale::system().name(); // e.g. "ru_RU"
-    defaultLocale.truncate(defaultLocale.lastIndexOf('_')); // e.g. "ru"
-
-    QString langPath = QApplication::applicationDirPath();
-    _changeLanguage->setLangPath(langPath.append("/languages"));
-    QDir dir(langPath);
-    QStringList fileNames = dir.entryList(QStringList("TranslationExample_*.qm"));
-
-    for (int i = 0; i < fileNames.size(); ++i)
-    {
-      // get locale extracted by filename
-        QString locale;
-        locale = fileNames[i];      // "TranslationExample_ru.qm"
-        locale.truncate(locale.lastIndexOf('.'));       // "TranslationExample_ru"
-        locale.remove(0, locale.indexOf('_') + 1);      // "ru"
-
-        QString lang = QLocale::languageToString(QLocale(locale).language());
-
-        QAction *action = new QAction(lang, this);
-        action->setCheckable(true);
-        action->setData(locale);
-
-        ui.menuLanguage->addAction(action);
-        langGroup->addAction(action);
-
-        // set default translators and language checked
-        if (defaultLocale == locale)
-        {
-            action->setChecked(true);
-        }
-    }
+    _changeLanguage->fillLanguageMenu(ui.menuLanguage);
 }
 
 // Called every time, when a menu entry of the language menu is called
@@ -577,7 +543,6 @@ void MainWindow::slotLanguageChanged(QAction* action)
     {
         // load the language dependant on the action content
         _changeLanguage->loadLanguage(action->data().toString());
-        //loadLanguage(action->data().toString());
     }
 }
 
@@ -607,81 +572,92 @@ void MainWindow::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
-void MainWindow::switchViewRecords(size_t index)
-{
-    const recordPtr &currPtr = getPtrByTabIndex(index);
-    setNameColumnTable(currPtr);
-    viewRecord(currPtr);
-}
 
-void MainWindow::checkNewRecords(size_t indexTab, size_t first, size_t step)
+void MainWindow::loadNewRecords()
 {
-    const recordPtr &currPtr = getPtrByTabIndex(indexTab);
-    size_t totalLoadRecords = currPtr->getNumberOfRecords();
-    if (first + step >= totalLoadRecords)
+    const recordPtr &ptr = getCurrentPtr();
+
+    size_t loaded = ptr->getNumberOfRecords();
+    size_t& step = getCurrentStep();
+    size_t& total = getCurrentTotalRecords();
+
+    //if initial load
+    if (ptr->getNumberOfRecords() == 0)
     {
-        size_t temp = (first + step) - totalLoadRecords;
-        if (temp != 0)
-            currPtr->loadNextRecords(temp);
-        else
-            currPtr->loadNextRecords(step);
+        total = ptr->getTotalRecords(); //save total
 
+        //set table headers
+        setTableHeaders();
     }
+
+    if (step > total) {
+        step = total;
+    }
+
+    //load new if needed
+    if (_firstRecord + step > loaded)
+    {
+        //load starts
+        ui.progressBar->setValue(0);
+
+        ptr->loadNextRecords(step);
+    }
+
+    //update step
+    ui.spinBox->setValue(step);
+
+    //update view
+    viewRecords();
 }
+
 
 void MainWindow::on_setRecordButton_clicked()
 {
-    size_t tempStep = ui.spinBox->value();
-    size_t tempIndex = ui.tabWidget->currentIndex();
+    size_t& step = getCurrentStep();
+    step = ui.spinBox->value();
 
-    checkNewRecords(tempIndex, _firstRecord, tempStep);
-    stepForTabs[tempIndex] = tempStep;
-    ui.progressBar->setValue(0);
-    switchViewRecords(tempIndex);
+    loadNewRecords();
+
+    ui.spinBox->setValue(step);
 }
 
-bool MainWindow::isOutOfRange(size_t indexTab, size_t first, size_t step)
-{
-    return (first + step >= getPtrByTabIndex(indexTab)->getTotalRecords());
-}
 
 void MainWindow::on_nextPageButton_clicked()
 {
-    checkNewRecords(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]);
-    if (isOutOfRange(ui.tabWidget->currentIndex(), _firstRecord, stepForTabs[ui.tabWidget->currentIndex()]) == false)
+    size_t step = getCurrentStep();
+
+    //check bounds
+    if (_firstRecord + step < getCurrentTotalRecords())
     {
-        _firstRecord += stepForTabs[ui.tabWidget->currentIndex()];
+        _firstRecord += step;
+        loadNewRecords();
     }
-
-    ui.progressBar->setValue(0);
-    switchViewRecords(ui.tabWidget->currentIndex());
-
-    if (_searchFlag == true)
-        search();
 }
+
 
 void MainWindow::on_prevPageButton_clicked()
 {
-    if (static_cast<int>(_firstRecord - stepForTabs[ui.tabWidget->currentIndex()]) <= 0)
+    size_t curStep = getCurrentStep();
+
+    //check bounds
+    if (_firstRecord > curStep)
     {
+        _firstRecord -= curStep;
+        viewRecords();
+    }
+    else if (_firstRecord > 0) {
         _firstRecord = 0;
+        viewRecords();
     }
-    else
-    {
-        _firstRecord -= stepForTabs[ui.tabWidget->currentIndex()];
-    }
-
-    ui.progressBar->setValue(0);
-    switchViewRecords(ui.tabWidget->currentIndex());
-
-    if (_searchFlag == true)
-        search();
 }
 
 void MainWindow::search()
 {
+    if (!_searchFlag) {
+        return;
+    }
+
     ui.clearSearchRecord->setEnabled(true);
-    _searchFlag = true;
 
     QString dataToFind = ui.lineEdit->text().toLower();
     if (dataToFind.size() >= 2)
@@ -738,32 +714,29 @@ void MainWindow::search()
 
 void MainWindow::on_searchButton_clicked()
 {
+    _searchFlag = true;
     search();
 }
 
-void MainWindow::viewStep(size_t indexTab)
-{
-    ui.spinBox->setValue(stepForTabs[indexTab]);
-}
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     _firstRecord = 0;
+    _searchFlag = false;
+    ui.foundTextLabel->hide();
 
-    if (_searchFlag)
-        _searchFlag = false;
-
-    if (ui.foundTextLabel->isVisible())
-        ui.foundTextLabel->hide();
-
-    ui.progressBar->setValue(0);
-    switchViewRecords(static_cast<size_t>(index));
-    viewStep(static_cast<size_t>(index));
+    loadNewRecords();
 }
 
-void MainWindow::viewCounterRecords(size_t first, size_t last, const recordPtr &ptr)
+void MainWindow::viewCounterRecords(size_t first, size_t last)
 {
-    QString temp = QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(ptr->getTotalRecords());
+    QString temp;
+
+    if (first == 0 && last == 0 )
+        temp = "0-0 / 0";
+    else
+        temp = QString::number(first + 1) + '-' + QString::number(last) + " / " + QString::number(getCurrentTotalRecords());
+
     ui.recordRangeTextLabel->setText(temp);
 }
 
@@ -791,7 +764,7 @@ void MainWindow::on_chooseProfile_activated(int index)
 {
     _profileNumber = static_cast<size_t>(index);
     _firstRecord = 0;
-    switchViewRecords(ui.tabWidget->currentIndex());
+    loadNewRecords();
 }
 
 void MainWindow::on_tableWidget_itemSelectionChanged()
@@ -813,4 +786,10 @@ void MainWindow::on_tableWidget_itemSelectionChanged()
 void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous)
 {
     _lastClickedItem = current;
+}
+
+void MainWindow::on_lineEdit_returnPressed()
+{
+    _searchFlag = true;
+    search();
 }

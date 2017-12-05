@@ -6,6 +6,50 @@ ChangeLanguage::ChangeLanguage(MainWindow *parent)
 
 }
 
+
+void ChangeLanguage::fillLanguageMenu(QMenu* langMenu)
+{
+    QActionGroup* langGroup = new QActionGroup(langMenu);
+    langGroup->setExclusive(true);
+
+    QObject::connect(langGroup, SIGNAL (triggered(QAction *)), _mainwindow, SLOT (slotLanguageChanged(QAction *)));
+
+    // format systems language
+    QString defaultLocale = QLocale::system().name(); // e.g. "ru_RU"
+    defaultLocale.truncate(defaultLocale.lastIndexOf('_')); // e.g. "ru"
+
+    QString langPath = QApplication::applicationDirPath();
+    setLangPath(langPath.append("/languages"));
+    QDir dir(langPath);
+    QStringList fileNames = dir.entryList(QStringList("TranslationExample_*.qm"));
+
+    for (int i = 0; i < fileNames.size(); ++i)
+    {
+      // get locale extracted by filename
+        QString locale;
+        locale = fileNames[i];      // "TranslationExample_ru.qm"
+        locale.truncate(locale.lastIndexOf('.'));       // "TranslationExample_ru"
+        locale.remove(0, locale.indexOf('_') + 1);      // "ru"
+
+        QString lang = QLocale::languageToString(QLocale(locale).language());
+
+        QAction *action = new QAction(langGroup);
+        action->setText(lang);
+        action->setCheckable(true);
+        action->setData(locale);
+
+        langMenu->addAction(action);
+        langGroup->addAction(action);
+
+        // set default translators and language checked
+        if (defaultLocale == locale)
+        {
+            action->setChecked(true);
+        }
+    }
+}
+
+
 void ChangeLanguage::loadLanguage(const QString &rLanguage)
 {
     if(_currLang != rLanguage)

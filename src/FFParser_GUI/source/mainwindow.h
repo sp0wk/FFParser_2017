@@ -56,12 +56,14 @@ public:
     using recordPtr = QSharedPointer<IRecordsStream>;
 
     QStringList getProfiles();
-    const recordPtr & getPtrByTabIndex(size_t);
-    const recordPtr & getPtr(ERecordTypes, size_t);
+    const recordPtr & getCurrentPtr();
+    size_t& getCurrentStep();
+    size_t& getCurrentTotalRecords();
+    const recordPtr & getPtr(ERecordTypes type, size_t profile);
     ERecordTypes getCurrentTabType();
-    QString getTableField(const char *);
+    QString getTableField(const char * text);
     IDataExporter * getExporter();
-    void exportSelectedFile(const char *, bool);
+    void exportSelectedFile(const char * path, bool md5);
     void exportAndOpenSelected();
     void showSelectedFileInExplorer();
     QTableWidgetItem* getLastClickedItem();
@@ -70,11 +72,12 @@ protected:
     void changeEvent(QEvent *);
     void closeEvent(QCloseEvent *);
 
-    void setNameColumnTable(const recordPtr &);
-    void viewRecord(const recordPtr &);
-    void removeRowTable(size_t);
-    void switchViewRecords(size_t);
+    void setTableHeaders();
+    void loadNewRecords();
+    void viewRecords();
     void setNameProfile();
+    void viewCounterRecords(size_t first, size_t last);
+    void search();
 
 protected slots:
     void slotLanguageChanged(QAction *);
@@ -109,10 +112,13 @@ private slots:
     void on_tableWidget_itemSelectionChanged();
     void on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
 
+    void on_lineEdit_returnPressed();
+
 private:
     //dll load
     const wchar_t* dllname;
     LibGuard dll_load;
+    static void s_libErrorHandler(const char* error_text, const char* error_title);
     //lib storage
     IStorageFactory* DLLStorage;
     const QString tempDirPath;
@@ -123,20 +129,14 @@ private:
     ContextMenu *_menu;
     ChangeLanguage *_changeLanguage;
 
-    void createUI(const QStringList &headers, size_t);
+    void initialLoad();
+    void createTableUI();
 
     void createLanguageMenu(void);
     void createFileMenu();
     void createHelpMenu();
 
-    void initialLoadRecord(const recordPtr &);
-    void checkNewRecords(size_t, size_t, size_t);
-    bool isOutOfRange(size_t, size_t, size_t);
-    void viewStep(size_t);
-    void viewCounterRecords(size_t, size_t, const recordPtr &);
-    void search();
     void setMainFormEnabled(bool);
-    void initialLoad();
 
 
     struct ProfileRecordData
@@ -152,12 +152,12 @@ private:
     QTableWidgetItem *_lastClickedItem;
 
     size_t _firstRecord;
-    size_t _oldStep;
     size_t _profileNumber;
     size_t _allAmountProfile;
     bool _searchFlag;
 
-    std::vector<size_t> stepForTabs;
+    QVector<size_t> _stepForTabs;
+    QVector<QVector<size_t>> _totalRecordsArray;
 };
 
 #endif // MAINWINDOW_H
