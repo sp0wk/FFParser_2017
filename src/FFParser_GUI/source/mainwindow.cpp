@@ -402,7 +402,7 @@ void MainWindow::setTableHeaders()
     ui.tableWidget->setHorizontalHeaderLabels(headers);
 
     for (int i = 0; i < counter; ++i) {
-        ui.tableWidget->setColumnWidth(i, ui.tableWidget->width() / counter);
+        ui.tableWidget->setColumnWidth(i, (ui.tableWidget->width() - 40) / counter);
     }
 }
 
@@ -724,6 +724,9 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     _firstRecord = 0;
     _searchFlag = false;
     ui.foundTextLabel->hide();
+
+    //set table headers
+    setTableHeaders();
 
     loadNewRecords();
 }
