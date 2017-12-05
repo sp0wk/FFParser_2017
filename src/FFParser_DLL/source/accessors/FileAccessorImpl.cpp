@@ -153,6 +153,13 @@ namespace FFParser {
 		catch (const std::exception &ex) {
 			//handle error
 			ErrorHandler::getInstance().onError(ex.what(), "ParserDLL error: \"Error during PROFILES.INI parsing occured\"");
+
+			//try local files
+			path full_path = current_path();
+			std::string local_path = full_path.generic_string();
+			std::string cache_path = local_path + "\\cache";
+
+			_profile_list.push_back({ "none", local_path, cache_path });
 		}
 	}
 
@@ -226,6 +233,12 @@ namespace FFParser {
 
 					std::sort(list.begin(), list.end());
 				}
+			}
+			else {
+				//handle error
+				std::string error("Directory doesn't exist:\n");
+				error += p.generic_string();
+				ErrorHandler::getInstance().onError(error.c_str(), "ParserDLL error: \"Error occured while reading cache folder contents\"");
 			}
 		}
 		catch (const filesystem_error& ex) {
