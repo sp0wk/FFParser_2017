@@ -27,6 +27,7 @@
 
 class Export;
 class ContextMenu;
+class ChangeLanguage;
 
 
 //for DLL
@@ -120,10 +121,9 @@ private:
     Ui::MainWindow ui;
     Export *_exportFileWindow;
     ContextMenu *_menu;
+    ChangeLanguage *_changeLanguage;
 
     void createUI(const QStringList &headers, size_t);
-
-    void loadLanguage(const QString &rLanguage);
 
     void createLanguageMenu(void);
     void createFileMenu();
@@ -148,11 +148,6 @@ private:
     };
 
     QVector<ProfileRecordData> _allProfiles;
-
-    QTranslator m_translator;
-    QTranslator m_translatorQt;
-    QString m_currLang;
-    QString m_langPath;
 
     QTableWidgetItem *_lastClickedItem;
 

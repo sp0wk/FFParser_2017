@@ -1,9 +1,12 @@
 #include "mainwindow.h"
 #include <QVariant>
 #include <QProcess>
+#include <QtConcurrent/QtConcurrentRun>
+#include <QFuture>
 #include "contextmenu.h"
 #include "export.h"
 #include "exportcachefiledialog.h"
+#include "changelanguage.h"
 
 using recordPtr = MainWindow::recordPtr;
 
@@ -15,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dll_load(LoadLibrary(dllname), [](HMODULE dll) { if (dll) FreeLibrary(dll); }),
     _exportFileWindow(new Export(this)),
     _menu(new ContextMenu(this)),
+    _changeLanguage(new ChangeLanguage(this)),
     _firstRecord(0),
     _oldStep(25),
     _profileNumber(0),
@@ -383,6 +387,7 @@ void MainWindow::viewRecord(const recordPtr &ptr)
 {
     removeRowTable(_oldStep);
 
+
     initialLoadRecord(ptr);
 
     IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
@@ -397,6 +402,10 @@ void MainWindow::viewRecord(const recordPtr &ptr)
     if (tempStep > total) {
         stepForTabs[ui.tabWidget->currentIndex()] = total;
     }
+
+    ui.progressBar->setRange(0, stepForTabs[ui.tabWidget->currentIndex()]);
+    ui.progressBar->setValue(0);
+    ui.progressBar->setAutoFillBackground(false);
 
     QStringList actualRowNumbers;
 
@@ -420,6 +429,9 @@ void MainWindow::viewRecord(const recordPtr &ptr)
 
         ++iterator;
         onerec = ptr->getNextRecord();
+
+        size_t currValue = ui.progressBar->value();
+        ui.progressBar->setValue(currValue + 1);
 
         if (onerec == nullptr)
             break;
@@ -528,9 +540,9 @@ void MainWindow::createLanguageMenu(void)
     QString defaultLocale = QLocale::system().name(); // e.g. "ru_RU"
     defaultLocale.truncate(defaultLocale.lastIndexOf('_')); // e.g. "ru"
 
-    m_langPath = QApplication::applicationDirPath();
-    m_langPath.append("/languages");
-    QDir dir(m_langPath);
+    QString langPath = QApplication::applicationDirPath();
+    _changeLanguage->setLangPath(langPath.append("/languages"));
+    QDir dir(langPath);
     QStringList fileNames = dir.entryList(QStringList("TranslationExample_*.qm"));
 
     for (int i = 0; i < fileNames.size(); ++i)
@@ -564,30 +576,8 @@ void MainWindow::slotLanguageChanged(QAction* action)
     if(action != nullptr)
     {
         // load the language dependant on the action content
-        loadLanguage(action->data().toString());
-    }
-}
-
-void switchTranslator(QTranslator& translator, const QString& filename)
-{
-    // remove the old translator
-    qApp->removeTranslator(&translator);
-
-    // load the new translator
-    if(translator.load(filename))
-        qApp->installTranslator(&translator);
-}
-
-void MainWindow::loadLanguage(const QString& rLanguage)
-{
-    if(m_currLang != rLanguage)
-    {
-        m_currLang = rLanguage;
-        QLocale locale = QLocale(m_currLang);
-        QLocale::setDefault(locale);
-        QString languageName = QLocale::languageToString(locale.language());
-        switchTranslator(m_translator, QString("languages/TranslationExample_%1.qm").arg(rLanguage));
-        ui.statusBar->showMessage(tr("Current Language changed to %1").arg(languageName));
+        _changeLanguage->loadLanguage(action->data().toString());
+        //loadLanguage(action->data().toString());
     }
 }
 
@@ -607,7 +597,7 @@ void MainWindow::changeEvent(QEvent* event)
             {
                 QString locale = QLocale::system().name();
                 locale.truncate(locale.lastIndexOf('_'));
-                loadLanguage(locale);
+                _changeLanguage->loadLanguage(locale);
                 break;
             }
             default:
@@ -646,6 +636,7 @@ void MainWindow::on_setRecordButton_clicked()
 
     checkNewRecords(tempIndex, _firstRecord, tempStep);
     stepForTabs[tempIndex] = tempStep;
+    ui.progressBar->setValue(0);
     switchViewRecords(tempIndex);
 }
 
@@ -662,6 +653,7 @@ void MainWindow::on_nextPageButton_clicked()
         _firstRecord += stepForTabs[ui.tabWidget->currentIndex()];
     }
 
+    ui.progressBar->setValue(0);
     switchViewRecords(ui.tabWidget->currentIndex());
 
     if (_searchFlag == true)
@@ -679,6 +671,7 @@ void MainWindow::on_prevPageButton_clicked()
         _firstRecord -= stepForTabs[ui.tabWidget->currentIndex()];
     }
 
+    ui.progressBar->setValue(0);
     switchViewRecords(ui.tabWidget->currentIndex());
 
     if (_searchFlag == true)
@@ -763,6 +756,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     if (ui.foundTextLabel->isVisible())
         ui.foundTextLabel->hide();
 
+    ui.progressBar->setValue(0);
     switchViewRecords(static_cast<size_t>(index));
     viewStep(static_cast<size_t>(index));
 }
