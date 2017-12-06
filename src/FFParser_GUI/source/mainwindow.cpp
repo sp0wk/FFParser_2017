@@ -12,10 +12,18 @@
 using recordPtr = MainWindow::recordPtr;
 using SetErrorCallbackFunc = void (CALL *)(void (*callback) (const char* error_text, const char* error_title));
 
+
 //lib error handler
 void MainWindow::s_libErrorHandler(const char* error_text, const char* error_title)
 {
     QMessageBox::warning(0, error_title, error_text, QMessageBox::Ok);
+}
+
+//async records loading
+void MainWindow::s_asyncRecordsLoading(MainWindow* mw, IRecordsStream* stream, size_t step)
+{
+    stream->loadNextRecords(step);
+    emit mw->recordsLoadedSignal();
 }
 
 
@@ -32,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _profileNumber(0),
     _allAmountProfile(0),
     _searchFlag(false),
-    _stepForTabs(4, 25)
+    _stepForTabs(size_t(ERecordTypes::NUMBER_OF_TYPES), 25)
 {
     ui.setupUi(this);
     createLanguageMenu();
@@ -49,6 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QIcon icon(appPath.append("/FFParser_GUI.ico"));
     this->setWindowIcon(icon);
 
+    connect(this, SIGNAL(recordsLoadedSignal()), this, SLOT(onRecordsLoadFinished()));
+
     initialLoad();
 }
 
@@ -60,6 +70,13 @@ MainWindow::~MainWindow()
     //delete temp dir
     tempDir.removeRecursively();
 }
+
+
+void MainWindow::onRecordsLoadFinished()
+{
+    viewRecords();
+}
+
 
 void MainWindow::initialLoad()
 {
@@ -85,6 +102,7 @@ void MainWindow::initialLoad()
 
             _allProfiles.resize(_allAmountProfile);
             _totalRecordsArray.resize(_allAmountProfile);
+            _watchers.resize(_allAmountProfile);
 
             // Create records
             for (int i = 0; i < _allProfiles.size(); ++i)
@@ -94,7 +112,12 @@ void MainWindow::initialLoad()
                 _allProfiles[i].loginsRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::LOGINS, i));
                 _allProfiles[i].cacheRecord.reset(DLLStorage->createRecordsStream(ERecordTypes::CACHEFILES, i));
 
-                _totalRecordsArray[i].resize(4);
+                _totalRecordsArray[i].resize(size_t(ERecordTypes::NUMBER_OF_TYPES));
+
+                //set watchers
+                for (int w = 0; w < size_t(ERecordTypes::NUMBER_OF_TYPES); ++w) {
+                    _watchers[i].push_back(new QFutureWatcher<void>(this));
+                }
             }
         }
     }
@@ -279,6 +302,18 @@ const recordPtr & MainWindow::getPtr(ERecordTypes type, size_t numberProfile)
     }
 }
 
+QFutureWatcher<void>* MainWindow::getWatcher(size_t profile, ERecordTypes rectype)
+{
+    return _watchers[profile][size_t(rectype)];
+}
+
+
+QFutureWatcher<void>* MainWindow::getCurrentWatcher()
+{
+    return _watchers[_profileNumber][size_t(getCurrentTabType())];
+}
+
+
 void MainWindow::exportSelectedFile(const char *path, bool md5)
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
@@ -423,13 +458,21 @@ void MainWindow::viewRecords()
 
     ptr->setCurrentRecord(_firstRecord);
 
-    ui.progressBar->setMaximum(getCurrentStep());
+    size_t& step = getCurrentStep();
+    ui.spinBox->setValue(step);
+
+    int diff = _firstRecord + step - getCurrentTotalRecords();
+    if (diff > 0) {
+        step -= diff;
+    }
+
+    ui.progressBar->setMaximum(step);
     ui.progressBar->setValue(0);
 
     QStringList actualRowNumbers;
 
     size_t iterator = 0;
-    size_t max_count = _firstRecord + getCurrentStep();
+    size_t max_count = _firstRecord + step;
 
     //read records to table
     for (size_t i = _firstRecord; i < max_count; ++i)
@@ -452,7 +495,6 @@ void MainWindow::viewRecords()
         size_t currValue = ui.progressBar->value();
         ui.progressBar->setValue(currValue + 1);
 
-
         if (onerec == nullptr)
             break;
     }
@@ -464,7 +506,11 @@ void MainWindow::viewRecords()
 
     //search text in updated set
     search();
+
+    //enable Next button
+    ui.nextPageButton->setEnabled(true);
 }
+
 
 void MainWindow::setNameProfile()
 {
@@ -575,39 +621,55 @@ void MainWindow::changeEvent(QEvent* event)
 
 void MainWindow::loadNewRecords()
 {
+    ui.nextPageButton->setDisabled(true);
+
     const recordPtr &ptr = getCurrentPtr();
 
     size_t loaded = ptr->getNumberOfRecords();
     size_t& step = getCurrentStep();
-    size_t& total = getCurrentTotalRecords();
-
-    //if initial load
-    if (ptr->getNumberOfRecords() == 0)
-    {
-        total = ptr->getTotalRecords(); //save total
-
-        //set table headers
-        setTableHeaders();
-    }
-
-    if (step > total) {
-        step = total;
-    }
 
     //load new if needed
     if (_firstRecord + step > loaded)
     {
+        size_t& total = getCurrentTotalRecords();
+
+        //if initial load
+        if (loaded == 0)
+        {
+            total = ptr->getTotalRecords(); //save total
+
+            //set table headers
+            setTableHeaders();
+        }
+
+        //correct step
+        if (step > total) {
+            step = total;
+        }
+
         //load starts
         ui.progressBar->setValue(0);
 
-        ptr->loadNextRecords(step);
+        //concurrency
+        QFutureWatcher<void>* watcher = this->getCurrentWatcher();
+
+        if (watcher->isRunning()) {
+
+            #ifndef NDEBUG
+                qDebug() << "Task discarded: \"Another stream task is already running!\"";
+            #endif
+
+            return;
+        }
+
+        //load new
+        QFuture<void> fut = QtConcurrent::run(s_asyncRecordsLoading, this, ptr.data(), step);
+        watcher->setFuture(fut);
     }
-
-    //update step
-    ui.spinBox->setValue(step);
-
-    //update view
-    viewRecords();
+    else {
+        //update view
+        viewRecords();
+    }
 }
 
 
@@ -617,8 +679,6 @@ void MainWindow::on_setRecordButton_clicked()
     step = ui.spinBox->value();
 
     loadNewRecords();
-
-    ui.spinBox->setValue(step);
 }
 
 
@@ -631,6 +691,10 @@ void MainWindow::on_nextPageButton_clicked()
     {
         _firstRecord += step;
         loadNewRecords();
+        ui.prevPageButton->setEnabled(true);
+    }
+    else {
+        ui.nextPageButton->setDisabled(true);
     }
 }
 
@@ -648,6 +712,9 @@ void MainWindow::on_prevPageButton_clicked()
     else if (_firstRecord > 0) {
         _firstRecord = 0;
         viewRecords();
+    }
+    else {
+        ui.prevPageButton->setDisabled(true);
     }
 }
 
@@ -724,6 +791,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     _firstRecord = 0;
     _searchFlag = false;
     ui.foundTextLabel->hide();
+    ui.prevPageButton->setDisabled(true);
 
     //set table headers
     setTableHeaders();
@@ -766,6 +834,7 @@ void MainWindow::on_clearSearchRecord_clicked()
 void MainWindow::on_chooseProfile_activated(int index)
 {
     _profileNumber = static_cast<size_t>(index);
+    ui.prevPageButton->setDisabled(true);
     _firstRecord = 0;
     loadNewRecords();
 }

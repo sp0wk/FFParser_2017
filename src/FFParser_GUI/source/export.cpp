@@ -12,6 +12,7 @@ Export::Export(MainWindow *parent) :
     ui->setupUi(this);
     ui->pathInputText->setText(QCoreApplication::applicationFilePath());
     this->setWindowTitle(tr("Data export"));
+    this->setModal(true);;
 }
 
 Export::~Export()

@@ -20,7 +20,7 @@
 #include <memory>
 #include <functional>
 #include <type_traits>
-
+#include <qfuturewatcher.h>
 
 class Export;
 class ContextMenu;
@@ -64,6 +64,15 @@ public:
     void exportAndOpenSelected();
     void showSelectedFileInExplorer();
     QTableWidgetItem* getLastClickedItem();
+    QFutureWatcher<void>* getWatcher(size_t profile, ERecordTypes rectype);
+    QFutureWatcher<void>* getCurrentWatcher();
+
+
+signals:
+    void recordsLoadedSignal();
+
+private slots:
+    void onRecordsLoadFinished();
 
 protected:
     void changeEvent(QEvent *);
@@ -115,7 +124,10 @@ private:
     //dll load
     const wchar_t* dllname;
     LibGuard dll_load;
+
     static void s_libErrorHandler(const char* error_text, const char* error_title);
+    static void s_asyncRecordsLoading(MainWindow* mw, IRecordsStream* stream, size_t step);
+
     //lib storage
     IStorageFactory* DLLStorage;
     const QString tempDirPath;
@@ -134,7 +146,6 @@ private:
     void createHelpMenu();
 
     void setMainFormEnabled(bool);
-
 
     struct ProfileRecordData
     {
@@ -155,6 +166,9 @@ private:
 
     QVector<size_t> _stepForTabs;
     QVector<QVector<size_t>> _totalRecordsArray;
+
+    //for concurrency
+    QVector<QVector<QFutureWatcher<void>*>> _watchers;
 };
 
 #endif // MAINWINDOW_H
