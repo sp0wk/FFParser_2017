@@ -56,7 +56,9 @@ public:
     const recordPtr & getCurrentPtr();
     size_t& getCurrentStep();
     size_t& getCurrentTotalRecords();
+    void updateTotalRecords();
     const recordPtr & getPtr(ERecordTypes type, size_t profile);
+    ERecordTypes getTabTypeByIndex(size_t index);
     ERecordTypes getCurrentTabType();
     QString getTableField(const char * text);
     IDataExporter * getExporter();
@@ -69,9 +71,11 @@ public:
 
 
 signals:
+    void libErrorSignal(const QString& error_text, const QString& error_title);
     void recordsLoadedSignal();
 
 private slots:
+    void onLibErrorSlot(const QString& error_text, const QString& error_title);
     void onRecordsLoadFinished();
 
 protected:

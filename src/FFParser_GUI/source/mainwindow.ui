@@ -36,6 +36,9 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QPushButton" name="nextPageButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>474</x>
@@ -49,6 +52,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="prevPageButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>394</x>
@@ -309,7 +315,7 @@
      <x>0</x>
      <y>0</y>
      <width>944</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLanguage">

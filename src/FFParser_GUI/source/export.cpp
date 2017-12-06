@@ -11,13 +11,14 @@ extern SetStopParsingFunc dll_stopParsing;
 Export::Export(MainWindow *parent) :
     QDialog(parent),
     ui(new Ui::Export),
-    _mainwindow(parent),
-    _watcher(new QFutureWatcher<void>(this))
+    _mainwindow(parent)
 {
     ui->setupUi(this);
-    ui->pathInputText->setText(QCoreApplication::applicationFilePath());
+    ui->pathInputText->setText(QCoreApplication::applicationDirPath());
     this->setWindowTitle(tr("Data export"));
-    this->setModal(true);;
+    this->setModal(true);
+
+    connect(this, &Export::streamExportFinished, this, &Export::onExportFinishedSlot);
 }
 
 Export::~Export()
@@ -25,11 +26,47 @@ Export::~Export()
     delete ui;
 }
 
+
+void Export::s_exportRecords(Export* exp, IRecordsStream* rstream, const QString& path, bool md5)
+{
+    rstream->loadNextRecords(); // Load all records
+    exp->exportPtr->exportRecords(rstream, path.toStdString().c_str(), md5);
+    emit exp->streamExportFinished();
+}
+
+
+void Export::s_exportCache(Export* exp, IRecordsStream* rstream, const QString& path, size_t profile, bool md5)
+{
+    rstream->loadNextRecords(); //load all cache records
+
+    //cache records
+    if (exp->ui->cacheCheckBox->isChecked())
+        exp->exportPtr->exportRecords(rstream, path.toStdString().c_str(), md5);
+
+    //cache files
+    if (exp->ui->cacheFilesCheckBox->isChecked())
+        exp->exportPtr->exportCache(rstream, path.toStdString().c_str(), profile, md5);
+
+    emit exp->streamExportFinished();
+}
+
+
+void Export::onExportFinishedSlot()
+{
+    size_t currValue = ui->progressBar->value();
+    ui->progressBar->setValue(currValue + 1);
+
+    //if all finished
+    if (ui->progressBar->value() == ui->progressBar->maximum()) {
+        ui->exportButton->setEnabled(true);
+        _watchers.clear();
+    }
+}
+
 void Export::exportData()
 {
-    IDataExporter *exportPtr = _mainwindow->getExporter();
-
-
+    ui->exportButton->setDisabled(true);
+    exportPtr = _mainwindow->getExporter();
     size_t profileNumber = ui->profilesToExport->currentIndex();
     QString path = ui->pathInputText->text();
 
@@ -58,52 +95,44 @@ void Export::exportData()
     {
         // Export history
         auto ptr = _mainwindow->getPtr(ERecordTypes::HISTORY, profileNumber).data();
-        ptr->loadNextRecords(); // Load all records
-        exportPtr->exportRecords(ptr, path.toStdString().c_str(), md5file);
-        size_t currValue = ui->progressBar->value();
-        ui->progressBar->setValue(currValue + 1);
+        QFutureWatcher<void>* watcher = _mainwindow->getWatcher(profileNumber, ERecordTypes::HISTORY);
+        watcher->waitForFinished();
+        QFuture<void> fut = QtConcurrent::run(s_exportRecords, this, ptr, path, md5file);
+        watcher->setFuture(fut);
+        _watchers.push_back(watcher);
     }
 
     if (ui->bookmarksCheckBox->isChecked())
     {
         // Export bookmarks
         auto ptr = _mainwindow->getPtr(ERecordTypes::BOOKMARKS, profileNumber).data();
-        ptr->loadNextRecords(); // Load all records
-        exportPtr->exportRecords(ptr, path.toStdString().c_str(), md5file);
-        size_t currValue = ui->progressBar->value();
-        ui->progressBar->setValue(currValue + 1);
+        QFutureWatcher<void>* watcher = _mainwindow->getWatcher(profileNumber, ERecordTypes::BOOKMARKS);
+        watcher->waitForFinished();
+        QFuture<void> fut = QtConcurrent::run(s_exportRecords, this, ptr, path, md5file);
+        watcher->setFuture(fut);
+        _watchers.push_back(watcher);
     }
 
     if (ui->loginsCheckBox->isChecked())
     {
-        // todo something
+        // Export logins
         auto ptr = _mainwindow->getPtr(ERecordTypes::LOGINS, profileNumber).data();
-        ptr->loadNextRecords(); // Load all records
-        exportPtr->exportRecords(ptr, path.toStdString().c_str(), md5file);
-        size_t currValue = ui->progressBar->value();
-        ui->progressBar->setValue(currValue + 1);
+        QFutureWatcher<void>* watcher = _mainwindow->getWatcher(profileNumber, ERecordTypes::LOGINS);
+        watcher->waitForFinished();
+        QFuture<void> fut = QtConcurrent::run(s_exportRecords, this, ptr, path, md5file);
+        watcher->setFuture(fut);
+        _watchers.push_back(watcher);
     }
 
-    if (ui->cacheCheckBox->isChecked())
+    if (ui->cacheCheckBox->isChecked() || ui->cacheFilesCheckBox->isChecked())
     {
-        // todo something
+        // Export cache
         auto ptr = _mainwindow->getPtr(ERecordTypes::CACHEFILES, profileNumber).data();
-        ptr->loadNextRecords(); // Load all records
-        exportPtr->exportRecords(ptr, path.toStdString().c_str(), md5file);
-        size_t currValue = ui->progressBar->value();
-        ui->progressBar->setValue(currValue + 1);
-    }
-
-
-    if (ui->cacheFilesCheckBox->isChecked())
-    {
-        // todo
-        auto ptr = _mainwindow->getPtr(ERecordTypes::CACHEFILES, profileNumber).data();
-        ptr->loadNextRecords(); // Load all record
-        QString cachePath = path + "/cache_files";
-        exportPtr->exportCache(ptr, cachePath.toStdString().c_str(), profileNumber, md5file);
-        size_t currValue = ui->progressBar->value();
-        ui->progressBar->setValue(currValue + 1);
+        QFutureWatcher<void>* watcher = _mainwindow->getWatcher(profileNumber, ERecordTypes::CACHEFILES);
+        watcher->waitForFinished();
+        QFuture<void> fut = QtConcurrent::run(s_exportCache, this, ptr, path, profileNumber, md5file);
+        watcher->setFuture(fut);
+        _watchers.push_back(watcher);
     }
 }
 
@@ -126,8 +155,7 @@ void Export::show()
 
 void Export::on_exportButton_clicked()
 {
-    QFuture<void> fut = QtConcurrent::run(this, &Export::exportData);
-    _watcher->setFuture(fut);
+    this->exportData();
 }
 
 void Export::on_browseButton_clicked()
@@ -140,22 +168,39 @@ void Export::on_browseButton_clicked()
 
 void Export::closeEvent(QCloseEvent *event)
 {
-    QMessageBox::StandardButton resBtn = QMessageBox::question(this, tr("Stop export"),
-                                                               tr("Stop export of data ?\n"),
-                                                               QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
-                                                               QMessageBox::Yes);
-    if (resBtn != QMessageBox::Yes)
-    {
-        event->ignore();
+    bool not_finished = false;
+
+    for (auto& task : _watchers) {
+        if (task->isRunning()) {
+            not_finished = true;
+            break;
+        }
     }
-    else
-    {
-        //stop parsing
-        dll_stopParsing(true);
 
-        //wait for last working task
-        _watcher->cancel();
+    if (not_finished) {
+        QMessageBox::StandardButton resBtn = QMessageBox::question(this, tr("Stop export"),
+                                                                   tr("Stop export of data ?\n"),
+                                                                   QMessageBox::Cancel | QMessageBox::Yes,
+                                                                   QMessageBox::Yes);
 
+        if (resBtn != QMessageBox::Yes) {
+            event->ignore();
+        }
+        else {
+            event->accept();
+
+            //stop parsing
+            dll_stopParsing(true);
+
+            //wait for all tasks to finish
+            for (auto& task : _watchers) {
+                task->waitForFinished();
+            }
+        }
+    }
+    else {
         event->accept();
     }
+
+    _mainwindow->updateTotalRecords();
 }

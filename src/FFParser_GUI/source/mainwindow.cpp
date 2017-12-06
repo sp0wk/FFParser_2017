@@ -16,9 +16,12 @@ SetStopParsingFunc dll_stopParsing = nullptr;
 
 
 //lib error handler
+static MainWindow* errorReceiver;
 void MainWindow::s_libErrorHandler(const char* error_text, const char* error_title)
 {
-    QMessageBox::warning(0, error_title, error_text, QMessageBox::Ok);
+    QString text = error_text;
+    QString title = error_title;
+    emit errorReceiver->libErrorSignal(text, title);
 }
 
 //async records loading
@@ -59,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QIcon icon(appPath.append("/FFParser_GUI.ico"));
     this->setWindowIcon(icon);
 
+    errorReceiver = this;
+    connect(this, &MainWindow::libErrorSignal, this, &MainWindow::onLibErrorSlot);
     connect(this, SIGNAL(recordsLoadedSignal()), this, SLOT(onRecordsLoadFinished()));
 
     initialLoad();
@@ -73,6 +78,11 @@ MainWindow::~MainWindow()
     tempDir.removeRecursively();
 }
 
+
+void MainWindow::onLibErrorSlot(const QString& error_text, const QString& error_title)
+{
+    QMessageBox::warning(this, error_title, error_text, QMessageBox::Ok);
+}
 
 void MainWindow::onRecordsLoadFinished()
 {
@@ -417,6 +427,16 @@ size_t& MainWindow::getCurrentTotalRecords()
     return _totalRecordsArray[_profileNumber][ui.tabWidget->currentIndex()];
 }
 
+void MainWindow::updateTotalRecords()
+{
+    for (size_t prof = 0; prof < _allAmountProfile; ++prof) {
+        for (size_t rec = 0; rec < ui.tabWidget->count(); ++rec) {
+            ERecordTypes type = getTabTypeByIndex(rec);
+            _totalRecordsArray[prof][rec] = this->getPtr(type, prof)->getTotalRecords();
+        }
+    }
+}
+
 IDataExporter *MainWindow::getExporter()
 {
     return DLLStorage->getDataExporter();
@@ -452,14 +472,13 @@ void MainWindow::viewRecords()
     //clear previous rows
     ui.tableWidget->setRowCount(0);
 
+    ptr->setCurrentRecord(_firstRecord);
     IRecord* onerec = ptr->getRecordByIndex(_firstRecord);
 
     if (onerec == nullptr) {
         viewCounterRecords(0, 0);
         return;
     }
-
-    ptr->setCurrentRecord(_firstRecord);
 
     size_t& step = getCurrentStep();
     ui.spinBox->setValue(step);
@@ -549,6 +568,21 @@ void MainWindow::slotCloseContextMenu()
     _menu->hide();
 }
 
+ERecordTypes MainWindow::getTabTypeByIndex(size_t index)
+{
+    switch (index)
+    {
+    case 0:
+        return ERecordTypes::HISTORY;
+    case 1:
+        return ERecordTypes::BOOKMARKS;
+    case 2:
+        return ERecordTypes::LOGINS;
+    case 3:
+        return ERecordTypes::CACHEFILES;
+    }
+}
+
 QString MainWindow::getTableField(const char *fieldName)
 {
     size_t row = ui.tableWidget->selectionModel()->currentIndex().row();
@@ -575,13 +609,20 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
     else
     {
-        //stop all parsing tasks
-        dll_stopParsing(true);
-
-        //wait for last working task
-        this->getCurrentWatcher()->waitForFinished();
-
+        this->hide();
         event->accept();
+
+        if (dll_load != nullptr) {
+            //stop all parsing tasks
+            dll_stopParsing(true);
+
+            //wait for all tasks to finish
+            for (auto& prof : _watchers) {
+                for (auto& rec : prof) {
+                    rec->waitForFinished();
+                }
+            }
+        }
     }
 }
 
@@ -634,28 +675,27 @@ void MainWindow::loadNewRecords()
 
     const recordPtr &ptr = getCurrentPtr();
 
+    size_t& total = getCurrentTotalRecords();
     size_t loaded = ptr->getNumberOfRecords();
     size_t& step = getCurrentStep();
+
+    //if initial load or all records are already loaded
+    if (loaded == 0 || loaded == total)
+    {
+        total = ptr->getTotalRecords(); //save total
+
+        //set table headers
+        setTableHeaders();
+    }
+
+    //correct step
+    if (step > total) {
+        step = total;
+    }
 
     //load new if needed
     if (_firstRecord + step > loaded)
     {
-        size_t& total = getCurrentTotalRecords();
-
-        //if initial load
-        if (loaded == 0)
-        {
-            total = ptr->getTotalRecords(); //save total
-
-            //set table headers
-            setTableHeaders();
-        }
-
-        //correct step
-        if (step > total) {
-            step = total;
-        }
-
         //load starts
         ui.progressBar->setValue(0);
 
@@ -663,7 +703,7 @@ void MainWindow::loadNewRecords()
         QFutureWatcher<void>* watcher = this->getCurrentWatcher();
 
         if (watcher->isRunning()) {
-
+            ui.tableWidget->setRowCount(0);
             #ifndef NDEBUG
                 qDebug() << "Task discarded: \"Another stream task is already running!\"";
             #endif
@@ -686,7 +726,6 @@ void MainWindow::on_setRecordButton_clicked()
 {
     size_t& step = getCurrentStep();
     step = ui.spinBox->value();
-
     loadNewRecords();
 }
 
