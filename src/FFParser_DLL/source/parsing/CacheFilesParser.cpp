@@ -3,6 +3,11 @@
 #include <cctype>
 
 
+#include <atomic>
+extern std::atomic_bool STOP_PARSING_FLAG;
+
+
+
 namespace FFParser {
 
 	using std::regex_constants::icase;
@@ -225,6 +230,12 @@ namespace FFParser {
 
 			//write to output
 			for (size_t file_num = from; file_num < last; ++file_num) {
+
+				//check global stop parsing flag
+				if (STOP_PARSING_FLAG.load()) {
+					break;
+				}
+
 				output.emplace_back();
 				parseCacheFile(path_to_cache + _filelist[file_num], output[count]);
 				++count;

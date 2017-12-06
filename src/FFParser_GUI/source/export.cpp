@@ -2,12 +2,17 @@
 #include "ui_export.h"
 #include "../include/IDataExporter.h"
 #include <QFileDialog>
+#include <QtConcurrent/QtConcurrent>
+
+using SetStopParsingFunc = void (CALL *)(bool flag);
+extern SetStopParsingFunc dll_stopParsing;
 
 
 Export::Export(MainWindow *parent) :
     QDialog(parent),
     ui(new Ui::Export),
-    _mainwindow(parent)
+    _mainwindow(parent),
+    _watcher(new QFutureWatcher<void>(this))
 {
     ui->setupUi(this);
     ui->pathInputText->setText(QCoreApplication::applicationFilePath());
@@ -121,7 +126,8 @@ void Export::show()
 
 void Export::on_exportButton_clicked()
 {
-    exportData();
+    QFuture<void> fut = QtConcurrent::run(this, &Export::exportData);
+    _watcher->setFuture(fut);
 }
 
 void Export::on_browseButton_clicked()
@@ -129,4 +135,27 @@ void Export::on_browseButton_clicked()
     QString path = QFileDialog::getExistingDirectory(0, ("Select Output Folder"), ui->pathInputText->text());
     if (path != "")
         ui->pathInputText->setText(path);
+}
+
+
+void Export::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question(this, tr("Stop export"),
+                                                               tr("Stop export of data ?\n"),
+                                                               QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                               QMessageBox::Yes);
+    if (resBtn != QMessageBox::Yes)
+    {
+        event->ignore();
+    }
+    else
+    {
+        //stop parsing
+        dll_stopParsing(true);
+
+        //wait for last working task
+        _watcher->cancel();
+
+        event->accept();
+    }
 }

@@ -2,9 +2,9 @@
 #define EXPORT_H
 
 #include <QDialog>
-#include <QDebug>
 #include <QString>
 #include <QVector>
+#include <qfuturewatcher.h>
 #include "mainwindow.h"
 
 
@@ -23,6 +23,9 @@ public:
     void exportData();
     virtual void show();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private slots:
 
     void on_exportButton_clicked();
@@ -32,6 +35,8 @@ private slots:
 private:
     Ui::Export *ui;
     MainWindow *_mainwindow;
+
+    QFutureWatcher<void>* _watcher;
 };
 
 #endif // EXPORT_H

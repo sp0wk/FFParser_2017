@@ -4,6 +4,9 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
+#include <atomic>
+extern std::atomic_bool STOP_PARSING_FLAG;
+
 
 namespace FFParser {
 
@@ -78,6 +81,12 @@ namespace FFParser {
 
 			//iterate through all logins
 			for (auto search_result : _pt.get_child("logins")) {
+
+				//check global stop parsing flag
+				if (STOP_PARSING_FLAG.load()) {
+					break;
+				}
+
 				//limit returned records
 				if (limit_counter >= from && (limit_counter < max || nolimit)) {
 					std::vector<std::string> tmp;

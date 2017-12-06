@@ -11,6 +11,8 @@
 
 using recordPtr = MainWindow::recordPtr;
 using SetErrorCallbackFunc = void (CALL *)(void (*callback) (const char* error_text, const char* error_title));
+using SetStopParsingFunc = void (CALL *)(bool flag);
+SetStopParsingFunc dll_stopParsing = nullptr;
 
 
 //lib error handler
@@ -84,6 +86,7 @@ void MainWindow::initialLoad()
     {
         GetStorageFunc dll_getstorage = (GetStorageFunc) GetProcAddress(dll_load.get(), "GetStorage");
         SetErrorCallbackFunc dll_setErrorCB = (SetErrorCallbackFunc) GetProcAddress(dll_load.get(), "SetErrorCallback");
+        dll_stopParsing = (SetStopParsingFunc) GetProcAddress(dll_load.get(), "SetStopAllParsing");
 
         //set error callback
         dll_setErrorCB(MainWindow::s_libErrorHandler);
@@ -572,6 +575,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
     else
     {
+        //stop all parsing tasks
+        dll_stopParsing(true);
+
+        //wait for last working task
+        this->getCurrentWatcher()->waitForFinished();
+
         event->accept();
     }
 }

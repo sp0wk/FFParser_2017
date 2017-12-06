@@ -2,6 +2,10 @@
 
 #include <ctime>	//for unix epoch to local time conversion
 
+#include <atomic>
+extern std::atomic_bool STOP_PARSING_FLAG;
+
+
 namespace FFParser {
 
 	//ctor
@@ -74,6 +78,12 @@ namespace FFParser {
 			output.reserve(_db_records.size());
 
 			for (size_t i = 0; i < _db_records.size(); ++i) {
+
+				//check global stop parsing flag
+				if (STOP_PARSING_FLAG.load()) {
+					break;
+				}
+
 				output.emplace_back();
 				parseBookmarkRecord(_db_records[i], output[i]);
 				++count;
