@@ -41,13 +41,19 @@ void Export::s_exportCache(Export* exp, IRecordsStream* rstream, const QString& 
 
     //cache records
     if (exp->ui->cacheCheckBox->isChecked())
+    {
         exp->exportPtr->exportRecords(rstream, path.toStdString().c_str(), md5);
+        emit exp->streamExportFinished();
+    }
 
     //cache files
     if (exp->ui->cacheFilesCheckBox->isChecked())
+    {
         exp->exportPtr->exportCache(rstream, path.toStdString().c_str(), profile, md5);
+        emit exp->streamExportFinished();
+    }
 
-    emit exp->streamExportFinished();
+
 }
 
 
@@ -57,7 +63,7 @@ void Export::onExportFinishedSlot()
     ui->progressBar->setValue(currValue + 1);
 
     //if all finished
-    if (ui->progressBar->value() == ui->progressBar->maximum()) {
+    if (ui->progressBar->value() <= ui->progressBar->maximum()) {
         ui->exportButton->setEnabled(true);
         _watchers.clear();
     }
