@@ -10,7 +10,7 @@ ExportCacheFileDialog::ExportCacheFileDialog(MainWindow *parent) :
     _mainwindow(parent)
 {
     ui->setupUi(this);
-    ui->pathInputText->setText(QCoreApplication::applicationFilePath());
+    ui->pathInputText->setText(QCoreApplication::applicationDirPath());
     this->setWindowTitle(tr("Cache file export"));
     this->setModal(true);
 }
