@@ -48,10 +48,10 @@ int main()
 	std::cout << FactoryStorage->getPathToProfile(0) << "\n\n";
 
 	//get records
-	std::unique_ptr<IRecordsStream> recstr( FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 1) );
+	std::unique_ptr<IRecordsStream> recstr( FactoryStorage->createRecordsStream(ERecordTypes::CACHEFILES, 0) );
 
 	size_t from = 0;
-	size_t number = 100;
+	size_t number = 10;
 	size_t cnt = recstr->loadRecords(from, number);
 	size_t cnt2 = recstr->loadNextRecords(number);
 	size_t sz = recstr->getNumberOfRecords();
