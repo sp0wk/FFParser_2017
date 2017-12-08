@@ -74,7 +74,7 @@ namespace FFParser {
 
 	IRecord* CALL RecordsStreamImpl::getPrevRecord()
 	{
-		if (_current_record == 0 || _records.size() == 0) {
+		if (_current_record == -1 || _current_record == 0 || _records.size() == 0) {
 			return nullptr;
 		}
 		return &_records[--_current_record];
@@ -122,7 +122,7 @@ namespace FFParser {
 			return -1;
 		}
 
-		if (_current_record != -1 && _records.size() > 0) {
+		if (_records.size() > 0 &&_current_record != -1 && _current_record != 0) {
 			for (size_t i = _current_record - 1; i > 0; --i) {
 				size_t found = _records[i].findText(text);
 
@@ -148,7 +148,7 @@ namespace FFParser {
 			return -1;
 		}
 
-		if (_records.size() > 0) {
+		if (_records.size() > 0 && _current_record < _records.size()) {
 			for (size_t i = _current_record + 1; i < _records.size(); ++i) {
 				size_t found = _records[i].findText(text);
 

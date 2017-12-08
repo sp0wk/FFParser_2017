@@ -156,8 +156,8 @@ namespace FFParser {
 
 			//try local files
 			path full_path = current_path();
-			std::string local_path = full_path.generic_string();
-			std::string cache_path = local_path + "\\cache";
+			std::string local_path = full_path.generic_string() + "/TESTDATA";
+			std::string cache_path = local_path + "/cache";
 
 			_profile_list.push_back({ "none", local_path, cache_path });
 		}

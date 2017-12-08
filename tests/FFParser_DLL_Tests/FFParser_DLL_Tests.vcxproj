@@ -38,9 +38,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\Config_defines.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2DEE62CA-FBDE-4533-9FB5-3B01702505C9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

@@ -50,7 +50,36 @@ FORMS += \
     source/export.ui \
     source/exportcachefiledialog.ui
 
-
-
-
+# Configuration settings
+win32 {
+    !contains(QMAKE_TARGET.arch, x86_64) {
+	CONFIG(debug, debug|release) {
+	    debug:DESTDIR = ../../bin/Debug/Win32
+	    debug:OBJECTS_DIR = Debug/Win32/.obj
+	    debug:MOC_DIR = Debug/Win32/.moc
+	    debug:RCC_DIR = Debug/Win32/.rcc
+	    debug:UI_DIR = Debug/Win32/.ui
+	} else {
+	    release:DESTDIR = ../../bin/Release/Win32
+	    release:OBJECTS_DIR = Release/Win32/.obj
+	    release:MOC_DIR = Release/Win32/.moc
+	    release:RCC_DIR = Release/Win32/.rcc
+	    release:UI_DIR = Release/Win32/.ui
+	}
+    } else {
+	CONFIG(debug, debug|release) {
+	    debug:DESTDIR = ../../bin/Debug/x64
+	    debug:OBJECTS_DIR = Debug/x64/.obj
+	    debug:MOC_DIR = Debug/x64/.moc
+	    debug:RCC_DIR = Debug/x64/.rcc
+	    debug:UI_DIR = Debug/x64/.ui
+	} else {
+	    release:DESTDIR = ../../bin/Release/x64
+	    release:OBJECTS_DIR = Release/x64/.obj
+	    release:MOC_DIR = Release/x64/.moc
+	    release:RCC_DIR = Release/x64/.rcc
+	    release:UI_DIR = Release/x64/.ui
+	}
+    }
+}
 

@@ -19,7 +19,6 @@ using GetStorageFunc = IStorageFactory* (CALL *)();
 GetStorageFunc dll_getstorage;
 
 IStorageFactory* storage;
-IRecordsStream* records;
 
 
 // initialization function:
@@ -36,7 +35,6 @@ bool init_unit_test()
 	}
 
 	storage = dll_getstorage();
-	records = storage->createRecordsStream(ERecordTypes::HISTORY, 0);
 
 
 	return true;

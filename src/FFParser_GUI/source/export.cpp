@@ -40,20 +40,16 @@ void Export::s_exportCache(Export* exp, IRecordsStream* rstream, const QString& 
     rstream->loadNextRecords(); //load all cache records
 
     //cache records
-    if (exp->ui->cacheCheckBox->isChecked())
-    {
+    if (exp->ui->cacheCheckBox->isChecked()) {
         exp->exportPtr->exportRecords(rstream, path.toStdString().c_str(), md5);
         emit exp->streamExportFinished();
     }
 
     //cache files
-    if (exp->ui->cacheFilesCheckBox->isChecked())
-    {
+    if (exp->ui->cacheFilesCheckBox->isChecked()) {
         exp->exportPtr->exportCache(rstream, path.toStdString().c_str(), profile, md5);
         emit exp->streamExportFinished();
     }
-
-
 }
 
 
