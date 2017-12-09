@@ -9,7 +9,7 @@ using namespace FFParser;
 
 
 extern IStorageFactory* storage;
-std::unique_ptr<IRecordsStream> one_rec(storage->createRecordsStream(ERecordTypes::HISTORY, 0));
+extern std::unique_ptr<IRecordsStream> one_rec;
 
 
 //TEST CASES
