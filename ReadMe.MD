@@ -1,48 +1,58 @@
-﻿# FirefoxParser_2017
+﻿# FFParser_2017
 
-Приложение FFParser предназначено для получения данных и файлов профиля Mоzilla Firefox
+FFParser is an application for extracting users' data from theirs Mozilla Firefox profiles.
 
-Основные возможности:
-- Поддержка нескольких профилей Firefox
+Main features:
+- Support for multiple profiles
+- Smooth concurrent loading of multiple records
+- Extracting of following data:
+  - History
+  - Bookmarks
+  - Logins and passwords
+  - Cache files
+- Extracted data search
+- Export extracted data in JSON
+- Calculate MD5 for exported files
 
-Получение данных профиля Firefox:
+## Application Info 
 
-- История 
-- Закладки
-- Расшифрованых логинов и паролей
-- Информации о кэш-файлах 
+Application consists of two components:
+- FFParser_DLL library (developed with Visual Studio 2013)
+- GUI (developed with QtCreator 3.3.1)
 
-Экспорт:
+Main 3rd-party libraries and components:
+- Boost 1.58.0 (property_tree, regex, filesystem, iostreams::filter::gzip)
+- sqlite3
+- WinCrypt
+- QtConcurrent
 
-- Записей о кэш-файлах
-- Кэш-файлов
-- Истории
-- Закладок
-- Логинов и паролей
+Used design patterns:
+- Factory method
+- Singleton
+- Facade
 
-Гинерация MD5 файлов для:
+## Build steps
 
-- Истории
-- Закладок
-- Логинов и паролей
-- Кэша
+- Library:
 
-# Информаци о приложении 
+  1. Add paths to Boost libraries (x86 and x64 correspondingly) to the project
+  2. Build from Visual Studio
 
-Приложение состоит из двух компонентов:
-- библиотека FFParser_DLL (разрабатывалась в Visual Studio 2013)
-- GUI часть (разрабатывалась в QtCreator 3.3.1) 
+- GUI:
 
-# Сборка проекта:
+  1. Specify build paths in FFParser_GUI project (project_dir/obj/FFParser_GUI)
+  2. Build from QtCreator
 
-- Сборка библиотеки:
+## Screenshots
 
- 1. В проекте Visual Studio добавить пути к биоблиотекам boost для win32 и х64 сборок соответственно. 
- 2. Собрать нужную конфигурацию.
+![Main window](https://github.com/sp0wk/FFParser_2017/raw/master/docs/screenshots/Main.png)
 
-- Сборка GUI
+![Main menu](https://github.com/sp0wk/FFParser_2017/raw/master/docs/screenshots/Main_menu.png)
 
- 1. В проекте FFParser_GUI указать пути для сборки нужной конфигурации:
-	Путь_к_папке_проекта/obj/FFParser_GUI
+![Record right click menu](https://github.com/sp0wk/FFParser_2017/raw/master/docs/screenshots/RClick_menu.png)
 
- 2. Собрать нужную конфигурацию.
+![File right click menu](https://github.com/sp0wk/FFParser_2017/raw/master/docs/screenshots/RClick_menu2.png)
+
+![File export](https://github.com/sp0wk/FFParser_2017/raw/master/docs/screenshots/FileExport.png)
+
+![Data export](https://github.com/sp0wk/FFParser_2017/raw/master/docs/screenshots/DataExport.png)
